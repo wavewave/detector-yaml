@@ -7,6 +7,7 @@ import           Data.Attoparsec
 import qualified Data.ByteString.Lazy.Char8 as L
 -- import           Data.Foldable
 -- import qualified Data.HashMap.Strict as HM
+import           Data.List (intersperse)
 import           Data.Monoid ((<>), mconcat, mempty)
 import           Data.Scientific
 import qualified Data.String as S (IsString(..), fromString)
@@ -14,19 +15,19 @@ import qualified Data.Text.Lazy as T
 import qualified Data.Text.Lazy.IO as TIO
 import qualified Data.Vector as V
 
--- data ArrayStyle = ListStyle | ItemStyle
+data ListStyle = Inline | Wrapped 
 
 data YamlValue = YObject [(T.Text, YamlValue)]
-               ---  | YLArray [YamlPrimitiveValue]
-               --- | YIArray [YamlValue]
-               | YPrim YamlPrimitiveValue 
+               | YLArray [YamlPrimValue]
+               --  | YIArray [YamlValue]
+               | YPrim YamlPrimValue 
 
-data YamlPrimitiveValue = YNumber !Scientific
-                        | YString T.Text
-                        | YBool Bool 
-                        | YNull 
+data YamlPrimValue = YNumber Scientific
+                   | YString T.Text
+                   | YBool Bool 
+                   | YNull 
 
-instance S.IsString YamlPrimitiveValue where
+instance S.IsString YamlPrimValue where
   fromString str = YString (T.pack str) 
 
 instance S.IsString YamlValue where
@@ -37,8 +38,13 @@ defIndent = 4
 
 buildYaml :: Int -> YamlValue -> Builder 
 buildYaml n (YObject m) = (mconcat . map (buildPair n) ) m
+buildYaml n (YLArray xs) = buildList n xs 
 buildYaml n (YPrim p) = buildPrim p 
 
+buildList :: Int -> [YamlPrimValue] -> Builder 
+buildList n xs = fromLazyText "[ "
+                 <> (mconcat . intersperse (fromLazyText ", ") . map buildPrim ) xs 
+                 <> fromLazyText " ]"
 
 buildPrim (YNumber s) = scientificBuilder s 
 buildPrim (YString txt) = fromLazyText txt
@@ -53,12 +59,14 @@ buildPair n (k,v) = fromLazyText "\n" <> mconcat (replicate n (fromString "_"))
 
 testvalue = YObject $ [ ("abc", "haha")
                       , ("def", testvalue2)
-                      , ("acd", "haah3") 
+                      , ("acd", testvalue3) 
                       , ("lo" , YPrim (YNumber (fromFloatDigits 314.159)))
                       ]
 testvalue2 = YObject $ [ ("hello", "okay") 
                        , ("world", "no")
                        ] 
+
+testvalue3 = YLArray [ "a", "bc" , "abc", "babo" ] 
 
 main :: IO ()
 main = do 
