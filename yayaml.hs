@@ -18,7 +18,7 @@ import qualified Data.Vector as V
 data ListStyle = Inline | Wrapped 
 
 data YamlValue = YObject [(T.Text, YamlValue)]
-               | YLArray [YamlPrimValue]
+               | YLArray ListStyle [YamlPrimValue]
                --  | YIArray [YamlValue]
                | YPrim YamlPrimValue 
 
@@ -38,24 +38,32 @@ defIndent = 4
 
 buildYaml :: Int -> YamlValue -> Builder 
 buildYaml n (YObject m) = (mconcat . map (buildPair n) ) m
-buildYaml n (YLArray xs) = buildList n xs 
+buildYaml n (YLArray sty xs) = buildList sty n xs 
 buildYaml n (YPrim p) = buildPrim p 
 
-buildList :: Int -> [YamlPrimValue] -> Builder 
-buildList n xs = fromLazyText "[ "
-                 <> (mconcat . intersperse (fromLazyText ", ") . map buildPrim ) xs 
-                 <> fromLazyText " ]"
+buildList :: ListStyle -> Int -> [YamlPrimValue] -> Builder 
+buildList Inline n xs = fromLazyText "[ "
+                        <> (mconcat . intersperse (fromLazyText ", ") . map buildPrim ) xs 
+                        <> fromLazyText " ]"
+buildList Wrapped n xs = fromLazyText "[ " 
+                         <> ( mconcat 
+                            . intersperse (makeIndent n <> fromLazyText ", ") 
+                            . map (\x -> buildPrim x <> fromLazyText "\n") ) xs
+                         <> makeIndent n <> fromLazyText "] "
 
 buildPrim (YNumber s) = scientificBuilder s 
 buildPrim (YString txt) = fromLazyText txt
 buildPrim (YBool b) = (fromLazyText . T.pack . show) b 
 buildPrim YNull = mempty 
 
+
+
 buildPair :: Int -> (T.Text, YamlValue) -> Builder
-buildPair n (k,v) = fromLazyText "\n" <> mconcat (replicate n (fromString "_")) 
+buildPair n (k,v) = fromLazyText "\n" <> makeIndent n 
                     <> fromLazyText k <> fromLazyText ": " <> buildYaml (n+defIndent) v 
 
-
+makeIndent :: Int -> Builder 
+makeIndent n = mconcat (replicate n (fromString "_"))
 
 testvalue = YObject $ [ ("abc", "haha")
                       , ("def", testvalue2)
@@ -66,7 +74,7 @@ testvalue2 = YObject $ [ ("hello", "okay")
                        , ("world", "no")
                        ] 
 
-testvalue3 = YLArray [ "a", "bc" , "abc", "babo" ] 
+testvalue3 = YLArray Wrapped [ "a", "bc" , "abc", "babo" ] 
 
 main :: IO ()
 main = do 
