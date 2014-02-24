@@ -3,32 +3,25 @@
 
 import GHC.Generics
 
-import Data.Yaml 
--- import Data.Aeson.Encode.Pretty 
--- import qualified Data.ByteString.Lazy.Char8 as L
+import qualified Data.Yaml as Y
 import qualified Data.ByteString.Char8 as B
 
--- import Text.Libyaml
-
-data Coord = Coord { x :: Double, y :: Double } deriving Generic
-
-instance ToJSON Coord 
+phoLowPtBins :: Y.Value
+phoLowPtBins = (Y.array . map Y.Number) [ 15.0, 18.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 60.0, 80.0, 100.0 ]  
 
 main :: IO ()
 main = do 
-  putStrLn "yaml test" 
-  let testobj = object [ ("test", String "test" )  
-                       , ("abc", Number 10.0)
-                       ] 
-      -- jsonconf = defConfig { confCompare = compare
-      --                     } 
-   
-  print testobj
+  let testobj = Y.object [ ("ElePtBins", Y.String "test" )  
+                         , ("EleEtaBins", Y.Number 10.0)
+                         , ("nEleeta", Y.String "test")
+                         , ("nElept", Y.Number 12)
+                         , ("TightEleEff", Y.String "test")
+                         , ("MediumEleEff", Y.String "test")
+                         , ("LooseEleEff", Y.String "test")
+                         , ("PhoLowPtBins", phoLowPtBins )
+                         , ("PhoHighPtBins", Y.String "test")
+                         , ("PhoEtaBins", Y.String "test")
+                         ] 
 
-  print (toJSON (Coord 10 30))
-
-  -- B.writeFile "test2.json" (encodePretty' jsonconf (Coord 10 30))
-
-  -- B.writeFile "test.json" (encodePretty (Coord 10 30))
-  B.putStrLn $ encode testobj 
+  B.putStrLn $ Y.encode testobj 
   
