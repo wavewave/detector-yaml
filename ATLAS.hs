@@ -43,7 +43,7 @@ data BJetEfficiency = BJetEfficiency
 
 data ATLASInfo = ATLASInfo { elecEff :: ElectronEfficiency 
                            , phoEff :: PhotonEfficiency 
-                           , bjetEff :: BJetEfficiency 
+                           , bJetEff :: BJetEfficiency 
                            }
 
 mkElectronEfficiency :: ElectronEfficiency -> YamlValue
@@ -83,7 +83,7 @@ mkATLAS :: ATLASInfo -> YamlValue
 mkATLAS ATLASInfo {..} = 
     YObject $ [ ( "ElectronEfficiency", mkElectronEfficiency elecEff )  
               , ( "PhotonEfficiency", mkPhotonEfficiency phoEff ) 
-
+              , ( "BJetEfficiency", mkBJetEfficiency bJetEff )
               ] 
 
 
@@ -247,3 +247,16 @@ atlasPhoEff = PhotonEfficiency
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0] ]
   }
+
+atlasBJetEff :: BJetEfficiency
+atlasBJetEff = BJetEfficiency 
+  { bTagEffPtBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ] 
+  , bTagRejPtBins = [ 20.0, 25.0, 40.0, 60.0, 90.0, 140.0, 200.0, 300.0, 500.0 ] 
+  , bTagEffEtaBins = [ 0.0, 1.2, 2.5 ] 
+  , bTagRejEtaBins = [ 0.0, 1.2, 2.5 ] 
+  , nBEeta = 2
+  , nBReta = 2
+  , nBEpt = 14
+  , nBRpt = 8
+  } 
+
