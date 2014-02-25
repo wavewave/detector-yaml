@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- import           Blaze.ByteString.Builder
 -- import           Blaze.ByteString.Builder.Char8
@@ -23,6 +24,7 @@ data YamlValue = YObject [(T.Text, YamlValue)]
                | YPrim YamlPrimValue 
 
 data YamlPrimValue = YNumber Scientific
+                   | YInteger Int 
                    | YString T.Text
                    | YBool Bool 
                    | YNull 
@@ -57,6 +59,7 @@ buildList Wrapped n xs = fromLazyText "\n" <> makeIndent n
                          <> makeIndent n <> fromLazyText "] "
 
 buildPrim (YNumber s) = scientificBuilder s 
+buildPrim (YInteger s) = (fromLazyText . T.pack . show) s
 buildPrim (YString txt) = fromLazyText txt
 buildPrim (YBool b) = (fromLazyText . T.pack . show) b 
 buildPrim YNull = mempty 
@@ -72,11 +75,79 @@ buildPair n (k,v) = fromLazyText "\n" <> makeIndent n
 makeIndent :: Int -> Builder 
 makeIndent n = mconcat (replicate n (fromString "_"))
 
-testvalue = YObject $ [ ("abc", "haha")
-                      , ("def", testvalue2)
-                      , ("acd", testvalue3) 
-                      , ("lo" , YPrim (YNumber (fromFloatDigits 314.159)))
-                      ]
+-- eleptbins = YLArray Inline $ map (YPrim . YNumber) [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0] 
+
+-- eleetabins = YLArray Inline $ map (YPrim . YNumber) [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
+ 
+data ATLASInfo = ATLASInfo { elePtBins :: [Scientific] 
+                           , eleEtaBins :: [Scientific] 
+                           , nEleEta :: Int
+                           , nElePt :: Int 
+                           , tightEleEff :: [ [ Scientific ] ]
+                           , mediumEleEff :: [ [ Scientific ] ] 
+                           , looseEleEff :: [ [ Scientific ] ] 
+                           }
+
+
+mkInline :: [Scientific] -> YamlValue 
+mkInline = YLArray Inline . map (YPrim . YNumber)  
+
+mkWrap :: [YamlValue] -> YamlValue 
+mkWrap = YLArray Wrapped 
+
+mkATLAS :: ATLASInfo -> YamlValue 
+mkATLAS ATLASInfo {..} = 
+  YObject $ [ ("ElePtBins", mkInline elePtBins)
+            , ("EleEtaBins", mkInline eleEtaBins)
+            , ("nEleEta", (YPrim . YInteger) nEleEta) 
+            , ("nElePt" , (YPrim . YInteger) nElePt)
+            , ("TightEleEff", mkWrap (map mkInline tightEleEff) ) 
+            , ("MediumEleEff", mkWrap (map mkInline mediumEleEff) )
+            , ("LooseEleEff", mkWrap (map mkInline looseEleEff) )
+            ]
+
+testvalue = mkATLAS (ATLASInfo 
+  { elePtBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
+  , eleEtaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
+  , nEleEta = 10
+  , nElePt = 12 
+  , tightEleEff = 
+      [ [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
+      , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
+      , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
+      , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
+      , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
+      , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
+      , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
+      , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
+      , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
+      , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ] ]
+  , mediumEleEff = 
+      [ [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
+      , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
+      , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
+      , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
+      , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
+      , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
+      , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
+      , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
+      , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
+      , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ] ]
+  , looseEleEff = 
+      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
+      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
+      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
+      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
+      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
+      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
+      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
+      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
+      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
+      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
+
+  })
+ 
+
 testvalue2 = YObject $ [ ("hello", "okay") 
                        , ("world", "no")
                        ] 
