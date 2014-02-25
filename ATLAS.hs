@@ -39,7 +39,20 @@ data BJetEfficiency = BJetEfficiency
                         , nBReta :: Int
                         , nBEpt :: Int
                         , nBRpt :: Int 
+                        , bTagEffSV50 :: [ [ Scientific ] ]
+                        , bTagEffJP50 :: [ [ Scientific ] ]
+                        , bTagEffJP70 :: [ [ Scientific ] ]
+                        , bTagRejSV50 :: [ [ Scientific ] ]
+                        , bTagRejJP50 :: [ [ Scientific ] ]
+                        , bTagRejJP70 :: [ [ Scientific ] ]  
                         } 
+
+data MuonEfficiency = MuonEfficiency
+                        { muPtBins :: [ Scientific ] 
+                        , muEtaBins :: [ Scientific ] 
+                        , nMuPt :: Int
+                        , nMuEta :: Int 
+                        }
 
 data ATLASInfo = ATLASInfo { elecEff :: ElectronEfficiency 
                            , phoEff :: PhotonEfficiency 
@@ -77,7 +90,20 @@ mkBJetEfficiency BJetEfficiency {..} =
               , ( "BTagRejPtBins", mkInline bTagRejPtBins )
               , ( "BTagEffEtaBins", mkInline bTagEffEtaBins )
               , ( "BTagRejEtaBins", mkInline bTagRejEtaBins ) 
+              , ( "nBEeta", (YPrim . YInteger) nBEeta )
+              , ( "nBReta", (YPrim . YInteger) nBReta ) 
+              , ( "nBEpt", (YPrim . YInteger) nBEpt )
+              , ( "nBRpt", (YPrim . YInteger) nBRpt )
+              , ( "BtagEffSV50", mkWrap (map mkInline bTagEffSV50) )
+              , ( "BtagEffJP50", mkWrap (map mkInline bTagEffJP50) )
+              , ( "BtagEffJP70", mkWrap (map mkInline bTagEffJP70) )
+              , ( "BtagRejSV50", mkWrap (map mkInline bTagRejSV50) )
+              , ( "BtagRejJP50", mkWrap (map mkInline bTagRejJP50) )
+              , ( "BtagRejJP70", mkWrap (map mkInline bTagRejJP70) )
               ] 
+
+mkMuonEfficiency :: MuonEfficiency -> YamlValue
+mkMuonEfficiency = undefined 
 
 mkATLAS :: ATLASInfo -> YamlValue 
 mkATLAS ATLASInfo {..} = 
@@ -258,5 +284,31 @@ atlasBJetEff = BJetEfficiency
   , nBReta = 2
   , nBEpt = 14
   , nBRpt = 8
+  , bTagEffSV50 = 
+      [ [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
+      , [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ] ]
+  , bTagEffJP50 = 
+      [ [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
+      , [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ] ]
+  , bTagEffJP70 = 
+      [ [ 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7 ]
+      , [ 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7 ] ]
+  , bTagRejSV50 = 
+      [ [ 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0 ]
+      , [ 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0 ] ]
+  , bTagRejJP50 = 
+      [ [ 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0 ]
+      , [ 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0 ] ]
+  , bTagRejJP70 =
+      [ [ 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0 ]
+      , [ 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0 ] ] 
+
   } 
 
+atlasMuonEff :: MuonEfficiency 
+atlasMuonEff = MuonEfficiency
+  { muPtBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
+  , muEtaBins = [ -2.5, -2.25, -2.0, -1.75, -1.50, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5 ]
+  , nMuPt = 8
+  , nMuEta = 20 } 
+ 
