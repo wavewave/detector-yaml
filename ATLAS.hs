@@ -57,6 +57,7 @@ data MuonEfficiency = MuonEfficiency
 data ATLASInfo = ATLASInfo { elecEff :: ElectronEfficiency 
                            , phoEff :: PhotonEfficiency 
                            , bJetEff :: BJetEfficiency 
+                           , muonEff :: MuonEfficiency
                            }
 
 mkElectronEfficiency :: ElectronEfficiency -> YamlValue
@@ -103,13 +104,20 @@ mkBJetEfficiency BJetEfficiency {..} =
               ] 
 
 mkMuonEfficiency :: MuonEfficiency -> YamlValue
-mkMuonEfficiency = undefined 
+mkMuonEfficiency MuonEfficiency {..} = 
+  YObject $ [ ( "MuPtBins", mkInline muPtBins ) 
+            , ( "MuEtaBins", mkInline muEtaBins ) 
+            , ( "nMuPt", (YPrim . YInteger) nMuPt) 
+            , ( "nMuEta", (YPrim . YInteger) nMuEta) 
+            ] 
+
 
 mkATLAS :: ATLASInfo -> YamlValue 
 mkATLAS ATLASInfo {..} = 
     YObject $ [ ( "ElectronEfficiency", mkElectronEfficiency elecEff )  
               , ( "PhotonEfficiency", mkPhotonEfficiency phoEff ) 
               , ( "BJetEfficiency", mkBJetEfficiency bJetEff )
+              , ( "MuonEfficiency", mkMuonEfficiency muonEff ) 
               ] 
 
 
@@ -310,5 +318,8 @@ atlasMuonEff = MuonEfficiency
   { muPtBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
   , muEtaBins = [ -2.5, -2.25, -2.0, -1.75, -1.50, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5 ]
   , nMuPt = 8
-  , nMuEta = 20 } 
+  , nMuEta = 20 
+  
+
+  } 
  

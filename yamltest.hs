@@ -7,6 +7,7 @@ import YAML
 testvalue = mkATLAS (ATLASInfo { elecEff = atlasElecEff 
                                , phoEff = atlasPhoEff 
                                , bJetEff = atlasBJetEff
+                               , muonEff = atlasMuonEff
                                })
 
 
