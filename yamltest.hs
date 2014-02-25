@@ -102,8 +102,20 @@ data PhotonEfficiency = PhotonEfficiency
                           , tightPhoEffHi  :: [ [ Scientific ] ] 
                           } 
 
+data BJetEfficiency = BJetEfficiency 
+                        { bTagEffPtBins :: [ Scientific ] 
+                        , bTagRejPtBins :: [ Scientific ] 
+                        , bTagEffEtaBins :: [ Scientific ] 
+                        , bTagRejEtaBins :: [ Scientific ]
+                        , nBEeta :: Int 
+                        , nBReta :: Int
+                        , nBEpt :: Int
+                        , nBRpt :: Int 
+                        } 
+
 data ATLASInfo = ATLASInfo { elecEff :: ElectronEfficiency 
                            , phoEff :: PhotonEfficiency 
+                           , bjetEff :: BJetEfficiency 
                            }
 
 mkInline :: [Scientific] -> YamlValue 
@@ -135,9 +147,15 @@ mkPhotonEfficiency PhotonEfficiency {..} =
               , ("TightPhoEffLow", mkWrap (map mkInline tightPhoEffLow) )
               , ("LoosePhoEffHi", mkWrap (map mkInline loosePhoEffLow) )
               , ("TightPhoEffHi", mkWrap (map mkInline loosePhoEffLow) )
- 
               ] 
 
+mkBJetEfficiency :: BJetEfficiency -> YamlValue
+mkBJetEfficiency BJetEfficiency {..} = 
+    YObject $ [ ( "BtagEffPtBins", mkInline bTagEffPtBins )
+              , ( "BTagRejPtBins", mkInline bTagRejPtBins )
+              , ( "BTagEffEtaBins", mkInline bTagEffEtaBins )
+              , ( "BTagRejEtaBins", mkInline bTagRejEtaBins ) 
+              ] 
 
 
 mkATLAS :: ATLASInfo -> YamlValue 
