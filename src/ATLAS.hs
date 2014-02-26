@@ -23,16 +23,17 @@ data DetectorDescription =
 instance Nameable DetectorDescription where
   name = detectorName  
 
+data Import = Import { fileName :: Text }
+
 data EfficiencyDescription = 
-  EfficiencyDescription { electron :: ElectronEfficiency 
-                        , photon :: PhotonEfficiency 
-                        , bJet :: BJetEfficiency 
-                        , muon :: MuonEfficiency
-                        , jet :: JetEfficiency
-                        , tau :: TauEfficiency 
+  EfficiencyDescription { electron :: Either Import ElectronEffData 
+                        , photon :: Either Import PhotonEffData 
+                        , bJet :: Either Import BJetEffData 
+                        , muon :: Either Import MuonEffData 
+                        , jet :: Either Import JetEffData 
+                        , tau :: Either Import TauEffData
                         , ptThresholds :: PTThresholds }
 
-data Import = Import { fileName :: Text }
 
 data MetaInfo = MetaInfo { tag :: Text
                          , description :: Text
@@ -136,25 +137,6 @@ mkImport :: Import -> YamlValue
 mkImport Import {..} = 
   YObject $ [ ("Import", mkString fileName) ] 
 
-mkElectronEfficiency :: ElectronEfficiency -> YamlValue
-mkElectronEfficiency ElectronEfficiency {..} = mkImport elecEffFile
-
-mkPhotonEfficiency :: PhotonEfficiency -> YamlValue
-mkPhotonEfficiency PhotonEfficiency {..} = mkImport phoEffFile
-
-mkBJetEfficiency :: BJetEfficiency -> YamlValue
-mkBJetEfficiency BJetEfficiency {..} = mkImport bJetEffFile
-
-mkMuonEfficiency :: MuonEfficiency -> YamlValue
-mkMuonEfficiency MuonEfficiency {..} = mkImport muonEffFile
-
-mkJetEfficiency :: JetEfficiency -> YamlValue
-mkJetEfficiency JetEfficiency {..} = mkImport jetEffFile
-
-mkTauEfficiency :: TauEfficiency -> YamlValue
-mkTauEfficiency TauEfficiency {..} = mkImport tauEffFile
-
-
 
 mkString = YPrim . YString
 
@@ -164,6 +146,10 @@ mkMetaInfoPairs MetaInfo {..} =
   , ("Description", mkString description) 
   , ("Comment", mkString comment )
   , ("Reference", mkString reference ) ]
+
+importOrEmbed :: (MakeYaml a) => Either Import a -> YamlValue
+importOrEmbed = either mkImport makeYaml
+
 
 instance MakeYaml Grid where
   makeYaml GridFull {..} = 
@@ -255,42 +241,25 @@ instance MakeYaml DetectorDescription where
 
 instance MakeYaml EfficiencyDescription where
   makeYaml EfficiencyDescription {..} = 
-    YObject $ [ ( "Electron", mkElectronEfficiency electron )  
-              , ( "Photon", mkPhotonEfficiency photon ) 
-              , ( "BJet", mkBJetEfficiency bJet )
-              , ( "MuonEfficiency", mkMuonEfficiency muon ) 
-              , ( "JetEfficiency", mkJetEfficiency jet )
-              , ( "TauEfficiency", mkTauEfficiency tau )
+    YObject $ [ ( "Electron", importOrEmbed electron )  
+              , ( "Photon", importOrEmbed photon ) 
+              , ( "BJet", importOrEmbed bJet )
+              , ( "Muon", importOrEmbed muon ) 
+              , ( "Jet", importOrEmbed jet )
+              , ( "Tau", importOrEmbed tau )
               , ( "PTThresholds", makeYaml ptThresholds )
               ] 
 
-atlasElecEff :: ElectronEfficiency
-atlasElecEff = ElectronEfficiency { elecEffFile = Import "Electron_Loose_ATLAS" }
-
-atlasPhoEff :: PhotonEfficiency
-atlasPhoEff = PhotonEfficiency { phoEffFile = Import "Photon_Tight_ATLAS" }
-
-atlasBJetEff :: BJetEfficiency
-atlasBJetEff = BJetEfficiency { bJetEffFile = Import "BJet_JP50_ATLAS" }
-
-atlasMuonEff :: MuonEfficiency
-atlasMuonEff = MuonEfficiency { muonEffFile = Import "Muon_CB1_ATLAS" }
-
-atlasJetEff :: JetEfficiency
-atlasJetEff = JetEfficiency { jetEffFile = Import "Jet_ATLAS" }
-
-atlasTauEff :: TauEfficiency
-atlasTauEff = TauEfficiency { tauEffFile = Import "Tau_BDT_Tight_ATLAS" }
-
-atlas2011Eff = EfficiencyDescription { electron = atlasElecEff 
-                                     , photon = atlasPhoEff 
-                                     , bJet = atlasBJetEff
-                                     , muon = atlasMuonEff
-                                     , jet = atlasJetEff
-                                     , tau = atlasTauEff
-                                     , ptThresholds = atlasPTThresholds 
-                                     }
-
+atlas2011Eff = EfficiencyDescription 
+  { electron = Left (Import "Electron_Loose_ATLAS")
+  , photon = Left (Import "Photon_Tight_ATLAS")
+  , bJet = Left (Import "BJet_JP50_ATLAS")
+  , muon = Left (Import "Muon_CB1_ATLAS")
+  , jet = Left (Import "Jet_ATLAS")
+  , tau = Right atlasTauDataCutLoose 
+           -- Left (Import "Tau_BDT_Tight_ATLAS")
+  , ptThresholds = atlasPTThresholds 
+  }
 
 
 atlasEleDataTight :: ElectronEffData
