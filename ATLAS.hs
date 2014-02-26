@@ -70,7 +70,7 @@ data TauEfficiency = TauEfficiency
                        { tauEffPtBins :: [ Scientific ] 
                        , tauEffEtaBins :: [ Scientific ] 
                        , nTEPt :: Int
-                       , nTEETa :: Int 
+                       , nTEEta :: Int 
                        , tauEffCutLSing :: [ [ Scientific ] ] 
                        , tauEffCutMSing :: [ [ Scientific ] ] 
                        , tauEffCutTSing :: [ [ Scientific ] ] 
@@ -179,7 +179,80 @@ mkMuonEfficiency MuonEfficiency {..} =
             , ( "MuEtaBins", mkInline muEtaBins ) 
             , ( "nMuPt", (YPrim . YInteger) nMuPt) 
             , ( "nMuEta", (YPrim . YInteger) nMuEta) 
+            , ( "CB1MuEff", mkWrap (map mkInline cB1MuEff) )
+            , ( "CB2MuEff", mkWrap (map mkInline cB2MuEff) )
+            , ( "ST1MuEff", mkWrap (map mkInline sT1MuEff) )
+            , ( "ST2MuEff", mkWrap (map mkInline sT2MuEff) )
             ] 
+
+mkJetEfficiency :: JetEfficiency -> YamlValue
+mkJetEfficiency JetEfficiency {..} = 
+  YObject $ [ ( "JetPtBins", mkInline jetPtBins )
+            , ( "jetEtaBins", mkInline jetEtaBins )
+            , ( "nJetPt", (YPrim . YInteger) nJetPt )
+            , ( "nJetEta", (YPrim . YInteger) nJetEta )
+            , ( "jetEff", mkWrap (map mkInline jetEff) )
+            ] 
+
+mkTauEfficiency :: TauEfficiency -> YamlValue
+mkTauEfficiency TauEfficiency {..} = 
+  YObject $ [ ( "TauEffPtBins", mkInline tauEffPtBins )
+            , ( "TauEffEtaBins", mkInline tauEffEtaBins )
+            , ( "nTEPt", (YPrim . YInteger) nTEPt )
+            , ( "nTEEta", (YPrim . YInteger) nTEEta ) 
+            , ( "TauEffCutLSing", mkWrap (map mkInline tauEffCutLSing) )
+            , ( "TauEffCutMSing", mkWrap (map mkInline tauEffCutMSing) )
+            , ( "TauEffCutTSing", mkWrap (map mkInline tauEffCutTSing) )
+            , ( "TauEffLikLSing", mkWrap (map mkInline tauEffLikLSing) )
+            , ( "TauEffLikMSing", mkWrap (map mkInline tauEffLikMSing) )
+            , ( "TauEffLikTSing", mkWrap (map mkInline tauEffLikTSing) )
+            , ( "TauEffBdtLSing", mkWrap (map mkInline tauEffBdtLSing) )
+            , ( "TauEffBdtMSing", mkWrap (map mkInline tauEffBdtMSing) )
+            , ( "TauEffBdtTSing", mkWrap (map mkInline tauEffBdtTSing) )
+            , ( "TauEffCutLMult", mkWrap (map mkInline tauEffCutLMult) )
+            , ( "TauEffCutMMult", mkWrap (map mkInline tauEffCutMMult) )
+            , ( "TauEffCutTMult", mkWrap (map mkInline tauEffCutTMult) )
+            , ( "TauEffLikLMult", mkWrap (map mkInline tauEffLikLMult) )
+            , ( "TauEffLikMMult", mkWrap (map mkInline tauEffLikMMult) )
+            , ( "TauEffLikTMult", mkWrap (map mkInline tauEffLikTMult) )
+            , ( "TauEffBdtLMult", mkWrap (map mkInline tauEffBdtLMult) )
+            , ( "TauEffBdtMMult", mkWrap (map mkInline tauEffBdtMMult) )
+            , ( "TauEffBdtTMult", mkWrap (map mkInline tauEffBdtTMult) ) 
+            , ( "TauRejPtBins", mkInline tauRejPtBins )
+            , ( "TauRejEtaBins", mkInline tauRejEtaBins )
+            , ( "nTRPt", (YPrim . YInteger) nTRPt )
+            , ( "nTREta", (YPrim . YInteger) nTREta )
+            , ( "TauRejCutLSing", mkWrap (map mkInline tauRejCutLSing) )
+            , ( "TauRejCutMSing", mkWrap (map mkInline tauRejCutMSing) )
+            , ( "TauRejCutTSing", mkWrap (map mkInline tauRejCutTSing) )
+            , ( "TauRejLikLSing", mkWrap (map mkInline tauRejLikLSing) )
+            , ( "TauRejLikMSing", mkWrap (map mkInline tauRejLikMSing) )
+            , ( "TauRejLikTSing", mkWrap (map mkInline tauRejLikTSing) )
+            , ( "TauRejBdtLSing", mkWrap (map mkInline tauRejBdtLSing) )
+            , ( "TauRejBdtMSing", mkWrap (map mkInline tauRejBdtMSing) )
+            , ( "TauRejBdtTSing", mkWrap (map mkInline tauRejBdtTSing) )
+            , ( "TauRejCutLMult", mkWrap (map mkInline tauRejCutLMult) )
+            , ( "TauRejCutMMult", mkWrap (map mkInline tauRejCutMMult) )
+            , ( "TauRejCutTMult", mkWrap (map mkInline tauRejCutTMult) )
+            , ( "TauRejLikLMult", mkWrap (map mkInline tauRejLikLMult) )
+            , ( "TauRejLikMMult", mkWrap (map mkInline tauRejLikMMult) )
+            , ( "TauRejLikTMult", mkWrap (map mkInline tauRejLikTMult) )
+            , ( "TauRejBdtLMult", mkWrap (map mkInline tauRejBdtLMult) )
+            , ( "TauRejBdtMMult", mkWrap (map mkInline tauRejBdtMMult) )
+            , ( "TauRejBdtTMult", mkWrap (map mkInline tauRejBdtTMult) )
+            ] 
+
+
+mkPTThresholds :: PTThresholds -> YamlValue
+mkPTThresholds PTThresholds {..} = 
+  YObject $ [ ( "MuPTMIN", (YPrim . YNumber) muPTMin )  
+            , ( "ElePTMIN", (YPrim . YNumber) elePTMin )
+            , ( "PhoPTMIN", (YPrim . YNumber) phoPTMin )
+            , ( "JetPTMIN", (YPrim . YNumber) jetPTMin )
+            , ( "BJetPTMIN", (YPrim . YNumber) bJetPTMin ) 
+            , ( "TrkPTMIN", (YPrim . YNumber) trkPTMin ) 
+            , ( "TauPTMIN", (YPrim . YNumber) tauPTMin ) 
+            ]
 
 
 mkATLAS :: ATLASInfo -> YamlValue 
