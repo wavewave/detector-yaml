@@ -71,24 +71,16 @@ data BJetEffData = BJetEffData
                      , bJetRejection :: PTEtaData
                      } 
 
-{-
-
-{ bTagEffPtBins :: [ Scientific ] 
-                     , bTagRejPtBins :: [ Scientific ] 
-                     , bTagEffEtaBins :: [ Scientific ] 
-                     , bTagRejEtaBins :: [ Scientific ]
-                     , bTagEffSV50 :: Grid
-                     , bTagEffJP50 :: Grid
-                     , bTagEffJP70 :: Grid
-                     , bTagRejSV50 :: Grid
-                     , bTagRejJP50 :: Grid
-                     , bTagRejJP70 :: Grid
-                     } 
--}
-
 data MuonEfficiency = MuonEfficiency { muonEffFile :: ExtFile }
 
-data MuonEffData = MuonEffData
+data MuonEffData = MuonEffData 
+                     { muonName :: Text
+                     , muonMetaInfo :: MetaInfo
+                     , muonEfficiency :: PTEtaData }
+
+
+{-
+
                         { muPtBins :: [ Scientific ] 
                         , muEtaBins :: [ Scientific ] 
                         , cB1MuEff :: Grid
@@ -96,6 +88,9 @@ data MuonEffData = MuonEffData
                         , sT1MuEff :: Grid
                         , sT2MuEff :: Grid
                         }
+
+-}
+
 
 data JetEfficiency = JetEfficiency { jetEffFile :: ExtFile }
 
@@ -256,13 +251,19 @@ mkBJetEffData BJetEffData {..} =
 
 mkMuonEffData :: MuonEffData -> YamlValue
 mkMuonEffData MuonEffData {..} = 
-  YObject $ [ ( "MuPtBins", mkInline muPtBins ) 
+  YObject $ [ ("Name", mkString muonName ) ]
+            <> mkMetaInfoPairs muonMetaInfo
+            <> [ ("Efficiency", mkPTEtaData muonEfficiency) ]
+
+{-
+( "MuPtBins", mkInline muPtBins ) 
             , ( "MuEtaBins", mkInline muEtaBins ) 
             , ( "CB1MuEff", (mkGrid  cB1MuEff) )
             , ( "CB2MuEff", (mkGrid  cB2MuEff) )
             , ( "ST1MuEff", (mkGrid  sT1MuEff) )
             , ( "ST2MuEff", (mkGrid  sT2MuEff) )
             ] 
+-}
 
 mkJetEffData :: JetEffData -> YamlValue
 mkJetEffData JetEffData {..} = 
@@ -391,7 +392,6 @@ atlasEleDataTight = ElectronEffData
       , etaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
       , grid = atlasElecTightEff
       }
-
   } 
 
 atlasEleDataMedium :: ElectronEffData
@@ -552,15 +552,62 @@ atlasBJetDataJP70 = BJetEffData
 
 
 
-atlasMuonEffData :: MuonEffData
-atlasMuonEffData = MuonEffData
-  { muPtBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
-  , muEtaBins = [ -2.5, -2.25, -2.0, -1.75, -1.50, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5 ]
-  , cB1MuEff = GridConst { gridConst = 1.0 }
-  , cB2MuEff = GridConst { gridConst = 1.0 }
-  , sT1MuEff = GridConst { gridConst = 1.0 }
-  , sT2MuEff = GridConst { gridConst = 1.0 }
-  } 
+atlasMuonDataCB1 :: MuonEffData
+atlasMuonDataCB1 = MuonEffData
+  { muonName = "Muon_CB1_ATLAS"
+  , muonMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "CB1 ATLAS Muon"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , muonEfficiency = PTEtaGrid 
+      { ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
+      , etaBins = [ -2.5, -2.25, -2.0, -1.75, -1.50, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+  }
+
+atlasMuonDataCB2 :: MuonEffData
+atlasMuonDataCB2 = MuonEffData
+  { muonName = "Muon_CB2_ATLAS"
+  , muonMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "CB2 ATLAS Muon"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , muonEfficiency = PTEtaGrid 
+      { ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
+      , etaBins = [ -2.5, -2.25, -2.0, -1.75, -1.50, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+  }
+
+atlasMuonDataST1 :: MuonEffData
+atlasMuonDataST1 = MuonEffData
+  { muonName = "Muon_ST1_ATLAS"
+  , muonMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "ST1 ATLAS Muon"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , muonEfficiency = PTEtaGrid 
+      { ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
+      , etaBins = [ -2.5, -2.25, -2.0, -1.75, -1.50, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+  }
+
+atlasMuonDataST2 :: MuonEffData
+atlasMuonDataST2 = MuonEffData
+  { muonName = "Muon_ST2_ATLAS"
+  , muonMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "ST2 ATLAS Muon"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , muonEfficiency = PTEtaGrid 
+      { ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
+      , etaBins = [ -2.5, -2.25, -2.0, -1.75, -1.50, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+  }
+
 
 atlasJetEffData :: JetEffData 
 atlasJetEffData = JetEffData
