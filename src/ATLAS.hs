@@ -27,7 +27,7 @@ data EfficiencyDescription =
                         , tau :: TauEfficiency 
                         , ptThresholds :: PTThresholds }
 
-data ExtFile = ExtFile { fileName :: Text }
+data Import = Import { fileName :: Text }
 
 data MetaInfo = MetaInfo { tag :: Text
                          , description :: Text
@@ -47,7 +47,7 @@ data PTEtaData = PTEtaGrid
                    { interpolationFunction :: Text
                    }
 
-data ElectronEfficiency = ElectronEfficiency { elecEffFile :: ExtFile }
+data ElectronEfficiency = ElectronEfficiency { elecEffFile :: Import }
 			  
 data ElectronEffData = ElectronEffData
                             { eleName :: Text
@@ -55,14 +55,14 @@ data ElectronEffData = ElectronEffData
                             , eleEfficiency :: PTEtaData
                             }
 			    
-data PhotonEfficiency = PhotonEfficiency { phoEffFile :: ExtFile }
+data PhotonEfficiency = PhotonEfficiency { phoEffFile :: Import }
 
 data PhotonEffData = PhotonEffData
                           { phoName :: Text
                           , phoMetaInfo :: MetaInfo
                           , phoEfficiency :: PTEtaData }
                        
-data BJetEfficiency = BJetEfficiency { bJetEffFile :: ExtFile }
+data BJetEfficiency = BJetEfficiency { bJetEffFile :: Import }
 
 data BJetEffData = BJetEffData
                      { bJetName :: Text 
@@ -71,14 +71,14 @@ data BJetEffData = BJetEffData
                      , bJetRejection :: PTEtaData
                      } 
 
-data MuonEfficiency = MuonEfficiency { muonEffFile :: ExtFile }
+data MuonEfficiency = MuonEfficiency { muonEffFile :: Import }
 
 data MuonEffData = MuonEffData 
                      { muonName :: Text
                      , muonMetaInfo :: MetaInfo
                      , muonEfficiency :: PTEtaData }
 
-data JetEfficiency = JetEfficiency { jetEffFile :: ExtFile }
+data JetEfficiency = JetEfficiency { jetEffFile :: Import }
 
 data JetEffData = JetEffData 
                        { jetName :: Text 
@@ -86,9 +86,18 @@ data JetEffData = JetEffData
                        , jetEfficiency :: PTEtaData }
 
 
-data TauEfficiency = TauEfficiency { tauEffFile :: ExtFile }
+data TauEfficiency = TauEfficiency { tauEffFile :: Import }
 
 data TauEffData = TauEffData
+                    { tauName :: Text
+                    , tauMetaInfo :: MetaInfo
+                    , tauTagMethod :: Text
+                    , tauEfficiency1Prong :: PTEtaData
+                    , tauRejection1Prong :: PTEtaData 
+                    , tauEfficiency3Prong :: PTEtaData
+                    , tauRejection3Prong :: PTEtaData
+                    } 
+{-
                        { tauEffPtBins :: [ Scientific ] 
                        , tauEffEtaBins :: [ Scientific ] 
                        , tauEffCutLSing :: Grid
@@ -130,6 +139,7 @@ data TauEffData = TauEffData
                        , tauRejBdtMMult :: Grid
                        , tauRejBdtTMult :: Grid
                        } 
+-}
 
 data PTThresholds = PTThresholds 
                       { muPTMin :: Scientific
@@ -142,28 +152,27 @@ data PTThresholds = PTThresholds
                       }
 
 
-mkExtFile :: ExtFile -> YamlValue
-mkExtFile ExtFile {..} = 
-  YObject $ [ ("Type", mkString "ExternalFile")
-            , ("FileName", mkString fileName) ] 
+mkImport :: Import -> YamlValue
+mkImport Import {..} = 
+  YObject $ [ ("Import", mkString fileName) ] 
 
 mkElectronEfficiency :: ElectronEfficiency -> YamlValue
-mkElectronEfficiency ElectronEfficiency {..} = mkExtFile elecEffFile
+mkElectronEfficiency ElectronEfficiency {..} = mkImport elecEffFile
 
 mkPhotonEfficiency :: PhotonEfficiency -> YamlValue
-mkPhotonEfficiency PhotonEfficiency {..} = mkExtFile phoEffFile
+mkPhotonEfficiency PhotonEfficiency {..} = mkImport phoEffFile
 
 mkBJetEfficiency :: BJetEfficiency -> YamlValue
-mkBJetEfficiency BJetEfficiency {..} = mkExtFile bJetEffFile
+mkBJetEfficiency BJetEfficiency {..} = mkImport bJetEffFile
 
 mkMuonEfficiency :: MuonEfficiency -> YamlValue
-mkMuonEfficiency MuonEfficiency {..} = mkExtFile muonEffFile
+mkMuonEfficiency MuonEfficiency {..} = mkImport muonEffFile
 
 mkJetEfficiency :: JetEfficiency -> YamlValue
-mkJetEfficiency JetEfficiency {..} = mkExtFile jetEffFile
+mkJetEfficiency JetEfficiency {..} = mkImport jetEffFile
 
 mkTauEfficiency :: TauEfficiency -> YamlValue
-mkTauEfficiency TauEfficiency {..} = mkExtFile tauEffFile
+mkTauEfficiency TauEfficiency {..} = mkImport tauEffFile
 
 mkGrid :: Grid -> YamlValue
 mkGrid GridFull {..} = 
@@ -219,20 +228,6 @@ mkBJetEffData BJetEffData {..} =
               <> [ ("Efficiency", mkPTEtaData bJetEfficiency) 
                  , ("Rejection", mkPTEtaData bJetRejection) ]
 
-{-
-( "BtagEffPtBins", mkInline bTagEffPtBins )
-              , ( "BTagRejPtBins", mkInline bTagRejPtBins )
-              , ( "BTagEffEtaBins", mkInline bTagEffEtaBins )
-              , ( "BTagRejEtaBins", mkInline bTagRejEtaBins ) 
-              , ( "BtagEffSV50", mkGrid bTagEffSV50 )
-              , ( "BtagEffJP50", mkGrid bTagEffJP50 )
-              , ( "BtagEffJP70", (mkGrid  bTagEffJP70) )
-              , ( "BtagRejSV50", (mkGrid  bTagRejSV50) )
-              , ( "BtagRejJP50", (mkGrid  bTagRejJP50) )
-              , ( "BtagRejJP70", (mkGrid  bTagRejJP70) )
-              ] 
--}
-
 -- charm rejection
 
 mkMuonEffData :: MuonEffData -> YamlValue
@@ -250,6 +245,15 @@ mkJetEffData JetEffData {..} =
 
 mkTauEffData :: TauEffData -> YamlValue
 mkTauEffData TauEffData {..} = 
+  YObject $ [ ("Name", mkString tauName) ] 
+            <> mkMetaInfoPairs tauMetaInfo 
+            <> [ ("TaggingMethod", mkString tauTagMethod) 
+               , ("Efficiency1Prong", mkPTEtaData tauEfficiency1Prong)
+               , ("Rejection1Prong", mkPTEtaData tauRejection1Prong)
+               , ("Efficiency3Prong", mkPTEtaData tauEfficiency3Prong)
+               , ("Rejection3Prong", mkPTEtaData tauRejection3Prong)
+               ] 
+{-
   YObject $ [ ( "TauEffPtBins", mkInline tauEffPtBins )
             , ( "TauEffEtaBins", mkInline tauEffEtaBins )
             , ( "TauEffCutLSing", (mkGrid  tauEffCutLSing) )
@@ -291,7 +295,7 @@ mkTauEffData TauEffData {..} =
             , ( "TauRejBdtMMult", (mkGrid  tauRejBdtMMult) )
             , ( "TauRejBdtTMult", (mkGrid  tauRejBdtTMult) )
             ] 
-
+-}
 
 mkPTThresholds :: PTThresholds -> YamlValue
 mkPTThresholds PTThresholds {..} = 
@@ -327,22 +331,22 @@ mkEfficiency EfficiencyDescription {..} =
               ] 
 
 atlasElecEff :: ElectronEfficiency
-atlasElecEff = ElectronEfficiency { elecEffFile = ExtFile "Atlas2011_ElecEff.yaml" }
+atlasElecEff = ElectronEfficiency { elecEffFile = Import "Atlas2011_ElecEff.yaml" }
 
 atlasPhoEff :: PhotonEfficiency
-atlasPhoEff = PhotonEfficiency { phoEffFile = ExtFile "Atlas2011_PhoEff.yaml" }
+atlasPhoEff = PhotonEfficiency { phoEffFile = Import "Atlas2011_PhoEff.yaml" }
 
 atlasBJetEff :: BJetEfficiency
-atlasBJetEff = BJetEfficiency { bJetEffFile = ExtFile "Atlas2011_BJetEff.yaml" }
+atlasBJetEff = BJetEfficiency { bJetEffFile = Import "Atlas2011_BJetEff.yaml" }
 
 atlasMuonEff :: MuonEfficiency
-atlasMuonEff = MuonEfficiency { muonEffFile = ExtFile "Atlas2011_MuonEff.yaml" }
+atlasMuonEff = MuonEfficiency { muonEffFile = Import "Atlas2011_MuonEff.yaml" }
 
 atlasJetEff :: JetEfficiency
-atlasJetEff = JetEfficiency { jetEffFile = ExtFile "Atlas2011_JetEff.yaml" }
+atlasJetEff = JetEfficiency { jetEffFile = Import "Atlas2011_JetEff.yaml" }
 
 atlasTauEff :: TauEfficiency
-atlasTauEff = TauEfficiency { tauEffFile = ExtFile "Atlas2011_TauEff.yaml" }
+atlasTauEff = TauEfficiency { tauEffFile = Import "Atlas2011_TauEff.yaml" }
 
 atlas2011Eff = EfficiencyDescription { electron = atlasElecEff 
                                      , photon = atlasPhoEff 
@@ -600,11 +604,36 @@ atlasJetData = JetEffData
       }
   } 
 
-atlasTauEffData :: TauEffData 
-atlasTauEffData = TauEffData 
-  { tauEffPtBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-  , tauEffEtaBins = [ 0.0, 1.3, 1.6, 2.5 ] 
-  , tauEffCutLSing = GridConst { gridConst = 1.0 }
+atlasTauDataCutLoose :: TauEffData 
+atlasTauDataCutLoose = TauEffData 
+  { tauName = "Tau_Cut_Loose_ATLAS"
+  , tauMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "ATLAS Tau Cut"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , tauTagMethod = "Cut"
+  , tauEfficiency1Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection1Prong = PTEtaGrid 
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauEfficiency3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+
+  }
+
+{-
+      
   , tauEffCutMSing = GridConst { gridConst = 1.0 }
   , tauEffCutTSing = GridConst { gridConst = 1.0 }
   , tauEffLikLSing = GridConst { gridConst = 1.0 }
@@ -613,7 +642,7 @@ atlasTauEffData = TauEffData
   , tauEffBdtLSing = GridConst { gridConst = 1.0 }
   , tauEffBdtMSing = GridConst { gridConst = 1.0 }
   , tauEffBdtTSing = GridConst { gridConst = 1.0 }
-  , tauEffCutLMult = GridConst { gridConst = 1.0 }
+  , tauEffCutLMult = 
   , tauEffCutMMult = GridConst { gridConst = 1.0 }
   , tauEffCutTMult = GridConst { gridConst = 1.0 }
   , tauEffLikLMult = GridConst { gridConst = 1.0 }
@@ -624,7 +653,7 @@ atlasTauEffData = TauEffData
   , tauEffBdtTMult = GridConst { gridConst = 1.0 }
   , tauRejPtBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
   , tauRejEtaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-  , tauRejCutLSing = GridConst { gridConst = 1.0 }
+  , tauRejCutLSing = 
   , tauRejCutMSing = GridConst { gridConst = 1.0 }
   , tauRejCutTSing = GridConst { gridConst = 1.0 }
   , tauRejLikLSing = GridConst { gridConst = 1.0 }
@@ -633,7 +662,7 @@ atlasTauEffData = TauEffData
   , tauRejBdtLSing = GridConst { gridConst = 1.0 }
   , tauRejBdtMSing = GridConst { gridConst = 1.0 }
   , tauRejBdtTSing = GridConst { gridConst = 1.0 }
-  , tauRejCutLMult = GridConst { gridConst = 1.0 }
+  , tauRejCutLMult = 
   , tauRejCutMMult = GridConst { gridConst = 1.0 }
   , tauRejCutTMult = GridConst { gridConst = 1.0 }
   , tauRejLikLMult = GridConst { gridConst = 1.0 }
@@ -643,6 +672,8 @@ atlasTauEffData = TauEffData
   , tauRejBdtMMult = GridConst { gridConst = 1.0 }
   , tauRejBdtTMult = GridConst { gridConst = 1.0 }
   }
+
+-}
 
 atlasPTThresholds :: PTThresholds
 atlasPTThresholds = PTThresholds  

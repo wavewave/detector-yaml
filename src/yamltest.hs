@@ -20,7 +20,7 @@ atlas2011pho_tight_yaml = mkPhotonEffData atlasPhoDataTight
 atlas2011bjet_sv50_yaml= mkBJetEffData atlasBJetDataSV50
 atlas2011muon_cb1_yaml = mkMuonEffData atlasMuonDataCB1
 atlas2011jet_yaml = mkJetEffData atlasJetData
-atlas2011tauyaml = mkTauEffData atlasTauEffData
+atlas2011tau_yaml = mkTauEffData atlasTauDataCutLoose
 
 
 
@@ -37,7 +37,7 @@ main = do
           , ("Atlas2011_BJetEff_SV50.yaml", atlas2011bjet_sv50_yaml)
           , ("Atlas2011_MuonEff.yaml", atlas2011muon_cb1_yaml)
           , ("Atlas2011_JetEff.yaml", atlas2011jet_yaml) 
-          , ("Atlas2011_TauEff.yaml", atlas2011tauyaml)
+          , ("Atlas2011_TauEff.yaml", atlas2011tau_yaml)
           ]
   
 
