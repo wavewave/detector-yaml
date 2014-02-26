@@ -28,20 +28,21 @@ data EfficiencyDescription =
 
 data ExtFile = ExtFile { fileName :: Text }
 
--- data MetaInfo = MetaInfo { tag :: Text
---                         , description :: Text
---                         , comment :: Text 
---                         , reference :: Text } 
+data MetaInfo = MetaInfo { tag :: Text
+                         , description :: Text
+                         , comment :: Text 
+                         , reference :: Text } 
 
 
 data ElectronEfficiency = ElectronEfficiency { elecEffFile :: ExtFile }
 			  
 data ElectronEffData = ElectronEffDataGrid    
                             { eleName :: Text
-                            , eleTag :: Text
-                            , eleDescr :: Text
-                            , eleComment :: Text
-                            , eleReference :: Text
+                            , eleMetaInfo :: MetaInfo 
+                            -- , eleTag :: Text
+                            -- , eleDescr :: Text
+                            -- , eleComment :: Text
+                            -- , eleReference :: Text
                             , elePtBins :: [Scientific] 
 			    , eleEtaBins :: [Scientific] 
                             , eleGrid :: Grid 
@@ -209,10 +210,10 @@ mkElectronEffData :: ElectronEffData -> YamlValue
 mkElectronEffData ElectronEffDataGrid {..} = 
     YObject $ [ ("Name", mkString eleName)
               , ("Type", mkString "Grid")
-              , ("Tag" , mkString eleTag)
-              , ("Description", mkString eleDescr)
-              , ("Comment", mkString eleComment)
-              , ("Reference", mkString eleReference) 
+              , ("Tag" , (mkString . tag) eleMetaInfo)
+              , ("Description", (mkString . description) eleMetaInfo)
+              , ("Comment", (mkString . comment) eleMetaInfo)
+              , ("Reference", (mkString . reference) eleMetaInfo) 
               , ("ElePtBins", mkInline elePtBins)
               , ("EleEtaBins", mkInline eleEtaBins)
               , ("EfficiencyGrid", mkGrid eleGrid )
@@ -255,6 +256,8 @@ mkBJetEffData BJetEffData {..} =
               , ( "BtagRejJP50", (mkGrid  bTagRejJP50) )
               , ( "BtagRejJP70", (mkGrid  bTagRejJP70) )
               ] 
+
+-- charm rejection
 
 mkMuonEffData :: MuonEffData -> YamlValue
 mkMuonEffData MuonEffData {..} = 
@@ -383,10 +386,11 @@ atlas2011Eff = EfficiencyDescription { elecEfficiency = atlasElecEff
 atlasElecEffData :: ElectronEffData
 atlasElecEffData = ElectronEffDataGrid
   { eleName = "Electron Tight"
-  , eleTag = "ATLAS"
-  , eleDescr = "Tight electron object 2011 ATLAS"
-  , eleComment = "We use table from reference" 
-  , eleReference = "arXiv:xxxx.yyyy"
+  , eleMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "Tight electron object 2011 ATLAS"
+      , comment = "We use table from reference" 
+      , reference = "arXiv:xxxx.yyyy" }
   , elePtBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
   , eleEtaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
   , eleGrid = atlasElecTightEff
