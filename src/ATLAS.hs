@@ -12,6 +12,7 @@ data DetectorDescription =
                       , detectorDescription :: Text
                       , detectorReference :: Text
                       , detectorComment :: Text
+                      , detectorValidationInfo :: Text 
                       , detectorEfficiency :: EfficiencyDescription
                       }
 
@@ -29,14 +30,28 @@ data ExtFile = ExtFile { fileName :: Text }
 
 data ElectronEfficiency = ElectronEfficiency { elecEffFile :: ExtFile }
 			  
-data ElectronEffData = ElectronEffData    
-                            { elePtBins :: [Scientific] 
+data ElectronEffData = ElectronEffDataGrid    
+                            { eleName :: Text
+                            , eleTag :: Text
+                            , eleDescr :: Text
+                            , eleComment :: Text
+                            , eleReference :: Text
+                            , elePtBins :: [Scientific] 
 			    , eleEtaBins :: [Scientific] 
-                            , eleGrids :: [ EfficiencyGrid ] 
-			    -- , tightEleEff :: [ [ Scientific ] ]
-			    -- , mediumEleEff :: [ [ Scientific ] ] 
-			    -- , looseEleEff :: [ [ Scientific ] ] 
+                            , eleGrid :: [ [ Scientific ] ] 
 			    }
+                     | ElectronEffDataInterpolation
+                            { eleName :: Text
+                            , eleTag :: Text 
+                            , eleDescr :: Text
+                            , eleComment :: Text
+                            , eleReference :: Text
+                            , eleFunc :: Text  
+			    }
+                         
+
+
+
 
 data EfficiencyGrid = EfficiencyGrid { effGridName :: Text
                                      , effGridData :: [ [ Scientific ] ] 
@@ -127,8 +142,6 @@ data TauEffData = TauEffData
                        , tauEffBdtTMult :: [ [ Scientific ] ]
                        , tauRejPtBins :: [ Scientific ] 
                        , tauRejEtaBins :: [ Scientific ] 
-                       -- , nTRPt :: Int
-                       -- , nTREta :: Int
                        , tauRejCutLSing :: [ [ Scientific ] ] 
                        , tauRejCutMSing :: [ [ Scientific ] ] 
                        , tauRejCutTSing :: [ [ Scientific ] ] 
@@ -189,26 +202,36 @@ mkGrid EfficiencyGrid {..} =
             , ("Data", mkWrap (map mkInline effGridData))
             ]
 
+mkString = YPrim . YString
+
 mkElectronEffData :: ElectronEffData -> YamlValue
-mkElectronEffData ElectronEffData {..} = 
-    YObject $ [ ("ElePtBins", mkInline elePtBins)
-            , ("EleEtaBins", mkInline eleEtaBins)
-            -- , ("nEleEta", (YPrim . YInteger) nEleEta) 
-            -- , ("nElePt" , (YPrim . YInteger) nElePt)
-            , ("EfficiencyGrid", YIArray (map mkGrid eleGrids) )
-            -- , ("TightEleEff", mkWrap (map mkInline tightEleEff) ) 
-            -- , ("MediumEleEff", mkWrap (map mkInline mediumEleEff) )
-            -- , ("LooseEleEff", mkWrap (map mkInline looseEleEff) )
-            ]
+mkElectronEffData ElectronEffDataGrid {..} = 
+    YObject $ [ ("Name", mkString eleName)
+              , ("Type", mkString "Grid")
+              , ("Tag" , mkString eleTag)
+              , ("Description", mkString eleDescr)
+              , ("Comment", mkString eleComment)
+              , ("Reference", mkString eleReference) 
+              , ("ElePtBins", mkInline elePtBins)
+              , ("EleEtaBins", mkInline eleEtaBins)
+              , ("EfficiencyGrid", mkWrap (map mkInline eleGrid) )
+              ]
+mkElectronEffData ElectronEffDataInterpolation {..} = 
+    YObject $ [ ("Name", mkString eleName)
+              , ("Type", mkString "Interpolation")
+              , ("Tag" , mkString eleTag)
+              , ("Description", mkString eleDescr)
+              , ("Comment", mkString eleComment)
+              , ("Reference", mkString eleReference) 
+              , ("Function", mkString eleFunc)
+              ]
+
 
 mkPhotonEffData :: PhotonEffData -> YamlValue
 mkPhotonEffData PhotonEffData {..} = 
     YObject $ [ ("PhoLowPtBins", mkInline phoLowPtBins)
               , ("PhoHighPtBins", mkInline phoHighPtBins)
               , ("PhoEtaBins", mkInline phoEtaBins) 
-              -- , ("nPhoEta", (YPrim . YInteger) nPhoEta) 
-              -- , ("nPhoPtLo", (YPrim . YInteger) nPhoPtLo)
-              -- , ("nPhoPtHi", (YPrim . YInteger) nPhoPtHi)
               , ("LoosePhoEffLow", mkWrap (map mkInline loosePhoEffLow) ) 
               , ("TightPhoEffLow", mkWrap (map mkInline tightPhoEffLow) )
               , ("LoosePhoEffHi", mkWrap (map mkInline loosePhoEffLow) )
@@ -224,10 +247,6 @@ mkBJetEffData BJetEffData {..} =
               , ( "BTagRejPtBins", mkInline bTagRejPtBins )
               , ( "BTagEffEtaBins", mkInline bTagEffEtaBins )
               , ( "BTagRejEtaBins", mkInline bTagRejEtaBins ) 
-              -- , ( "nBEeta", (YPrim . YInteger) nBEeta )
-              -- , ( "nBReta", (YPrim . YInteger) nBReta ) 
-              -- , ( "nBEpt", (YPrim . YInteger) nBEpt )
-              -- , ( "nBRpt", (YPrim . YInteger) nBRpt )
               , ( "BtagEffSV50", mkWrap (map mkInline bTagEffSV50) )
               , ( "BtagEffJP50", mkWrap (map mkInline bTagEffJP50) )
               , ( "BtagEffJP70", mkWrap (map mkInline bTagEffJP70) )
@@ -240,8 +259,6 @@ mkMuonEffData :: MuonEffData -> YamlValue
 mkMuonEffData MuonEffData {..} = 
   YObject $ [ ( "MuPtBins", mkInline muPtBins ) 
             , ( "MuEtaBins", mkInline muEtaBins ) 
-            -- , ( "nMuPt", (YPrim . YInteger) nMuPt) 
-            -- , ( "nMuEta", (YPrim . YInteger) nMuEta) 
             , ( "CB1MuEff", mkWrap (map mkInline cB1MuEff) )
             , ( "CB2MuEff", mkWrap (map mkInline cB2MuEff) )
             , ( "ST1MuEff", mkWrap (map mkInline sT1MuEff) )
@@ -252,8 +269,6 @@ mkJetEffData :: JetEffData -> YamlValue
 mkJetEffData JetEffData {..} = 
   YObject $ [ ( "JetPtBins", mkInline jetPtBins )
             , ( "jetEtaBins", mkInline jetEtaBins )
-            -- , ( "nJetPt", (YPrim . YInteger) nJetPt )
-            -- , ( "nJetEta", (YPrim . YInteger) nJetEta )
             , ( "jetEff", mkWrap (map mkInline jetEff) )
             ] 
 
@@ -261,8 +276,6 @@ mkTauEffData :: TauEffData -> YamlValue
 mkTauEffData TauEffData {..} = 
   YObject $ [ ( "TauEffPtBins", mkInline tauEffPtBins )
             , ( "TauEffEtaBins", mkInline tauEffEtaBins )
-            -- , ( "nTEPt", (YPrim . YInteger) nTEPt )
-            -- , ( "nTEEta", (YPrim . YInteger) nTEEta ) 
             , ( "TauEffCutLSing", mkWrap (map mkInline tauEffCutLSing) )
             , ( "TauEffCutMSing", mkWrap (map mkInline tauEffCutMSing) )
             , ( "TauEffCutTSing", mkWrap (map mkInline tauEffCutTSing) )
@@ -283,8 +296,6 @@ mkTauEffData TauEffData {..} =
             , ( "TauEffBdtTMult", mkWrap (map mkInline tauEffBdtTMult) ) 
             , ( "TauRejPtBins", mkInline tauRejPtBins )
             , ( "TauRejEtaBins", mkInline tauRejEtaBins )
-            -- , ( "nTRPt", (YPrim . YInteger) nTRPt )
-            -- , ( "nTREta", (YPrim . YInteger) nTREta )
             , ( "TauRejCutLSing", mkWrap (map mkInline tauRejCutLSing) )
             , ( "TauRejCutMSing", mkWrap (map mkInline tauRejCutMSing) )
             , ( "TauRejCutTSing", mkWrap (map mkInline tauRejCutTSing) )
@@ -320,10 +331,11 @@ mkPTThresholds PTThresholds {..} =
 
 mkDetector :: DetectorDescription -> YamlValue 
 mkDetector DetectorDescription {..} = 
-    YObject $ [ ( "Name", (YPrim . YString) detectorName )
-              , ( "Description", (YPrim . YString) detectorDescription )
-              , ( "Reference", (YPrim . YString) detectorReference )
-              , ( "Comment", (YPrim . YString) detectorComment )
+    YObject $ [ ( "Name", mkString detectorName )
+              , ( "Description", mkString detectorDescription )
+              , ( "Reference", mkString detectorReference )
+              , ( "Comment", mkString detectorComment )
+              , ( "ValidationInfo", mkString detectorValidationInfo )
               , ( "Efficiency", mkEfficiency detectorEfficiency ) 
               ]
 
@@ -368,17 +380,22 @@ atlas2011Eff = EfficiencyDescription { elecEfficiency = atlasElecEff
 
 
 atlasElecEffData :: ElectronEffData
-atlasElecEffData = ElectronEffData
-  { elePtBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
+atlasElecEffData = ElectronEffDataGrid
+  { eleName = "Electron Tight"
+  , eleTag = "ATLAS"
+  , eleDescr = "Tight electron object 2011 ATLAS"
+  , eleComment = "We use table from reference" 
+  , eleReference = "arXiv:xxxx.yyyy"
+  , elePtBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
   , eleEtaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
-  -- , nEleEta = 10
-  -- , nElePt = 12 
-  , eleGrids = [ atlasElecTightEff, atlasElecMediumEff, atlasElecLooseEff ]
-  } 
+  , eleGrid = atlasElecTightEff
 
-atlasElecTightEff = EfficiencyGrid 
-  { effGridName = "Tight"
-  , effGridData =
+
+  } 
+  -- , atlasElecMediumEff, atlasElecLooseEff ]
+
+
+atlasElecTightEff = 
       [ [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
@@ -389,7 +406,7 @@ atlasElecTightEff = EfficiencyGrid
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ] ]
-  }
+
 
 atlasElecMediumEff = EfficiencyGrid
   { effGridName = "Medium"

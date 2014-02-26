@@ -11,6 +11,7 @@ atlas2011yaml = mkDetector $ DetectorDescription
                            , detectorDescription = "Topo jets used in .."
                            , detectorReference = "arXiv:xxxx.yyyy"
                            , detectorComment = "extracted the efficiencies from the plot 3,4,5 in the reference" 
+                           , detectorValidationInfo = "Validated on 2014/02" 
                            , detectorEfficiency = atlas2011Eff }
 
 
