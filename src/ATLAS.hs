@@ -78,27 +78,13 @@ data MuonEffData = MuonEffData
                      , muonMetaInfo :: MetaInfo
                      , muonEfficiency :: PTEtaData }
 
-
-{-
-
-                        { muPtBins :: [ Scientific ] 
-                        , muEtaBins :: [ Scientific ] 
-                        , cB1MuEff :: Grid
-                        , cB2MuEff :: Grid
-                        , sT1MuEff :: Grid
-                        , sT2MuEff :: Grid
-                        }
-
--}
-
-
 data JetEfficiency = JetEfficiency { jetEffFile :: ExtFile }
 
 data JetEffData = JetEffData 
-                       { jetPtBins :: [ Scientific ]
-                       , jetEtaBins :: [ Scientific ] 
-                       , jetEff :: Grid
-                       } 
+                       { jetName :: Text 
+                       , jetMetaInfo :: MetaInfo 
+                       , jetEfficiency :: PTEtaData }
+
 
 data TauEfficiency = TauEfficiency { tauEffFile :: ExtFile }
 
@@ -255,22 +241,12 @@ mkMuonEffData MuonEffData {..} =
             <> mkMetaInfoPairs muonMetaInfo
             <> [ ("Efficiency", mkPTEtaData muonEfficiency) ]
 
-{-
-( "MuPtBins", mkInline muPtBins ) 
-            , ( "MuEtaBins", mkInline muEtaBins ) 
-            , ( "CB1MuEff", (mkGrid  cB1MuEff) )
-            , ( "CB2MuEff", (mkGrid  cB2MuEff) )
-            , ( "ST1MuEff", (mkGrid  sT1MuEff) )
-            , ( "ST2MuEff", (mkGrid  sT2MuEff) )
-            ] 
--}
 
 mkJetEffData :: JetEffData -> YamlValue
 mkJetEffData JetEffData {..} = 
-  YObject $ [ ( "JetPtBins", mkInline jetPtBins )
-            , ( "jetEtaBins", mkInline jetEtaBins )
-            , ( "jetEff", (mkGrid  jetEff) )
-            ] 
+  YObject $ [ ( "Name", mkString jetName ) ]
+            <> mkMetaInfoPairs jetMetaInfo
+            <> [ ("Efficiency", mkPTEtaData jetEfficiency) ] 
 
 mkTauEffData :: TauEffData -> YamlValue
 mkTauEffData TauEffData {..} = 
@@ -609,11 +585,19 @@ atlasMuonDataST2 = MuonEffData
   }
 
 
-atlasJetEffData :: JetEffData 
-atlasJetEffData = JetEffData
-  { jetPtBins = [ 20.0, 30.0, 40.0, 60.0, 80.0, 120.0, 160.0, 200.0, 280.0, 360.0, 500.0, 600.0, 900.0, 1200.0, 2000.0 ] 
-  , jetEtaBins = [ -4.5, -3.6, -2.8, -2.5, -2.0, -1.2, -0.8, -0.3, 0.0, 0.3, 0.8, 1.2, 2.0, 2.5, 2.8, 3.6, 4.5 ]
-  , jetEff = GridConst { gridConst = 1.0 }
+atlasJetData :: JetEffData 
+atlasJetData = JetEffData
+  { jetName = "Jet_ATLAS"
+  , jetMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "ATLAS Jet"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , jetEfficiency = PTEtaGrid 
+      { ptBins = [ 20.0, 30.0, 40.0, 60.0, 80.0, 120.0, 160.0, 200.0, 280.0, 360.0, 500.0, 600.0, 900.0, 1200.0, 2000.0 ] 
+      , etaBins = [ -4.5, -3.6, -2.8, -2.5, -2.0, -1.2, -0.8, -0.3, 0.0, 0.3, 0.8, 1.2, 2.0, 2.5, 2.8, 3.6, 4.5 ]
+      , grid = GridConst { gridConst = 1.0 }
+      }
   } 
 
 atlasTauEffData :: TauEffData 
