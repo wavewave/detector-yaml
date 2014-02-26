@@ -3,6 +3,7 @@
 
 module ATLAS where
 
+import Data.Monoid ((<>))
 import Data.Scientific
 import Data.Text.Lazy (Text(..))
 import YAML
@@ -33,68 +34,59 @@ data MetaInfo = MetaInfo { tag :: Text
                          , comment :: Text 
                          , reference :: Text } 
 
+data Grid = GridFull { gridData :: [ [ Scientific ] ] 
+                                  }
+          | GridConst { gridConst :: Scientific } 
+
 
 data ElectronEfficiency = ElectronEfficiency { elecEffFile :: ExtFile }
 			  
 data ElectronEffData = ElectronEffDataGrid    
                             { eleName :: Text
                             , eleMetaInfo :: MetaInfo 
-                            -- , eleTag :: Text
-                            -- , eleDescr :: Text
-                            -- , eleComment :: Text
-                            -- , eleReference :: Text
                             , elePtBins :: [Scientific] 
 			    , eleEtaBins :: [Scientific] 
-                            , eleGrid :: Grid 
-			    }
+                            , eleGrid :: Grid }
                      | ElectronEffDataInterpolation
                             { eleName :: Text
-                            , eleTag :: Text 
-                            , eleDescr :: Text
-                            , eleComment :: Text
-                            , eleReference :: Text
-                            , eleFunc :: Text  
-			    }
-                         
-data Grid = GridFull { gridData :: [ [ Scientific ] ] 
-                                  }
-          | GridConst { gridConst :: Scientific } 
-
-
+                            , eleMetaInfo :: MetaInfo
+                            , eleFunc :: Text }
+			    
 data PhotonEfficiency = PhotonEfficiency { phoEffFile :: ExtFile }
 
-data PhotonEffData = PhotonEffData 
-                          { phoLowPtBins :: [Scientific] 
-                          , phoHighPtBins :: [Scientific]
+data PhotonEffData = PhotonEffDataGrid
+                          { phoName :: Text
+                          , phoMetaInfo :: MetaInfo
+                          , phoPtBins :: [Scientific] 
                           , phoEtaBins :: [Scientific] 
-                          , loosePhoEffLow :: Grid
-                          , tightPhoEffLow :: Grid
-                          , loosePhoEffHi  :: Grid
-                          , tightPhoEffHi  :: Grid
-                          } 
-
+                          , phoGrid :: Grid }
+                   | PhotonEffDataInterpolation
+                          { phoName :: Text
+                          , phoMetaInfo :: MetaInfo
+                          , phoFunc :: Text }
+                       
 data BJetEfficiency = BJetEfficiency { bJetEffFile :: ExtFile }
 
 data BJetEffData = BJetEffData
-                        { bTagEffPtBins :: [ Scientific ] 
-                        , bTagRejPtBins :: [ Scientific ] 
-                        , bTagEffEtaBins :: [ Scientific ] 
-                        , bTagRejEtaBins :: [ Scientific ]
-                        , bTagEffSV50 :: Grid
-                        , bTagEffJP50 :: Grid
-                        , bTagEffJP70 :: Grid
-                        , bTagRejSV50 :: Grid
-                        , bTagRejJP50 :: Grid
-                        , bTagRejJP70 :: Grid
-                        } 
+                     -- { bJetName :: Text 
+                     -- , bJetMetaInfo :: MetaInfo
+                     { bTagEffPtBins :: [ Scientific ] 
+                     , bTagRejPtBins :: [ Scientific ] 
+                     , bTagEffEtaBins :: [ Scientific ] 
+                     , bTagRejEtaBins :: [ Scientific ]
+                     , bTagEffSV50 :: Grid
+                     , bTagEffJP50 :: Grid
+                     , bTagEffJP70 :: Grid
+                     , bTagRejSV50 :: Grid
+                     , bTagRejJP50 :: Grid
+                     , bTagRejJP70 :: Grid
+                     } 
 
 data MuonEfficiency = MuonEfficiency { muonEffFile :: ExtFile }
 
 data MuonEffData = MuonEffData
                         { muPtBins :: [ Scientific ] 
                         , muEtaBins :: [ Scientific ] 
-                        -- , nMuPt :: Int
-                        -- , nMuEta :: Int 
                         , cB1MuEff :: Grid
                         , cB2MuEff :: Grid
                         , sT1MuEff :: Grid
@@ -106,8 +98,6 @@ data JetEfficiency = JetEfficiency { jetEffFile :: ExtFile }
 data JetEffData = JetEffData 
                        { jetPtBins :: [ Scientific ]
                        , jetEtaBins :: [ Scientific ] 
-                       -- , nJetPt :: Int
-                       -- , nJetEta :: Int
                        , jetEff :: Grid
                        } 
 
@@ -116,8 +106,6 @@ data TauEfficiency = TauEfficiency { tauEffFile :: ExtFile }
 data TauEffData = TauEffData
                        { tauEffPtBins :: [ Scientific ] 
                        , tauEffEtaBins :: [ Scientific ] 
-                       -- , nTEPt :: Int
-                       -- , nTEEta :: Int 
                        , tauEffCutLSing :: Grid
                        , tauEffCutMSing :: Grid
                        , tauEffCutTSing :: Grid
@@ -206,38 +194,39 @@ mkGrid GridConst {..} =
 
 mkString = YPrim . YString
 
+mkMetaInfoPairs :: MetaInfo -> [ (Text, YamlValue) ]
+mkMetaInfoPairs MetaInfo {..} = 
+  [ ("Tag" , mkString tag)
+  , ("Description", mkString description) 
+  , ("Comment", mkString comment )
+  , ("Reference", mkString reference ) ]
+
+
 mkElectronEffData :: ElectronEffData -> YamlValue
 mkElectronEffData ElectronEffDataGrid {..} = 
-    YObject $ [ ("Name", mkString eleName)
-              , ("Type", mkString "Grid")
-              , ("Tag" , (mkString . tag) eleMetaInfo)
-              , ("Description", (mkString . description) eleMetaInfo)
-              , ("Comment", (mkString . comment) eleMetaInfo)
-              , ("Reference", (mkString . reference) eleMetaInfo) 
-              , ("ElePtBins", mkInline elePtBins)
-              , ("EleEtaBins", mkInline eleEtaBins)
+    YObject $ [ ("Name", mkString eleName) 
+              , ("Type", mkString "Grid") ] 
+              <> mkMetaInfoPairs eleMetaInfo <>
+              [ ("PtBins", mkInline elePtBins)
+              , ("EtaBins", mkInline eleEtaBins)
               , ("EfficiencyGrid", mkGrid eleGrid )
               ]
 mkElectronEffData ElectronEffDataInterpolation {..} = 
     YObject $ [ ("Name", mkString eleName)
-              , ("Type", mkString "Interpolation")
-              , ("Tag" , mkString eleTag)
-              , ("Description", mkString eleDescr)
-              , ("Comment", mkString eleComment)
-              , ("Reference", mkString eleReference) 
-              , ("Function", mkString eleFunc)
+              , ("Type", mkString "Interpolation") ]
+              <> mkMetaInfoPairs eleMetaInfo <>
+              [ ("Function", mkString eleFunc)
               ]
 
 
 mkPhotonEffData :: PhotonEffData -> YamlValue
-mkPhotonEffData PhotonEffData {..} = 
-    YObject $ [ ("PhoLowPtBins", mkInline phoLowPtBins)
-              , ("PhoHighPtBins", mkInline phoHighPtBins)
-              , ("PhoEtaBins", mkInline phoEtaBins) 
-              , ("LoosePhoEffLow", (mkGrid  loosePhoEffLow) ) 
-              , ("TightPhoEffLow", (mkGrid  tightPhoEffLow) )
-              , ("LoosePhoEffHi", (mkGrid  loosePhoEffLow) )
-              , ("TightPhoEffHi", (mkGrid  loosePhoEffLow) )
+mkPhotonEffData PhotonEffDataGrid {..} = 
+    YObject $ [ ("Name", mkString phoName)
+              , ("Type", mkString "Grid") ]
+              <> mkMetaInfoPairs phoMetaInfo <> 
+              [ ("PtBins", mkInline phoPtBins)
+              , ("EtaBins", mkInline phoEtaBins) 
+              , ("EfficiencyData", mkGrid  phoGrid ) 
               ] 
 
 
@@ -383,9 +372,9 @@ atlas2011Eff = EfficiencyDescription { elecEfficiency = atlasElecEff
 
 
 
-atlasElecEffData :: ElectronEffData
-atlasElecEffData = ElectronEffDataGrid
-  { eleName = "Electron Tight"
+atlasEleDataTight :: ElectronEffData
+atlasEleDataTight = ElectronEffDataGrid
+  { eleName = "ElectronTightATLAS"
   , eleMetaInfo = MetaInfo 
       { tag = "ATLAS"
       , description = "Tight electron object 2011 ATLAS"
@@ -397,8 +386,32 @@ atlasElecEffData = ElectronEffDataGrid
 
 
   } 
-  -- , atlasElecMediumEff, atlasElecLooseEff ]
 
+atlasEleDataMedium :: ElectronEffData
+atlasEleDataMedium = ElectronEffDataGrid
+  { eleName = "ElectronMediumATLAS"
+  , eleMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "Medium electron object 2011 ATLAS"
+      , comment = "We use table from reference" 
+      , reference = "arXiv:xxxx.yyyy" }
+  , elePtBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
+  , eleEtaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
+  , eleGrid = atlasElecMediumEff
+  } 
+
+atlasEleDataLoose :: ElectronEffData
+atlasEleDataLoose = ElectronEffDataGrid
+  { eleName = "ElectronLooseATLAS"
+  , eleMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "Loose electron object 2011 ATLAS"
+      , comment = "We use table from reference" 
+      , reference = "arXiv:xxxx.yyyy" }
+  , elePtBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
+  , eleEtaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
+  , eleGrid = atlasElecLooseEff
+  } 
 
 atlasElecTightEff = GridFull { gridData =
       [ [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
@@ -423,7 +436,7 @@ atlasElecMediumEff = GridFull { gridData =
       , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
       , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
       , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
-      , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]      ]
+      , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ] ]
     }
 atlasElecLooseEff = GridFull { gridData = 
       [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
@@ -438,18 +451,30 @@ atlasElecLooseEff = GridFull { gridData =
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
     }
 
-atlasPhoEffData :: PhotonEffData
-atlasPhoEffData = PhotonEffData 
-  { phoLowPtBins = [15.0, 18.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 60.0, 80.0, 100.0]
-  , phoHighPtBins = [150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0] 
+atlasPhoDataLoose :: PhotonEffData
+atlasPhoDataLoose = PhotonEffDataGrid
+  { phoName = "PhotonLooseATLAS"
+  , phoMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "Loose photon object 2011 ATLAS"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , phoPtBins = [15.0, 18.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 60.0, 80.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0] 
   , phoEtaBins = [ -2.4, -2.2, -2.0, -1.8, -1.52, -1.37, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, -0.1, 0.0, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.37, 1.52, 1.8, 2.0, 2.2, 2.4 ] 
-  -- , nPhoEta = 26
-  -- , nPhoPtLo = 11
-  -- , nPhoPtHi = 8 
-  , loosePhoEffLow = GridConst { gridConst = 1.0 }
-  , tightPhoEffLow = GridConst { gridConst = 1.0 } 
-  , loosePhoEffHi = GridConst { gridConst = 1.0 } 
-  , tightPhoEffHi = GridConst { gridConst = 1.0 }
+  , phoGrid = GridConst { gridConst = 1.0 }
+  }
+
+atlasPhoDataTight :: PhotonEffData
+atlasPhoDataTight = PhotonEffDataGrid
+  { phoName = "PhotonTightATLAS"
+  , phoMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "Tight photon object 2011 ATLAS"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , phoPtBins = [15.0, 18.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 60.0, 80.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0] 
+  , phoEtaBins = [ -2.4, -2.2, -2.0, -1.8, -1.52, -1.37, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, -0.1, 0.0, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.37, 1.52, 1.8, 2.0, 2.2, 2.4 ] 
+  , phoGrid = GridConst { gridConst = 1.0 }
   }
 
 atlasBJetEffData :: BJetEffData
@@ -459,8 +484,6 @@ atlasBJetEffData = BJetEffData
   , bTagEffEtaBins = [ 0.0, 1.2, 2.5 ] 
   , bTagRejEtaBins = [ 0.0, 1.2, 2.5 ] 
   , bTagEffSV50 = GridConst { gridConst = 0.5 } 
-      -- [ [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
-      -- , [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ] ]
   , bTagEffJP50 = GridFull { gridData =  
       [ [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
       , [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ] ]
@@ -475,8 +498,6 @@ atlasMuonEffData :: MuonEffData
 atlasMuonEffData = MuonEffData
   { muPtBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
   , muEtaBins = [ -2.5, -2.25, -2.0, -1.75, -1.50, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5 ]
-  -- , nMuPt = 8
-  -- , nMuEta = 20 
   , cB1MuEff = GridConst { gridConst = 1.0 }
   , cB2MuEff = GridConst { gridConst = 1.0 }
   , sT1MuEff = GridConst { gridConst = 1.0 }
