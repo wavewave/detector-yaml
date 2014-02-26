@@ -19,7 +19,8 @@ Executable yamltest
                    base>4, 
                    text, 
                    scientific, 
-                   bytestring
+                   bytestring, 
+                   filepath
                    -- attoparsec
 
 

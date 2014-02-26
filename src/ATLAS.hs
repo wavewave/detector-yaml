@@ -8,6 +8,9 @@ import Data.Scientific
 import Data.Text.Lazy (Text(..))
 import YAML
 
+class Nameable a where
+  name :: a -> Text
+
 data DetectorDescription = 
   DetectorDescription { detectorName :: Text
                       , detectorDescription :: Text
@@ -17,6 +20,8 @@ data DetectorDescription =
                       , detectorEfficiency :: EfficiencyDescription
                       }
 
+instance Nameable DetectorDescription where
+  name = detectorName  
 
 data EfficiencyDescription = 
   EfficiencyDescription { electron :: ElectronEfficiency 
@@ -54,6 +59,9 @@ data ElectronEffData = ElectronEffData
                             , eleMetaInfo :: MetaInfo 
                             , eleEfficiency :: PTEtaData
                             }
+
+instance Nameable ElectronEffData where
+  name = eleName
 			    
 data PhotonEfficiency = PhotonEfficiency { phoEffFile :: Import }
 
@@ -61,6 +69,9 @@ data PhotonEffData = PhotonEffData
                           { phoName :: Text
                           , phoMetaInfo :: MetaInfo
                           , phoEfficiency :: PTEtaData }
+
+instance Nameable PhotonEffData where
+  name = phoName
                        
 data BJetEfficiency = BJetEfficiency { bJetEffFile :: Import }
 
@@ -71,6 +82,9 @@ data BJetEffData = BJetEffData
                      , bJetRejection :: PTEtaData
                      } 
 
+instance Nameable BJetEffData where
+  name = bJetName
+
 data MuonEfficiency = MuonEfficiency { muonEffFile :: Import }
 
 data MuonEffData = MuonEffData 
@@ -78,12 +92,18 @@ data MuonEffData = MuonEffData
                      , muonMetaInfo :: MetaInfo
                      , muonEfficiency :: PTEtaData }
 
+instance Nameable MuonEffData where
+  name = muonName
+
 data JetEfficiency = JetEfficiency { jetEffFile :: Import }
 
 data JetEffData = JetEffData 
                        { jetName :: Text 
                        , jetMetaInfo :: MetaInfo 
                        , jetEfficiency :: PTEtaData }
+
+instance Nameable JetEffData where
+  name = jetName
 
 
 data TauEfficiency = TauEfficiency { tauEffFile :: Import }
@@ -97,49 +117,9 @@ data TauEffData = TauEffData
                     , tauEfficiency3Prong :: PTEtaData
                     , tauRejection3Prong :: PTEtaData
                     } 
-{-
-                       { tauEffPtBins :: [ Scientific ] 
-                       , tauEffEtaBins :: [ Scientific ] 
-                       , tauEffCutLSing :: Grid
-                       , tauEffCutMSing :: Grid
-                       , tauEffCutTSing :: Grid
-                       , tauEffLikLSing :: Grid
-                       , tauEffLikMSing :: Grid
-                       , tauEffLikTSing :: Grid
-                       , tauEffBdtLSing :: Grid
-                       , tauEffBdtMSing :: Grid
-                       , tauEffBdtTSing :: Grid
-                       , tauEffCutLMult :: Grid
-                       , tauEffCutMMult :: Grid
-                       , tauEffCutTMult :: Grid
-                       , tauEffLikLMult :: Grid
-                       , tauEffLikMMult :: Grid
-                       , tauEffLikTMult :: Grid
-                       , tauEffBdtLMult :: Grid
-                       , tauEffBdtMMult :: Grid
-                       , tauEffBdtTMult :: Grid
-                       , tauRejPtBins :: [ Scientific ] 
-                       , tauRejEtaBins :: [ Scientific ] 
-                       , tauRejCutLSing :: Grid
-                       , tauRejCutMSing :: Grid
-                       , tauRejCutTSing :: Grid
-                       , tauRejLikLSing :: Grid
-                       , tauRejLikMSing :: Grid
-                       , tauRejLikTSing :: Grid
-                       , tauRejBdtLSing :: Grid
-                       , tauRejBdtMSing :: Grid
-                       , tauRejBdtTSing :: Grid
-                       , tauRejCutLMult :: Grid
-                       , tauRejCutMMult :: Grid
-                       , tauRejCutTMult :: Grid
-                       , tauRejLikLMult :: Grid
-                       , tauRejLikMMult :: Grid
-                       , tauRejLikTMult :: Grid
-                       , tauRejBdtLMult :: Grid
-                       , tauRejBdtMMult :: Grid
-                       , tauRejBdtTMult :: Grid
-                       } 
--}
+
+instance Nameable TauEffData where
+  name = tauName
 
 data PTThresholds = PTThresholds 
                       { muPTMin :: Scientific
@@ -174,16 +154,6 @@ mkJetEfficiency JetEfficiency {..} = mkImport jetEffFile
 mkTauEfficiency :: TauEfficiency -> YamlValue
 mkTauEfficiency TauEfficiency {..} = mkImport tauEffFile
 
-mkGrid :: Grid -> YamlValue
-mkGrid GridFull {..} = 
-  YObject $ [ ("Type", mkString "Full")
-            , ("Data", mkWrap (map mkInline gridData))
-            ]
-mkGrid GridConst {..} = 
-  YObject $ [ ("Type", mkString "Const")
-            , ("Data", (YPrim . YNumber) gridConst)
-            ]
-
 
 
 mkString = YPrim . YString
@@ -195,158 +165,122 @@ mkMetaInfoPairs MetaInfo {..} =
   , ("Comment", mkString comment )
   , ("Reference", mkString reference ) ]
 
+instance MakeYaml Grid where
+  makeYaml GridFull {..} = 
+    YObject $ [ ("Type", mkString "Full")
+              , ("Data", mkWrap (map mkInline gridData))
+              ]
+  makeYaml GridConst {..} = 
+    YObject $ [ ("Type", mkString "Const")
+              , ("Data", (YPrim . YNumber) gridConst)
+              ]
 
-mkElectronEffData :: ElectronEffData -> YamlValue
-mkElectronEffData ElectronEffData {..} = 
+instance MakeYaml ElectronEffData where
+  makeYaml ElectronEffData {..} = 
     YObject $ [ ("Name", mkString eleName) ]
               <> mkMetaInfoPairs eleMetaInfo 
-              <> [ ("Efficiency", mkPTEtaData eleEfficiency) ]
+              <> [ ("Efficiency", makeYaml eleEfficiency) ]
 
-
-mkPTEtaData :: PTEtaData -> YamlValue
-mkPTEtaData PTEtaGrid {..} = 
+instance MakeYaml PTEtaData where 
+  makeYaml PTEtaGrid {..} = 
     YObject $ [ ("Type", mkString "Grid" )
               , ("PtBins", mkInline ptBins)
               , ("EtaBins", mkInline etaBins)
-              , ("Grid", mkGrid grid ) ]
-mkPTEtaData PTEtaInterpolation {..} =
+              , ("Grid", makeYaml grid ) ]
+  makeYaml PTEtaInterpolation {..} =
     YObject $ [ ("Type", mkString "Interpolation")
               , ("Function", mkString interpolationFunction ) ] 
 
 
-mkPhotonEffData :: PhotonEffData -> YamlValue
-mkPhotonEffData PhotonEffData {..} = 
+instance MakeYaml PhotonEffData where
+  makeYaml PhotonEffData {..} = 
     YObject $ [ ("Name", mkString phoName) ] 
               <> mkMetaInfoPairs phoMetaInfo 
-              <> [ ("Efficiency", mkPTEtaData phoEfficiency ) ] 
+              <> [ ("Efficiency", makeYaml phoEfficiency ) ] 
 
 
-mkBJetEffData :: BJetEffData -> YamlValue
-mkBJetEffData BJetEffData {..} = 
+instance MakeYaml BJetEffData where
+  makeYaml BJetEffData {..} = 
     YObject $ [ ("Name", mkString bJetName) ]
               <> mkMetaInfoPairs bJetMetaInfo
-              <> [ ("Efficiency", mkPTEtaData bJetEfficiency) 
-                 , ("Rejection", mkPTEtaData bJetRejection) ]
+              <> [ ("Efficiency", makeYaml bJetEfficiency) 
+                 , ("Rejection", makeYaml bJetRejection) ]
 
 -- charm rejection
 
-mkMuonEffData :: MuonEffData -> YamlValue
-mkMuonEffData MuonEffData {..} = 
-  YObject $ [ ("Name", mkString muonName ) ]
-            <> mkMetaInfoPairs muonMetaInfo
-            <> [ ("Efficiency", mkPTEtaData muonEfficiency) ]
+instance MakeYaml MuonEffData where
+  makeYaml MuonEffData {..} = 
+    YObject $ [ ("Name", mkString muonName ) ]
+              <> mkMetaInfoPairs muonMetaInfo
+              <> [ ("Efficiency", makeYaml muonEfficiency) ]
 
 
-mkJetEffData :: JetEffData -> YamlValue
-mkJetEffData JetEffData {..} = 
-  YObject $ [ ( "Name", mkString jetName ) ]
-            <> mkMetaInfoPairs jetMetaInfo
-            <> [ ("Efficiency", mkPTEtaData jetEfficiency) ] 
+instance MakeYaml JetEffData where 
+  makeYaml JetEffData {..} = 
+    YObject $ [ ( "Name", mkString jetName ) ]
+              <> mkMetaInfoPairs jetMetaInfo
+              <> [ ("Efficiency", makeYaml jetEfficiency) ] 
 
-mkTauEffData :: TauEffData -> YamlValue
-mkTauEffData TauEffData {..} = 
-  YObject $ [ ("Name", mkString tauName) ] 
-            <> mkMetaInfoPairs tauMetaInfo 
-            <> [ ("TaggingMethod", mkString tauTagMethod) 
-               , ("Efficiency1Prong", mkPTEtaData tauEfficiency1Prong)
-               , ("Rejection1Prong", mkPTEtaData tauRejection1Prong)
-               , ("Efficiency3Prong", mkPTEtaData tauEfficiency3Prong)
-               , ("Rejection3Prong", mkPTEtaData tauRejection3Prong)
-               ] 
-{-
-  YObject $ [ ( "TauEffPtBins", mkInline tauEffPtBins )
-            , ( "TauEffEtaBins", mkInline tauEffEtaBins )
-            , ( "TauEffCutLSing", (mkGrid  tauEffCutLSing) )
-            , ( "TauEffCutMSing", (mkGrid  tauEffCutMSing) )
-            , ( "TauEffCutTSing", (mkGrid  tauEffCutTSing) )
-            , ( "TauEffLikLSing", (mkGrid  tauEffLikLSing) )
-            , ( "TauEffLikMSing", (mkGrid  tauEffLikMSing) )
-            , ( "TauEffLikTSing", (mkGrid  tauEffLikTSing) )
-            , ( "TauEffBdtLSing", (mkGrid  tauEffBdtLSing) )
-            , ( "TauEffBdtMSing", (mkGrid  tauEffBdtMSing) )
-            , ( "TauEffBdtTSing", (mkGrid  tauEffBdtTSing) )
-            , ( "TauEffCutLMult", (mkGrid  tauEffCutLMult) )
-            , ( "TauEffCutMMult", (mkGrid  tauEffCutMMult) )
-            , ( "TauEffCutTMult", (mkGrid  tauEffCutTMult) )
-            , ( "TauEffLikLMult", (mkGrid  tauEffLikLMult) )
-            , ( "TauEffLikMMult", (mkGrid  tauEffLikMMult) )
-            , ( "TauEffLikTMult", (mkGrid  tauEffLikTMult) )
-            , ( "TauEffBdtLMult", (mkGrid  tauEffBdtLMult) )
-            , ( "TauEffBdtMMult", (mkGrid  tauEffBdtMMult) )
-            , ( "TauEffBdtTMult", (mkGrid  tauEffBdtTMult) ) 
-            , ( "TauRejPtBins", mkInline tauRejPtBins )
-            , ( "TauRejEtaBins", mkInline tauRejEtaBins )
-            , ( "TauRejCutLSing", (mkGrid  tauRejCutLSing) )
-            , ( "TauRejCutMSing", (mkGrid  tauRejCutMSing) )
-            , ( "TauRejCutTSing", (mkGrid  tauRejCutTSing) )
-            , ( "TauRejLikLSing", (mkGrid  tauRejLikLSing) )
-            , ( "TauRejLikMSing", (mkGrid  tauRejLikMSing) )
-            , ( "TauRejLikTSing", (mkGrid  tauRejLikTSing) )
-            , ( "TauRejBdtLSing", (mkGrid  tauRejBdtLSing) )
-            , ( "TauRejBdtMSing", (mkGrid  tauRejBdtMSing) )
-            , ( "TauRejBdtTSing", (mkGrid  tauRejBdtTSing) )
-            , ( "TauRejCutLMult", (mkGrid  tauRejCutLMult) )
-            , ( "TauRejCutMMult", (mkGrid  tauRejCutMMult) )
-            , ( "TauRejCutTMult", (mkGrid  tauRejCutTMult) )
-            , ( "TauRejLikLMult", (mkGrid  tauRejLikLMult) )
-            , ( "TauRejLikMMult", (mkGrid  tauRejLikMMult) )
-            , ( "TauRejLikTMult", (mkGrid  tauRejLikTMult) )
-            , ( "TauRejBdtLMult", (mkGrid  tauRejBdtLMult) )
-            , ( "TauRejBdtMMult", (mkGrid  tauRejBdtMMult) )
-            , ( "TauRejBdtTMult", (mkGrid  tauRejBdtTMult) )
-            ] 
--}
+instance MakeYaml TauEffData where
+  makeYaml TauEffData {..} = 
+    YObject $ [ ("Name", mkString tauName) ] 
+              <> mkMetaInfoPairs tauMetaInfo 
+              <> [ ("TaggingMethod", mkString tauTagMethod) 
+                 , ("Efficiency1Prong", makeYaml tauEfficiency1Prong)
+                 , ("Rejection1Prong", makeYaml tauRejection1Prong)
+                 , ("Efficiency3Prong", makeYaml tauEfficiency3Prong)
+                 , ("Rejection3Prong", makeYaml tauRejection3Prong)
+                 ] 
 
-mkPTThresholds :: PTThresholds -> YamlValue
-mkPTThresholds PTThresholds {..} = 
-  YObject $ [ ( "MuPTMIN", (YPrim . YNumber) muPTMin )  
-            , ( "ElePTMIN", (YPrim . YNumber) elePTMin )
-            , ( "PhoPTMIN", (YPrim . YNumber) phoPTMin )
-            , ( "JetPTMIN", (YPrim . YNumber) jetPTMin )
-            , ( "BJetPTMIN", (YPrim . YNumber) bJetPTMin ) 
-            , ( "TrkPTMIN", (YPrim . YNumber) trkPTMin ) 
-            , ( "TauPTMIN", (YPrim . YNumber) tauPTMin ) 
-            ]
+instance MakeYaml PTThresholds where
+  makeYaml PTThresholds {..} = 
+    YObject $ [ ( "MuPTMIN", (YPrim . YNumber) muPTMin )  
+              , ( "ElePTMIN", (YPrim . YNumber) elePTMin )
+              , ( "PhoPTMIN", (YPrim . YNumber) phoPTMin )
+              , ( "JetPTMIN", (YPrim . YNumber) jetPTMin )
+              , ( "BJetPTMIN", (YPrim . YNumber) bJetPTMin ) 
+              , ( "TrkPTMIN", (YPrim . YNumber) trkPTMin ) 
+              , ( "TauPTMIN", (YPrim . YNumber) tauPTMin ) 
+              ]
 
-
-mkDetector :: DetectorDescription -> YamlValue 
-mkDetector DetectorDescription {..} = 
+instance MakeYaml DetectorDescription where
+  makeYaml DetectorDescription {..} = 
     YObject $ [ ( "Name", mkString detectorName )
               , ( "Description", mkString detectorDescription )
               , ( "Reference", mkString detectorReference )
               , ( "Comment", mkString detectorComment )
               , ( "ValidationInfo", mkString detectorValidationInfo )
-              , ( "Efficiency", mkEfficiency detectorEfficiency ) 
+              , ( "Efficiency", makeYaml detectorEfficiency ) 
               ]
 
-mkEfficiency :: EfficiencyDescription -> YamlValue
-mkEfficiency EfficiencyDescription {..} = 
+instance MakeYaml EfficiencyDescription where
+  makeYaml EfficiencyDescription {..} = 
     YObject $ [ ( "Electron", mkElectronEfficiency electron )  
               , ( "Photon", mkPhotonEfficiency photon ) 
               , ( "BJet", mkBJetEfficiency bJet )
               , ( "MuonEfficiency", mkMuonEfficiency muon ) 
               , ( "JetEfficiency", mkJetEfficiency jet )
               , ( "TauEfficiency", mkTauEfficiency tau )
-              , ( "PTThresholds", mkPTThresholds ptThresholds )
+              , ( "PTThresholds", makeYaml ptThresholds )
               ] 
 
 atlasElecEff :: ElectronEfficiency
-atlasElecEff = ElectronEfficiency { elecEffFile = Import "Atlas2011_ElecEff.yaml" }
+atlasElecEff = ElectronEfficiency { elecEffFile = Import "Electron_Loose_ATLAS" }
 
 atlasPhoEff :: PhotonEfficiency
-atlasPhoEff = PhotonEfficiency { phoEffFile = Import "Atlas2011_PhoEff.yaml" }
+atlasPhoEff = PhotonEfficiency { phoEffFile = Import "Photon_Tight_ATLAS" }
 
 atlasBJetEff :: BJetEfficiency
-atlasBJetEff = BJetEfficiency { bJetEffFile = Import "Atlas2011_BJetEff.yaml" }
+atlasBJetEff = BJetEfficiency { bJetEffFile = Import "BJet_JP50_ATLAS" }
 
 atlasMuonEff :: MuonEfficiency
-atlasMuonEff = MuonEfficiency { muonEffFile = Import "Atlas2011_MuonEff.yaml" }
+atlasMuonEff = MuonEfficiency { muonEffFile = Import "Muon_CB1_ATLAS" }
 
 atlasJetEff :: JetEfficiency
-atlasJetEff = JetEfficiency { jetEffFile = Import "Atlas2011_JetEff.yaml" }
+atlasJetEff = JetEfficiency { jetEffFile = Import "Jet_ATLAS" }
 
 atlasTauEff :: TauEfficiency
-atlasTauEff = TauEfficiency { tauEffFile = Import "Atlas2011_TauEff.yaml" }
+atlasTauEff = TauEfficiency { tauEffFile = Import "Tau_BDT_Tight_ATLAS" }
 
 atlas2011Eff = EfficiencyDescription { electron = atlasElecEff 
                                      , photon = atlasPhoEff 
@@ -361,7 +295,7 @@ atlas2011Eff = EfficiencyDescription { electron = atlasElecEff
 
 atlasEleDataTight :: ElectronEffData
 atlasEleDataTight = ElectronEffData
-  { eleName = "ElectronTightATLAS"
+  { eleName = "Electron_Tight_ATLAS"
   , eleMetaInfo = MetaInfo 
       { tag = "ATLAS"
       , description = "Tight electron object 2011 ATLAS"
@@ -376,7 +310,7 @@ atlasEleDataTight = ElectronEffData
 
 atlasEleDataMedium :: ElectronEffData
 atlasEleDataMedium = ElectronEffData
-  { eleName = "ElectronMediumATLAS"
+  { eleName = "Electron_Medium_ATLAS"
   , eleMetaInfo = MetaInfo 
       { tag = "ATLAS"
       , description = "Medium electron object 2011 ATLAS"
@@ -391,7 +325,7 @@ atlasEleDataMedium = ElectronEffData
 
 atlasEleDataLoose :: ElectronEffData
 atlasEleDataLoose = ElectronEffData
-  { eleName = "ElectronLooseATLAS"
+  { eleName = "Electron_Loose_ATLAS"
   , eleMetaInfo = MetaInfo 
       { tag = "ATLAS"
       , description = "Loose electron object 2011 ATLAS"
@@ -444,7 +378,7 @@ atlasElecLooseEff = GridFull { gridData =
 
 atlasPhoDataLoose :: PhotonEffData
 atlasPhoDataLoose = PhotonEffData
-  { phoName = "PhotonLooseATLAS"
+  { phoName = "Photon_Loose_ATLAS"
   , phoMetaInfo = MetaInfo 
       { tag = "ATLAS"
       , description = "Loose photon object 2011 ATLAS"
@@ -458,7 +392,7 @@ atlasPhoDataLoose = PhotonEffData
 
 atlasPhoDataTight :: PhotonEffData
 atlasPhoDataTight = PhotonEffData
-  { phoName = "PhotonTightATLAS"
+  { phoName = "Photon_Tight_ATLAS"
   , phoMetaInfo = MetaInfo 
       { tag = "ATLAS"
       , description = "Tight photon object 2011 ATLAS"
@@ -527,9 +461,6 @@ atlasBJetDataJP70 = BJetEffData
       , etaBins = [ 0.0, 1.2, 2.5 ]
       , grid = GridConst { gridConst = 100.0 } }
   }
-
-
-
 
 
 atlasMuonDataCB1 :: MuonEffData
@@ -609,7 +540,7 @@ atlasTauDataCutLoose = TauEffData
   { tauName = "Tau_Cut_Loose_ATLAS"
   , tauMetaInfo = MetaInfo 
       { tag = "ATLAS"
-      , description = "ATLAS Tau Cut"
+      , description = "ATLAS Tau Cut Loose"
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , tauTagMethod = "Cut"
@@ -632,48 +563,230 @@ atlasTauDataCutLoose = TauEffData
 
   }
 
-{-
-      
-  , tauEffCutMSing = GridConst { gridConst = 1.0 }
-  , tauEffCutTSing = GridConst { gridConst = 1.0 }
-  , tauEffLikLSing = GridConst { gridConst = 1.0 }
-  , tauEffLikMSing = GridConst { gridConst = 1.0 }
-  , tauEffLikTSing = GridConst { gridConst = 1.0 }
-  , tauEffBdtLSing = GridConst { gridConst = 1.0 }
-  , tauEffBdtMSing = GridConst { gridConst = 1.0 }
-  , tauEffBdtTSing = GridConst { gridConst = 1.0 }
-  , tauEffCutLMult = 
-  , tauEffCutMMult = GridConst { gridConst = 1.0 }
-  , tauEffCutTMult = GridConst { gridConst = 1.0 }
-  , tauEffLikLMult = GridConst { gridConst = 1.0 }
-  , tauEffLikMMult = GridConst { gridConst = 1.0 }
-  , tauEffLikTMult = GridConst { gridConst = 1.0 }
-  , tauEffBdtLMult = GridConst { gridConst = 1.0 }
-  , tauEffBdtMMult = GridConst { gridConst = 1.0 }
-  , tauEffBdtTMult = GridConst { gridConst = 1.0 }
-  , tauRejPtBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-  , tauRejEtaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-  , tauRejCutLSing = 
-  , tauRejCutMSing = GridConst { gridConst = 1.0 }
-  , tauRejCutTSing = GridConst { gridConst = 1.0 }
-  , tauRejLikLSing = GridConst { gridConst = 1.0 }
-  , tauRejLikMSing = GridConst { gridConst = 1.0 }
-  , tauRejLikTSing = GridConst { gridConst = 1.0 }
-  , tauRejBdtLSing = GridConst { gridConst = 1.0 }
-  , tauRejBdtMSing = GridConst { gridConst = 1.0 }
-  , tauRejBdtTSing = GridConst { gridConst = 1.0 }
-  , tauRejCutLMult = 
-  , tauRejCutMMult = GridConst { gridConst = 1.0 }
-  , tauRejCutTMult = GridConst { gridConst = 1.0 }
-  , tauRejLikLMult = GridConst { gridConst = 1.0 }
-  , tauRejLikMMult = GridConst { gridConst = 1.0 }
-  , tauRejLikTMult = GridConst { gridConst = 1.0 }
-  , tauRejBdtLMult = GridConst { gridConst = 1.0 }
-  , tauRejBdtMMult = GridConst { gridConst = 1.0 }
-  , tauRejBdtTMult = GridConst { gridConst = 1.0 }
+atlasTauDataCutMedium :: TauEffData 
+atlasTauDataCutMedium = TauEffData 
+  { tauName = "Tau_Cut_Medium_ATLAS"
+  , tauMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "ATLAS Tau Cut Medium"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , tauTagMethod = "Cut"
+  , tauEfficiency1Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection1Prong = PTEtaGrid 
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauEfficiency3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+
   }
 
--}
+atlasTauDataCutTight :: TauEffData 
+atlasTauDataCutTight = TauEffData 
+  { tauName = "Tau_Cut_Tight_ATLAS"
+  , tauMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "ATLAS Tau Cut Tight"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , tauTagMethod = "Cut"
+  , tauEfficiency1Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection1Prong = PTEtaGrid 
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauEfficiency3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+
+  }
+
+atlasTauDataLikLoose :: TauEffData 
+atlasTauDataLikLoose = TauEffData 
+  { tauName = "Tau_Lik_Loose_ATLAS"
+  , tauMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "ATLAS Tau Likelihood Loose"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , tauTagMethod = "Likelihood"
+  , tauEfficiency1Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection1Prong = PTEtaGrid 
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauEfficiency3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+
+  }
+
+atlasTauDataLikMedium :: TauEffData 
+atlasTauDataLikMedium = TauEffData 
+  { tauName = "Tau_Lik_Medium_ATLAS"
+  , tauMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "ATLAS Tau Likelihood Medium"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , tauTagMethod = "Likelihood"
+  , tauEfficiency1Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection1Prong = PTEtaGrid 
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauEfficiency3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+
+  }
+
+atlasTauDataLikTight :: TauEffData 
+atlasTauDataLikTight = TauEffData 
+  { tauName = "Tau_Lik_Tight_ATLAS"
+  , tauMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "ATLAS Tau Likelihood Tight"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , tauTagMethod = "Likelihood"
+  , tauEfficiency1Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection1Prong = PTEtaGrid 
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauEfficiency3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+
+  }
+
+atlasTauDataBDTLoose :: TauEffData 
+atlasTauDataBDTLoose = TauEffData 
+  { tauName = "Tau_BDT_Loose_ATLAS"
+  , tauMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "ATLAS Tau BDT Loose"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , tauTagMethod = "BoostedDecisionTree"
+  , tauEfficiency1Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection1Prong = PTEtaGrid 
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauEfficiency3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+
+  }
+
+atlasTauDataBDTMedium :: TauEffData 
+atlasTauDataBDTMedium = TauEffData 
+  { tauName = "Tau_BDT_Medium_ATLAS"
+  , tauMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "ATLAS Tau BDT Medium"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , tauTagMethod = "BoostedDecisionTree"
+  , tauEfficiency1Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection1Prong = PTEtaGrid 
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauEfficiency3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+
+  }
+
+atlasTauDataBDTTight :: TauEffData 
+atlasTauDataBDTTight = TauEffData 
+  { tauName = "Tau_BDT_Tight_ATLAS"
+  , tauMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "ATLAS Tau Likelihood Tight"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , tauTagMethod = "BoostedDecisionTree"
+  , tauEfficiency1Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection1Prong = PTEtaGrid 
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauEfficiency3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+      , grid = GridConst { gridConst = 1.0 } }
+  , tauRejection3Prong = PTEtaGrid
+      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+      , grid = GridConst { gridConst = 1.0 } }
+
+  }
+
 
 atlasPTThresholds :: PTThresholds
 atlasPTThresholds = PTThresholds  
