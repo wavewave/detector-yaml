@@ -52,7 +52,77 @@ data MuonEfficiency = MuonEfficiency
                         , muEtaBins :: [ Scientific ] 
                         , nMuPt :: Int
                         , nMuEta :: Int 
+                        , cB1MuEff :: [ [ Scientific ] ] 
+                        , cB2MuEff :: [ [ Scientific ] ]
+                        , sT1MuEff :: [ [ Scientific ] ] 
+                        , sT2MuEff :: [ [ Scientific ] ]
                         }
+
+data JetEfficiency = JetEfficiency 
+                       { jetPtBins :: [ Scientific ]
+                       , jetEtaBins :: [ Scientific ] 
+                       , nJetPt :: Int
+                       , nJetEta :: Int
+                       , jetEff :: [ [ Scientific ] ] 
+                       } 
+
+data TauEfficiency = TauEfficiency
+                       { tauEffPtBins :: [ Scientific ] 
+                       , tauEffEtaBins :: [ Scientific ] 
+                       , nTEPt :: Int
+                       , nTEETa :: Int 
+                       , tauEffCutLSing :: [ [ Scientific ] ] 
+                       , tauEffCutMSing :: [ [ Scientific ] ] 
+                       , tauEffCutTSing :: [ [ Scientific ] ] 
+                       , tauEffLikLSing :: [ [ Scientific ] ] 
+                       , tauEffLikMSing :: [ [ Scientific ] ]
+                       , tauEffLikTSing :: [ [ Scientific ] ] 
+                       , tauEffBdtLSing :: [ [ Scientific ] ] 
+                       , tauEffBdtMSing :: [ [ Scientific ] ]
+                       , tauEffBdtTSing :: [ [ Scientific ] ]
+                       , tauEffCutLMult :: [ [ Scientific ] ]
+                       , tauEffCutMMult :: [ [ Scientific ] ]
+                       , tauEffCutTMult :: [ [ Scientific ] ] 
+                       , tauEffLikLMult :: [ [ Scientific ] ]
+                       , tauEffLikMMult :: [ [ Scientific ] ] 
+                       , tauEffLikTMult :: [ [ Scientific ] ]
+                       , tauEffBdtLMult :: [ [ Scientific ] ]
+                       , tauEffBdtMMult :: [ [ Scientific ] ] 
+                       , tauEffBdtTMult :: [ [ Scientific ] ]
+                       , tauRejPtBins :: [ Scientific ] 
+                       , tauRejEtaBins :: [ Scientific ] 
+                       , nTRPt :: Int
+                       , nTREta :: Int
+                       , tauRejCutLSing :: [ [ Scientific ] ] 
+                       , tauRejCutMSing :: [ [ Scientific ] ] 
+                       , tauRejCutTSing :: [ [ Scientific ] ] 
+                       , tauRejLikLSing :: [ [ Scientific ] ] 
+                       , tauRejLikMSing :: [ [ Scientific ] ]
+                       , tauRejLikTSing :: [ [ Scientific ] ] 
+                       , tauRejBdtLSing :: [ [ Scientific ] ] 
+                       , tauRejBdtMSing :: [ [ Scientific ] ]
+                       , tauRejBdtTSing :: [ [ Scientific ] ]
+                       , tauRejCutLMult :: [ [ Scientific ] ]
+                       , tauRejCutMMult :: [ [ Scientific ] ]
+                       , tauRejCutTMult :: [ [ Scientific ] ] 
+                       , tauRejLikLMult :: [ [ Scientific ] ]
+                       , tauRejLikMMult :: [ [ Scientific ] ] 
+                       , tauRejLikTMult :: [ [ Scientific ] ]
+                       , tauRejBdtLMult :: [ [ Scientific ] ]
+                       , tauRejBdtMMult :: [ [ Scientific ] ] 
+                       , tauRejBdtTMult :: [ [ Scientific ] ]
+                       } 
+
+data PTThresholds = PTThresholds 
+                      { muPTMin :: Scientific
+                      , elePTMin :: Scientific
+                      , phoPTMin :: Scientific
+                      , jetPTMin :: Scientific
+                      , bJetPTMin :: Scientific
+                      , trkPTMin :: Scientific
+                      , tauPTMin :: Scientific
+                      }
+
 
 data ATLASInfo = ATLASInfo { elecEff :: ElectronEfficiency 
                            , phoEff :: PhotonEfficiency 
