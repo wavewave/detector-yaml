@@ -28,6 +28,12 @@ data EfficiencyDescription =
 
 data ExtFile = ExtFile { fileName :: Text }
 
+-- data MetaInfo = MetaInfo { tag :: Text
+--                         , description :: Text
+--                         , comment :: Text 
+--                         , reference :: Text } 
+
+
 data ElectronEfficiency = ElectronEfficiency { elecEffFile :: ExtFile }
 			  
 data ElectronEffData = ElectronEffDataGrid    
@@ -38,7 +44,7 @@ data ElectronEffData = ElectronEffDataGrid
                             , eleReference :: Text
                             , elePtBins :: [Scientific] 
 			    , eleEtaBins :: [Scientific] 
-                            , eleGrid :: [ [ Scientific ] ] 
+                            , eleGrid :: Grid 
 			    }
                      | ElectronEffDataInterpolation
                             { eleName :: Text
@@ -49,13 +55,9 @@ data ElectronEffData = ElectronEffDataGrid
                             , eleFunc :: Text  
 			    }
                          
-
-
-
-
-data EfficiencyGrid = EfficiencyGrid { effGridName :: Text
-                                     , effGridData :: [ [ Scientific ] ] 
-                                     }
+data Grid = GridFull { gridData :: [ [ Scientific ] ] 
+                                  }
+          | GridConst { gridConst :: Scientific } 
 
 
 data PhotonEfficiency = PhotonEfficiency { phoEffFile :: ExtFile }
@@ -64,13 +66,10 @@ data PhotonEffData = PhotonEffData
                           { phoLowPtBins :: [Scientific] 
                           , phoHighPtBins :: [Scientific]
                           , phoEtaBins :: [Scientific] 
-                          -- , nPhoEta :: Int
-                          -- , nPhoPtLo :: Int
-                          -- , nPhoPtHi :: Int
-                          , loosePhoEffLow :: [ [ Scientific ] ] 
-                          , tightPhoEffLow :: [ [ Scientific ] ] 
-                          , loosePhoEffHi  :: [ [ Scientific ] ] 
-                          , tightPhoEffHi  :: [ [ Scientific ] ] 
+                          , loosePhoEffLow :: Grid
+                          , tightPhoEffLow :: Grid
+                          , loosePhoEffHi  :: Grid
+                          , tightPhoEffHi  :: Grid
                           } 
 
 data BJetEfficiency = BJetEfficiency { bJetEffFile :: ExtFile }
@@ -80,16 +79,12 @@ data BJetEffData = BJetEffData
                         , bTagRejPtBins :: [ Scientific ] 
                         , bTagEffEtaBins :: [ Scientific ] 
                         , bTagRejEtaBins :: [ Scientific ]
-                        -- , nBEeta :: Int 
-                        -- , nBReta :: Int
-                        -- , nBEpt :: Int
-                        -- , nBRpt :: Int 
-                        , bTagEffSV50 :: [ [ Scientific ] ]
-                        , bTagEffJP50 :: [ [ Scientific ] ]
-                        , bTagEffJP70 :: [ [ Scientific ] ]
-                        , bTagRejSV50 :: [ [ Scientific ] ]
-                        , bTagRejJP50 :: [ [ Scientific ] ]
-                        , bTagRejJP70 :: [ [ Scientific ] ]  
+                        , bTagEffSV50 :: Grid
+                        , bTagEffJP50 :: Grid
+                        , bTagEffJP70 :: Grid
+                        , bTagRejSV50 :: Grid
+                        , bTagRejJP50 :: Grid
+                        , bTagRejJP70 :: Grid
                         } 
 
 data MuonEfficiency = MuonEfficiency { muonEffFile :: ExtFile }
@@ -99,10 +94,10 @@ data MuonEffData = MuonEffData
                         , muEtaBins :: [ Scientific ] 
                         -- , nMuPt :: Int
                         -- , nMuEta :: Int 
-                        , cB1MuEff :: [ [ Scientific ] ] 
-                        , cB2MuEff :: [ [ Scientific ] ]
-                        , sT1MuEff :: [ [ Scientific ] ] 
-                        , sT2MuEff :: [ [ Scientific ] ]
+                        , cB1MuEff :: Grid
+                        , cB2MuEff :: Grid
+                        , sT1MuEff :: Grid
+                        , sT2MuEff :: Grid
                         }
 
 data JetEfficiency = JetEfficiency { jetEffFile :: ExtFile }
@@ -112,7 +107,7 @@ data JetEffData = JetEffData
                        , jetEtaBins :: [ Scientific ] 
                        -- , nJetPt :: Int
                        -- , nJetEta :: Int
-                       , jetEff :: [ [ Scientific ] ] 
+                       , jetEff :: Grid
                        } 
 
 data TauEfficiency = TauEfficiency { tauEffFile :: ExtFile }
@@ -122,44 +117,44 @@ data TauEffData = TauEffData
                        , tauEffEtaBins :: [ Scientific ] 
                        -- , nTEPt :: Int
                        -- , nTEEta :: Int 
-                       , tauEffCutLSing :: [ [ Scientific ] ] 
-                       , tauEffCutMSing :: [ [ Scientific ] ] 
-                       , tauEffCutTSing :: [ [ Scientific ] ] 
-                       , tauEffLikLSing :: [ [ Scientific ] ] 
-                       , tauEffLikMSing :: [ [ Scientific ] ]
-                       , tauEffLikTSing :: [ [ Scientific ] ] 
-                       , tauEffBdtLSing :: [ [ Scientific ] ] 
-                       , tauEffBdtMSing :: [ [ Scientific ] ]
-                       , tauEffBdtTSing :: [ [ Scientific ] ]
-                       , tauEffCutLMult :: [ [ Scientific ] ]
-                       , tauEffCutMMult :: [ [ Scientific ] ]
-                       , tauEffCutTMult :: [ [ Scientific ] ] 
-                       , tauEffLikLMult :: [ [ Scientific ] ]
-                       , tauEffLikMMult :: [ [ Scientific ] ] 
-                       , tauEffLikTMult :: [ [ Scientific ] ]
-                       , tauEffBdtLMult :: [ [ Scientific ] ]
-                       , tauEffBdtMMult :: [ [ Scientific ] ] 
-                       , tauEffBdtTMult :: [ [ Scientific ] ]
+                       , tauEffCutLSing :: Grid
+                       , tauEffCutMSing :: Grid
+                       , tauEffCutTSing :: Grid
+                       , tauEffLikLSing :: Grid
+                       , tauEffLikMSing :: Grid
+                       , tauEffLikTSing :: Grid
+                       , tauEffBdtLSing :: Grid
+                       , tauEffBdtMSing :: Grid
+                       , tauEffBdtTSing :: Grid
+                       , tauEffCutLMult :: Grid
+                       , tauEffCutMMult :: Grid
+                       , tauEffCutTMult :: Grid
+                       , tauEffLikLMult :: Grid
+                       , tauEffLikMMult :: Grid
+                       , tauEffLikTMult :: Grid
+                       , tauEffBdtLMult :: Grid
+                       , tauEffBdtMMult :: Grid
+                       , tauEffBdtTMult :: Grid
                        , tauRejPtBins :: [ Scientific ] 
                        , tauRejEtaBins :: [ Scientific ] 
-                       , tauRejCutLSing :: [ [ Scientific ] ] 
-                       , tauRejCutMSing :: [ [ Scientific ] ] 
-                       , tauRejCutTSing :: [ [ Scientific ] ] 
-                       , tauRejLikLSing :: [ [ Scientific ] ] 
-                       , tauRejLikMSing :: [ [ Scientific ] ]
-                       , tauRejLikTSing :: [ [ Scientific ] ] 
-                       , tauRejBdtLSing :: [ [ Scientific ] ] 
-                       , tauRejBdtMSing :: [ [ Scientific ] ]
-                       , tauRejBdtTSing :: [ [ Scientific ] ]
-                       , tauRejCutLMult :: [ [ Scientific ] ]
-                       , tauRejCutMMult :: [ [ Scientific ] ]
-                       , tauRejCutTMult :: [ [ Scientific ] ] 
-                       , tauRejLikLMult :: [ [ Scientific ] ]
-                       , tauRejLikMMult :: [ [ Scientific ] ] 
-                       , tauRejLikTMult :: [ [ Scientific ] ]
-                       , tauRejBdtLMult :: [ [ Scientific ] ]
-                       , tauRejBdtMMult :: [ [ Scientific ] ] 
-                       , tauRejBdtTMult :: [ [ Scientific ] ]
+                       , tauRejCutLSing :: Grid
+                       , tauRejCutMSing :: Grid
+                       , tauRejCutTSing :: Grid
+                       , tauRejLikLSing :: Grid
+                       , tauRejLikMSing :: Grid
+                       , tauRejLikTSing :: Grid
+                       , tauRejBdtLSing :: Grid
+                       , tauRejBdtMSing :: Grid
+                       , tauRejBdtTSing :: Grid
+                       , tauRejCutLMult :: Grid
+                       , tauRejCutMMult :: Grid
+                       , tauRejCutTMult :: Grid
+                       , tauRejLikLMult :: Grid
+                       , tauRejLikMMult :: Grid
+                       , tauRejLikTMult :: Grid
+                       , tauRejBdtLMult :: Grid
+                       , tauRejBdtMMult :: Grid
+                       , tauRejBdtTMult :: Grid
                        } 
 
 data PTThresholds = PTThresholds 
@@ -196,11 +191,17 @@ mkJetEfficiency JetEfficiency {..} = mkExtFile jetEffFile
 mkTauEfficiency :: TauEfficiency -> YamlValue
 mkTauEfficiency TauEfficiency {..} = mkExtFile tauEffFile
 
-mkGrid :: EfficiencyGrid -> YamlValue
-mkGrid EfficiencyGrid {..} = 
-  YObject $ [ ("Name", (YPrim . YString) effGridName)
-            , ("Data", mkWrap (map mkInline effGridData))
+mkGrid :: Grid -> YamlValue
+mkGrid GridFull {..} = 
+  YObject $ [ ("Type", mkString "Full")
+            , ("Data", mkWrap (map mkInline gridData))
             ]
+mkGrid GridConst {..} = 
+  YObject $ [ ("Type", mkString "Const")
+            , ("Data", (YPrim . YNumber) gridConst)
+            ]
+
+
 
 mkString = YPrim . YString
 
@@ -214,7 +215,7 @@ mkElectronEffData ElectronEffDataGrid {..} =
               , ("Reference", mkString eleReference) 
               , ("ElePtBins", mkInline elePtBins)
               , ("EleEtaBins", mkInline eleEtaBins)
-              , ("EfficiencyGrid", mkWrap (map mkInline eleGrid) )
+              , ("EfficiencyGrid", mkGrid eleGrid )
               ]
 mkElectronEffData ElectronEffDataInterpolation {..} = 
     YObject $ [ ("Name", mkString eleName)
@@ -232,10 +233,10 @@ mkPhotonEffData PhotonEffData {..} =
     YObject $ [ ("PhoLowPtBins", mkInline phoLowPtBins)
               , ("PhoHighPtBins", mkInline phoHighPtBins)
               , ("PhoEtaBins", mkInline phoEtaBins) 
-              , ("LoosePhoEffLow", mkWrap (map mkInline loosePhoEffLow) ) 
-              , ("TightPhoEffLow", mkWrap (map mkInline tightPhoEffLow) )
-              , ("LoosePhoEffHi", mkWrap (map mkInline loosePhoEffLow) )
-              , ("TightPhoEffHi", mkWrap (map mkInline loosePhoEffLow) )
+              , ("LoosePhoEffLow", (mkGrid  loosePhoEffLow) ) 
+              , ("TightPhoEffLow", (mkGrid  tightPhoEffLow) )
+              , ("LoosePhoEffHi", (mkGrid  loosePhoEffLow) )
+              , ("TightPhoEffHi", (mkGrid  loosePhoEffLow) )
               ] 
 
 
@@ -247,73 +248,73 @@ mkBJetEffData BJetEffData {..} =
               , ( "BTagRejPtBins", mkInline bTagRejPtBins )
               , ( "BTagEffEtaBins", mkInline bTagEffEtaBins )
               , ( "BTagRejEtaBins", mkInline bTagRejEtaBins ) 
-              , ( "BtagEffSV50", mkWrap (map mkInline bTagEffSV50) )
-              , ( "BtagEffJP50", mkWrap (map mkInline bTagEffJP50) )
-              , ( "BtagEffJP70", mkWrap (map mkInline bTagEffJP70) )
-              , ( "BtagRejSV50", mkWrap (map mkInline bTagRejSV50) )
-              , ( "BtagRejJP50", mkWrap (map mkInline bTagRejJP50) )
-              , ( "BtagRejJP70", mkWrap (map mkInline bTagRejJP70) )
+              , ( "BtagEffSV50", mkGrid bTagEffSV50 )
+              , ( "BtagEffJP50", mkGrid bTagEffJP50 )
+              , ( "BtagEffJP70", (mkGrid  bTagEffJP70) )
+              , ( "BtagRejSV50", (mkGrid  bTagRejSV50) )
+              , ( "BtagRejJP50", (mkGrid  bTagRejJP50) )
+              , ( "BtagRejJP70", (mkGrid  bTagRejJP70) )
               ] 
 
 mkMuonEffData :: MuonEffData -> YamlValue
 mkMuonEffData MuonEffData {..} = 
   YObject $ [ ( "MuPtBins", mkInline muPtBins ) 
             , ( "MuEtaBins", mkInline muEtaBins ) 
-            , ( "CB1MuEff", mkWrap (map mkInline cB1MuEff) )
-            , ( "CB2MuEff", mkWrap (map mkInline cB2MuEff) )
-            , ( "ST1MuEff", mkWrap (map mkInline sT1MuEff) )
-            , ( "ST2MuEff", mkWrap (map mkInline sT2MuEff) )
+            , ( "CB1MuEff", (mkGrid  cB1MuEff) )
+            , ( "CB2MuEff", (mkGrid  cB2MuEff) )
+            , ( "ST1MuEff", (mkGrid  sT1MuEff) )
+            , ( "ST2MuEff", (mkGrid  sT2MuEff) )
             ] 
 
 mkJetEffData :: JetEffData -> YamlValue
 mkJetEffData JetEffData {..} = 
   YObject $ [ ( "JetPtBins", mkInline jetPtBins )
             , ( "jetEtaBins", mkInline jetEtaBins )
-            , ( "jetEff", mkWrap (map mkInline jetEff) )
+            , ( "jetEff", (mkGrid  jetEff) )
             ] 
 
 mkTauEffData :: TauEffData -> YamlValue
 mkTauEffData TauEffData {..} = 
   YObject $ [ ( "TauEffPtBins", mkInline tauEffPtBins )
             , ( "TauEffEtaBins", mkInline tauEffEtaBins )
-            , ( "TauEffCutLSing", mkWrap (map mkInline tauEffCutLSing) )
-            , ( "TauEffCutMSing", mkWrap (map mkInline tauEffCutMSing) )
-            , ( "TauEffCutTSing", mkWrap (map mkInline tauEffCutTSing) )
-            , ( "TauEffLikLSing", mkWrap (map mkInline tauEffLikLSing) )
-            , ( "TauEffLikMSing", mkWrap (map mkInline tauEffLikMSing) )
-            , ( "TauEffLikTSing", mkWrap (map mkInline tauEffLikTSing) )
-            , ( "TauEffBdtLSing", mkWrap (map mkInline tauEffBdtLSing) )
-            , ( "TauEffBdtMSing", mkWrap (map mkInline tauEffBdtMSing) )
-            , ( "TauEffBdtTSing", mkWrap (map mkInline tauEffBdtTSing) )
-            , ( "TauEffCutLMult", mkWrap (map mkInline tauEffCutLMult) )
-            , ( "TauEffCutMMult", mkWrap (map mkInline tauEffCutMMult) )
-            , ( "TauEffCutTMult", mkWrap (map mkInline tauEffCutTMult) )
-            , ( "TauEffLikLMult", mkWrap (map mkInline tauEffLikLMult) )
-            , ( "TauEffLikMMult", mkWrap (map mkInline tauEffLikMMult) )
-            , ( "TauEffLikTMult", mkWrap (map mkInline tauEffLikTMult) )
-            , ( "TauEffBdtLMult", mkWrap (map mkInline tauEffBdtLMult) )
-            , ( "TauEffBdtMMult", mkWrap (map mkInline tauEffBdtMMult) )
-            , ( "TauEffBdtTMult", mkWrap (map mkInline tauEffBdtTMult) ) 
+            , ( "TauEffCutLSing", (mkGrid  tauEffCutLSing) )
+            , ( "TauEffCutMSing", (mkGrid  tauEffCutMSing) )
+            , ( "TauEffCutTSing", (mkGrid  tauEffCutTSing) )
+            , ( "TauEffLikLSing", (mkGrid  tauEffLikLSing) )
+            , ( "TauEffLikMSing", (mkGrid  tauEffLikMSing) )
+            , ( "TauEffLikTSing", (mkGrid  tauEffLikTSing) )
+            , ( "TauEffBdtLSing", (mkGrid  tauEffBdtLSing) )
+            , ( "TauEffBdtMSing", (mkGrid  tauEffBdtMSing) )
+            , ( "TauEffBdtTSing", (mkGrid  tauEffBdtTSing) )
+            , ( "TauEffCutLMult", (mkGrid  tauEffCutLMult) )
+            , ( "TauEffCutMMult", (mkGrid  tauEffCutMMult) )
+            , ( "TauEffCutTMult", (mkGrid  tauEffCutTMult) )
+            , ( "TauEffLikLMult", (mkGrid  tauEffLikLMult) )
+            , ( "TauEffLikMMult", (mkGrid  tauEffLikMMult) )
+            , ( "TauEffLikTMult", (mkGrid  tauEffLikTMult) )
+            , ( "TauEffBdtLMult", (mkGrid  tauEffBdtLMult) )
+            , ( "TauEffBdtMMult", (mkGrid  tauEffBdtMMult) )
+            , ( "TauEffBdtTMult", (mkGrid  tauEffBdtTMult) ) 
             , ( "TauRejPtBins", mkInline tauRejPtBins )
             , ( "TauRejEtaBins", mkInline tauRejEtaBins )
-            , ( "TauRejCutLSing", mkWrap (map mkInline tauRejCutLSing) )
-            , ( "TauRejCutMSing", mkWrap (map mkInline tauRejCutMSing) )
-            , ( "TauRejCutTSing", mkWrap (map mkInline tauRejCutTSing) )
-            , ( "TauRejLikLSing", mkWrap (map mkInline tauRejLikLSing) )
-            , ( "TauRejLikMSing", mkWrap (map mkInline tauRejLikMSing) )
-            , ( "TauRejLikTSing", mkWrap (map mkInline tauRejLikTSing) )
-            , ( "TauRejBdtLSing", mkWrap (map mkInline tauRejBdtLSing) )
-            , ( "TauRejBdtMSing", mkWrap (map mkInline tauRejBdtMSing) )
-            , ( "TauRejBdtTSing", mkWrap (map mkInline tauRejBdtTSing) )
-            , ( "TauRejCutLMult", mkWrap (map mkInline tauRejCutLMult) )
-            , ( "TauRejCutMMult", mkWrap (map mkInline tauRejCutMMult) )
-            , ( "TauRejCutTMult", mkWrap (map mkInline tauRejCutTMult) )
-            , ( "TauRejLikLMult", mkWrap (map mkInline tauRejLikLMult) )
-            , ( "TauRejLikMMult", mkWrap (map mkInline tauRejLikMMult) )
-            , ( "TauRejLikTMult", mkWrap (map mkInline tauRejLikTMult) )
-            , ( "TauRejBdtLMult", mkWrap (map mkInline tauRejBdtLMult) )
-            , ( "TauRejBdtMMult", mkWrap (map mkInline tauRejBdtMMult) )
-            , ( "TauRejBdtTMult", mkWrap (map mkInline tauRejBdtTMult) )
+            , ( "TauRejCutLSing", (mkGrid  tauRejCutLSing) )
+            , ( "TauRejCutMSing", (mkGrid  tauRejCutMSing) )
+            , ( "TauRejCutTSing", (mkGrid  tauRejCutTSing) )
+            , ( "TauRejLikLSing", (mkGrid  tauRejLikLSing) )
+            , ( "TauRejLikMSing", (mkGrid  tauRejLikMSing) )
+            , ( "TauRejLikTSing", (mkGrid  tauRejLikTSing) )
+            , ( "TauRejBdtLSing", (mkGrid  tauRejBdtLSing) )
+            , ( "TauRejBdtMSing", (mkGrid  tauRejBdtMSing) )
+            , ( "TauRejBdtTSing", (mkGrid  tauRejBdtTSing) )
+            , ( "TauRejCutLMult", (mkGrid  tauRejCutLMult) )
+            , ( "TauRejCutMMult", (mkGrid  tauRejCutMMult) )
+            , ( "TauRejCutTMult", (mkGrid  tauRejCutTMult) )
+            , ( "TauRejLikLMult", (mkGrid  tauRejLikLMult) )
+            , ( "TauRejLikMMult", (mkGrid  tauRejLikMMult) )
+            , ( "TauRejLikTMult", (mkGrid  tauRejLikTMult) )
+            , ( "TauRejBdtLMult", (mkGrid  tauRejBdtLMult) )
+            , ( "TauRejBdtMMult", (mkGrid  tauRejBdtMMult) )
+            , ( "TauRejBdtTMult", (mkGrid  tauRejBdtTMult) )
             ] 
 
 
@@ -395,7 +396,7 @@ atlasElecEffData = ElectronEffDataGrid
   -- , atlasElecMediumEff, atlasElecLooseEff ]
 
 
-atlasElecTightEff = 
+atlasElecTightEff = GridFull { gridData =
       [ [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
@@ -406,11 +407,9 @@ atlasElecTightEff =
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ] ]
+ }
 
-
-atlasElecMediumEff = EfficiencyGrid
-  { effGridName = "Medium"
-  , effGridData = 
+atlasElecMediumEff = GridFull { gridData = 
       [ [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
       , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
       , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
@@ -420,11 +419,9 @@ atlasElecMediumEff = EfficiencyGrid
       , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
       , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
       , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
-      , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ] ]
-  }
-atlasElecLooseEff = EfficiencyGrid 
-  { effGridName = "Loose"
-  , effGridData =  
+      , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]      ]
+    }
+atlasElecLooseEff = GridFull { gridData = 
       [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
@@ -435,7 +432,7 @@ atlasElecLooseEff = EfficiencyGrid
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  }
+    }
 
 atlasPhoEffData :: PhotonEffData
 atlasPhoEffData = PhotonEffData 
@@ -445,114 +442,10 @@ atlasPhoEffData = PhotonEffData
   -- , nPhoEta = 26
   -- , nPhoPtLo = 11
   -- , nPhoPtHi = 8 
-  , loosePhoEffLow = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tightPhoEffLow = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0] ]
-  , loosePhoEffHi = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0] ]
-  , tightPhoEffHi = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0] ]
+  , loosePhoEffLow = GridConst { gridConst = 1.0 }
+  , tightPhoEffLow = GridConst { gridConst = 1.0 } 
+  , loosePhoEffHi = GridConst { gridConst = 1.0 } 
+  , tightPhoEffHi = GridConst { gridConst = 1.0 }
   }
 
 atlasBJetEffData :: BJetEffData
@@ -561,29 +454,17 @@ atlasBJetEffData = BJetEffData
   , bTagRejPtBins = [ 20.0, 25.0, 40.0, 60.0, 90.0, 140.0, 200.0, 300.0, 500.0 ] 
   , bTagEffEtaBins = [ 0.0, 1.2, 2.5 ] 
   , bTagRejEtaBins = [ 0.0, 1.2, 2.5 ] 
-  -- , nBEeta = 2
-  -- , nBReta = 2
-  -- , nBEpt = 14
-  -- , nBRpt = 8
-  , bTagEffSV50 = 
+  , bTagEffSV50 = GridConst { gridConst = 0.5 } 
+      -- [ [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
+      -- , [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ] ]
+  , bTagEffJP50 = GridFull { gridData =  
       [ [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
       , [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ] ]
-  , bTagEffJP50 = 
-      [ [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
-      , [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ] ]
-  , bTagEffJP70 = 
-      [ [ 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7 ]
-      , [ 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7 ] ]
-  , bTagRejSV50 = 
-      [ [ 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0 ]
-      , [ 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0 ] ]
-  , bTagRejJP50 = 
-      [ [ 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0 ]
-      , [ 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0 ] ]
-  , bTagRejJP70 =
-      [ [ 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0 ]
-      , [ 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0 ] ] 
-
+    }
+  , bTagEffJP70 = GridConst { gridConst = 0.7 }
+  , bTagRejSV50 = GridConst { gridConst = 100.0 }
+  , bTagRejJP50 = GridConst { gridConst = 100.0 }
+  , bTagRejJP70 = GridConst { gridConst = 100.0 }
   } 
 
 atlasMuonEffData :: MuonEffData
@@ -592,271 +473,61 @@ atlasMuonEffData = MuonEffData
   , muEtaBins = [ -2.5, -2.25, -2.0, -1.75, -1.50, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5 ]
   -- , nMuPt = 8
   -- , nMuEta = 20 
-  , cB1MuEff = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]  
-  , cB2MuEff = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , sT1MuEff = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , sT2MuEff = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
+  , cB1MuEff = GridConst { gridConst = 1.0 }
+  , cB2MuEff = GridConst { gridConst = 1.0 }
+  , sT1MuEff = GridConst { gridConst = 1.0 }
+  , sT2MuEff = GridConst { gridConst = 1.0 }
   } 
 
 atlasJetEffData :: JetEffData 
 atlasJetEffData = JetEffData
   { jetPtBins = [ 20.0, 30.0, 40.0, 60.0, 80.0, 120.0, 160.0, 200.0, 280.0, 360.0, 500.0, 600.0, 900.0, 1200.0, 2000.0 ] 
   , jetEtaBins = [ -4.5, -3.6, -2.8, -2.5, -2.0, -1.2, -0.8, -0.3, 0.0, 0.3, 0.8, 1.2, 2.0, 2.5, 2.8, 3.6, 4.5 ]
-  -- , nJetPt = 14
-  -- , nJetEta = 16 
-  , jetEff = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
+  , jetEff = GridConst { gridConst = 1.0 }
   } 
 
 atlasTauEffData :: TauEffData 
 atlasTauEffData = TauEffData 
   { tauEffPtBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
   , tauEffEtaBins = [ 0.0, 1.3, 1.6, 2.5 ] 
-  -- , nTEPt = 9
-  -- , nTEEta = 3 
-  , tauEffCutLSing = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffCutMSing = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffCutTSing = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffLikLSing =
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffLikMSing = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffLikTSing = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffBdtLSing =
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffBdtMSing = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffBdtTSing = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffCutLMult =
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffCutMMult = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffCutTMult = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffLikLMult =
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffLikMMult = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffLikTMult = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffBdtLMult =
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffBdtMMult = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauEffBdtTMult = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
+  , tauEffCutLSing = GridConst { gridConst = 1.0 }
+  , tauEffCutMSing = GridConst { gridConst = 1.0 }
+  , tauEffCutTSing = GridConst { gridConst = 1.0 }
+  , tauEffLikLSing = GridConst { gridConst = 1.0 }
+  , tauEffLikMSing = GridConst { gridConst = 1.0 }
+  , tauEffLikTSing = GridConst { gridConst = 1.0 }
+  , tauEffBdtLSing = GridConst { gridConst = 1.0 }
+  , tauEffBdtMSing = GridConst { gridConst = 1.0 }
+  , tauEffBdtTSing = GridConst { gridConst = 1.0 }
+  , tauEffCutLMult = GridConst { gridConst = 1.0 }
+  , tauEffCutMMult = GridConst { gridConst = 1.0 }
+  , tauEffCutTMult = GridConst { gridConst = 1.0 }
+  , tauEffLikLMult = GridConst { gridConst = 1.0 }
+  , tauEffLikMMult = GridConst { gridConst = 1.0 }
+  , tauEffLikTMult = GridConst { gridConst = 1.0 }
+  , tauEffBdtLMult = GridConst { gridConst = 1.0 }
+  , tauEffBdtMMult = GridConst { gridConst = 1.0 }
+  , tauEffBdtTMult = GridConst { gridConst = 1.0 }
   , tauRejPtBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
   , tauRejEtaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-  -- , nTRPt = 9 
-  -- , nTREta = 3
-  , tauRejCutLSing = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejCutMSing = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejCutTSing = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejLikLSing =
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejLikMSing = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejLikTSing = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejBdtLSing =
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejBdtMSing = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejBdtTSing = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejCutLMult =
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejCutMMult = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejCutTMult = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejLikLMult =
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejLikMMult = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejLikTMult = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejBdtLMult =
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejBdtMMult = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-  , tauRejBdtTMult = 
-      [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
-      , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
+  , tauRejCutLSing = GridConst { gridConst = 1.0 }
+  , tauRejCutMSing = GridConst { gridConst = 1.0 }
+  , tauRejCutTSing = GridConst { gridConst = 1.0 }
+  , tauRejLikLSing = GridConst { gridConst = 1.0 }
+  , tauRejLikMSing = GridConst { gridConst = 1.0 }
+  , tauRejLikTSing = GridConst { gridConst = 1.0 }
+  , tauRejBdtLSing = GridConst { gridConst = 1.0 }
+  , tauRejBdtMSing = GridConst { gridConst = 1.0 }
+  , tauRejBdtTSing = GridConst { gridConst = 1.0 }
+  , tauRejCutLMult = GridConst { gridConst = 1.0 }
+  , tauRejCutMMult = GridConst { gridConst = 1.0 }
+  , tauRejCutTMult = GridConst { gridConst = 1.0 }
+  , tauRejLikLMult = GridConst { gridConst = 1.0 }
+  , tauRejLikMMult = GridConst { gridConst = 1.0 }
+  , tauRejLikTMult = GridConst { gridConst = 1.0 }
+  , tauRejBdtLMult = GridConst { gridConst = 1.0 }
+  , tauRejBdtMMult = GridConst { gridConst = 1.0 }
+  , tauRejBdtTMult = GridConst { gridConst = 1.0 }
   }
 
 atlasPTThresholds :: PTThresholds
