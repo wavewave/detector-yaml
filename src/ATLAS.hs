@@ -4,41 +4,67 @@
 module ATLAS where
 
 import Data.Scientific
+import Data.Text.Lazy (Text(..))
 import YAML
 
+data DetectorDescription = 
+  DetectorDescription { detectorName :: Text
+                      , detectorDescription :: Text
+                      , detectorReference :: Text
+                      , detectorComment :: Text
+                      , detectorEfficiency :: EfficiencyDescription
+                      }
 
-data ElectronEfficiency = ElectronEfficiency 
-			    { elePtBins :: [Scientific] 
+
+data EfficiencyDescription = 
+  EfficiencyDescription { elecEfficiency :: ElectronEfficiency 
+                        , phoEfficiency :: PhotonEfficiency 
+                        , bJetEfficiency :: BJetEfficiency 
+                        , muonEfficiency :: MuonEfficiency
+                        , jetEfficiency :: JetEfficiency
+                        , tauEfficiency :: TauEfficiency 
+                        , ptThresholds :: PTThresholds }
+
+data ExtFile = ExtFile { fileName :: Text }
+
+data ElectronEfficiency = ElectronEfficiency { elecEffFile :: ExtFile }
+			  
+data ElectronEffData = ElectronEffData    
+                            { elePtBins :: [Scientific] 
 			    , eleEtaBins :: [Scientific] 
-			    , nEleEta :: Int
-			    , nElePt :: Int 
+			    -- , nEleEta :: Int
+			    -- , nElePt :: Int 
 			    , tightEleEff :: [ [ Scientific ] ]
 			    , mediumEleEff :: [ [ Scientific ] ] 
 			    , looseEleEff :: [ [ Scientific ] ] 
 			    }
 
-data PhotonEfficiency = PhotonEfficiency 
+data PhotonEfficiency = PhotonEfficiency { phoEffFile :: ExtFile }
+
+data PhotonEffData = PhotonEffData 
                           { phoLowPtBins :: [Scientific] 
                           , phoHighPtBins :: [Scientific]
                           , phoEtaBins :: [Scientific] 
-                          , nPhoEta :: Int
-                          , nPhoPtLo :: Int
-                          , nPhoPtHi :: Int
+                          -- , nPhoEta :: Int
+                          -- , nPhoPtLo :: Int
+                          -- , nPhoPtHi :: Int
                           , loosePhoEffLow :: [ [ Scientific ] ] 
                           , tightPhoEffLow :: [ [ Scientific ] ] 
                           , loosePhoEffHi  :: [ [ Scientific ] ] 
                           , tightPhoEffHi  :: [ [ Scientific ] ] 
                           } 
 
-data BJetEfficiency = BJetEfficiency 
+data BJetEfficiency = BJetEfficiency { bJetEffFile :: ExtFile }
+
+data BJetEffData = BJetEffData
                         { bTagEffPtBins :: [ Scientific ] 
                         , bTagRejPtBins :: [ Scientific ] 
                         , bTagEffEtaBins :: [ Scientific ] 
                         , bTagRejEtaBins :: [ Scientific ]
-                        , nBEeta :: Int 
-                        , nBReta :: Int
-                        , nBEpt :: Int
-                        , nBRpt :: Int 
+                        -- , nBEeta :: Int 
+                        -- , nBReta :: Int
+                        -- , nBEpt :: Int
+                        -- , nBRpt :: Int 
                         , bTagEffSV50 :: [ [ Scientific ] ]
                         , bTagEffJP50 :: [ [ Scientific ] ]
                         , bTagEffJP70 :: [ [ Scientific ] ]
@@ -47,30 +73,36 @@ data BJetEfficiency = BJetEfficiency
                         , bTagRejJP70 :: [ [ Scientific ] ]  
                         } 
 
-data MuonEfficiency = MuonEfficiency
+data MuonEfficiency = MuonEfficiency { muonEffFile :: ExtFile }
+
+data MuonEffData = MuonEffData
                         { muPtBins :: [ Scientific ] 
                         , muEtaBins :: [ Scientific ] 
-                        , nMuPt :: Int
-                        , nMuEta :: Int 
+                        -- , nMuPt :: Int
+                        -- , nMuEta :: Int 
                         , cB1MuEff :: [ [ Scientific ] ] 
                         , cB2MuEff :: [ [ Scientific ] ]
                         , sT1MuEff :: [ [ Scientific ] ] 
                         , sT2MuEff :: [ [ Scientific ] ]
                         }
 
-data JetEfficiency = JetEfficiency 
+data JetEfficiency = JetEfficiency { jetEffFile :: ExtFile }
+
+data JetEffData = JetEffData 
                        { jetPtBins :: [ Scientific ]
                        , jetEtaBins :: [ Scientific ] 
-                       , nJetPt :: Int
-                       , nJetEta :: Int
+                       -- , nJetPt :: Int
+                       -- , nJetEta :: Int
                        , jetEff :: [ [ Scientific ] ] 
                        } 
 
-data TauEfficiency = TauEfficiency
+data TauEfficiency = TauEfficiency { tauEffFile :: ExtFile }
+
+data TauEffData = TauEffData
                        { tauEffPtBins :: [ Scientific ] 
                        , tauEffEtaBins :: [ Scientific ] 
-                       , nTEPt :: Int
-                       , nTEEta :: Int 
+                       -- , nTEPt :: Int
+                       -- , nTEEta :: Int 
                        , tauEffCutLSing :: [ [ Scientific ] ] 
                        , tauEffCutMSing :: [ [ Scientific ] ] 
                        , tauEffCutTSing :: [ [ Scientific ] ] 
@@ -91,8 +123,8 @@ data TauEfficiency = TauEfficiency
                        , tauEffBdtTMult :: [ [ Scientific ] ]
                        , tauRejPtBins :: [ Scientific ] 
                        , tauRejEtaBins :: [ Scientific ] 
-                       , nTRPt :: Int
-                       , nTREta :: Int
+                       -- , nTRPt :: Int
+                       -- , nTREta :: Int
                        , tauRejCutLSing :: [ [ Scientific ] ] 
                        , tauRejCutMSing :: [ [ Scientific ] ] 
                        , tauRejCutTSing :: [ [ Scientific ] ] 
@@ -124,50 +156,68 @@ data PTThresholds = PTThresholds
                       }
 
 
-data ATLASInfo = ATLASInfo { elecEfficiency :: ElectronEfficiency 
-                           , phoEfficiency :: PhotonEfficiency 
-                           , bJetEfficiency :: BJetEfficiency 
-                           , muonEfficiency :: MuonEfficiency
-                           , jetEfficiency :: JetEfficiency
-                           , tauEfficiency :: TauEfficiency 
-                           , ptThresholds :: PTThresholds 
-                           }
+mkExtFile :: ExtFile -> YamlValue
+mkExtFile ExtFile {..} = 
+  YObject $ [ ("Type", (YPrim . YString) "ExternalFile")
+            , ("FileName", (YPrim . YString) fileName) ] 
 
 mkElectronEfficiency :: ElectronEfficiency -> YamlValue
-mkElectronEfficiency ElectronEfficiency {..} = 
+mkElectronEfficiency ElectronEfficiency {..} = mkExtFile elecEffFile
+
+mkPhotonEfficiency :: PhotonEfficiency -> YamlValue
+mkPhotonEfficiency PhotonEfficiency {..} = mkExtFile phoEffFile
+
+mkBJetEfficiency :: BJetEfficiency -> YamlValue
+mkBJetEfficiency BJetEfficiency {..} = mkExtFile bJetEffFile
+
+mkMuonEfficiency :: MuonEfficiency -> YamlValue
+mkMuonEfficiency MuonEfficiency {..} = mkExtFile muonEffFile
+
+mkJetEfficiency :: JetEfficiency -> YamlValue
+mkJetEfficiency JetEfficiency {..} = mkExtFile jetEffFile
+
+mkTauEfficiency :: TauEfficiency -> YamlValue
+mkTauEfficiency TauEfficiency {..} = mkExtFile tauEffFile
+
+
+mkElectronEffData :: ElectronEffData -> YamlValue
+mkElectronEffData ElectronEffData {..} = 
     YObject $ [ ("ElePtBins", mkInline elePtBins)
             , ("EleEtaBins", mkInline eleEtaBins)
-            , ("nEleEta", (YPrim . YInteger) nEleEta) 
-            , ("nElePt" , (YPrim . YInteger) nElePt)
+            -- , ("nEleEta", (YPrim . YInteger) nEleEta) 
+            -- , ("nElePt" , (YPrim . YInteger) nElePt)
             , ("TightEleEff", mkWrap (map mkInline tightEleEff) ) 
             , ("MediumEleEff", mkWrap (map mkInline mediumEleEff) )
             , ("LooseEleEff", mkWrap (map mkInline looseEleEff) )
             ]
 
-mkPhotonEfficiency :: PhotonEfficiency -> YamlValue
-mkPhotonEfficiency PhotonEfficiency {..} = 
+mkPhotonEffData :: PhotonEffData -> YamlValue
+mkPhotonEffData PhotonEffData {..} = 
     YObject $ [ ("PhoLowPtBins", mkInline phoLowPtBins)
               , ("PhoHighPtBins", mkInline phoHighPtBins)
               , ("PhoEtaBins", mkInline phoEtaBins) 
-              , ("nPhoEta", (YPrim . YInteger) nPhoEta) 
-              , ("nPhoPtLo", (YPrim . YInteger) nPhoPtLo)
-              , ("nPhoPtHi", (YPrim . YInteger) nPhoPtHi)
+              -- , ("nPhoEta", (YPrim . YInteger) nPhoEta) 
+              -- , ("nPhoPtLo", (YPrim . YInteger) nPhoPtLo)
+              -- , ("nPhoPtHi", (YPrim . YInteger) nPhoPtHi)
               , ("LoosePhoEffLow", mkWrap (map mkInline loosePhoEffLow) ) 
               , ("TightPhoEffLow", mkWrap (map mkInline tightPhoEffLow) )
               , ("LoosePhoEffHi", mkWrap (map mkInline loosePhoEffLow) )
               , ("TightPhoEffHi", mkWrap (map mkInline loosePhoEffLow) )
               ] 
 
-mkBJetEfficiency :: BJetEfficiency -> YamlValue
-mkBJetEfficiency BJetEfficiency {..} = 
+
+
+
+mkBJetEffData :: BJetEffData -> YamlValue
+mkBJetEffData BJetEffData {..} = 
     YObject $ [ ( "BtagEffPtBins", mkInline bTagEffPtBins )
               , ( "BTagRejPtBins", mkInline bTagRejPtBins )
               , ( "BTagEffEtaBins", mkInline bTagEffEtaBins )
               , ( "BTagRejEtaBins", mkInline bTagRejEtaBins ) 
-              , ( "nBEeta", (YPrim . YInteger) nBEeta )
-              , ( "nBReta", (YPrim . YInteger) nBReta ) 
-              , ( "nBEpt", (YPrim . YInteger) nBEpt )
-              , ( "nBRpt", (YPrim . YInteger) nBRpt )
+              -- , ( "nBEeta", (YPrim . YInteger) nBEeta )
+              -- , ( "nBReta", (YPrim . YInteger) nBReta ) 
+              -- , ( "nBEpt", (YPrim . YInteger) nBEpt )
+              -- , ( "nBRpt", (YPrim . YInteger) nBRpt )
               , ( "BtagEffSV50", mkWrap (map mkInline bTagEffSV50) )
               , ( "BtagEffJP50", mkWrap (map mkInline bTagEffJP50) )
               , ( "BtagEffJP70", mkWrap (map mkInline bTagEffJP70) )
@@ -176,33 +226,33 @@ mkBJetEfficiency BJetEfficiency {..} =
               , ( "BtagRejJP70", mkWrap (map mkInline bTagRejJP70) )
               ] 
 
-mkMuonEfficiency :: MuonEfficiency -> YamlValue
-mkMuonEfficiency MuonEfficiency {..} = 
+mkMuonEffData :: MuonEffData -> YamlValue
+mkMuonEffData MuonEffData {..} = 
   YObject $ [ ( "MuPtBins", mkInline muPtBins ) 
             , ( "MuEtaBins", mkInline muEtaBins ) 
-            , ( "nMuPt", (YPrim . YInteger) nMuPt) 
-            , ( "nMuEta", (YPrim . YInteger) nMuEta) 
+            -- , ( "nMuPt", (YPrim . YInteger) nMuPt) 
+            -- , ( "nMuEta", (YPrim . YInteger) nMuEta) 
             , ( "CB1MuEff", mkWrap (map mkInline cB1MuEff) )
             , ( "CB2MuEff", mkWrap (map mkInline cB2MuEff) )
             , ( "ST1MuEff", mkWrap (map mkInline sT1MuEff) )
             , ( "ST2MuEff", mkWrap (map mkInline sT2MuEff) )
             ] 
 
-mkJetEfficiency :: JetEfficiency -> YamlValue
-mkJetEfficiency JetEfficiency {..} = 
+mkJetEffData :: JetEffData -> YamlValue
+mkJetEffData JetEffData {..} = 
   YObject $ [ ( "JetPtBins", mkInline jetPtBins )
             , ( "jetEtaBins", mkInline jetEtaBins )
-            , ( "nJetPt", (YPrim . YInteger) nJetPt )
-            , ( "nJetEta", (YPrim . YInteger) nJetEta )
+            -- , ( "nJetPt", (YPrim . YInteger) nJetPt )
+            -- , ( "nJetEta", (YPrim . YInteger) nJetEta )
             , ( "jetEff", mkWrap (map mkInline jetEff) )
             ] 
 
-mkTauEfficiency :: TauEfficiency -> YamlValue
-mkTauEfficiency TauEfficiency {..} = 
+mkTauEffData :: TauEffData -> YamlValue
+mkTauEffData TauEffData {..} = 
   YObject $ [ ( "TauEffPtBins", mkInline tauEffPtBins )
             , ( "TauEffEtaBins", mkInline tauEffEtaBins )
-            , ( "nTEPt", (YPrim . YInteger) nTEPt )
-            , ( "nTEEta", (YPrim . YInteger) nTEEta ) 
+            -- , ( "nTEPt", (YPrim . YInteger) nTEPt )
+            -- , ( "nTEEta", (YPrim . YInteger) nTEEta ) 
             , ( "TauEffCutLSing", mkWrap (map mkInline tauEffCutLSing) )
             , ( "TauEffCutMSing", mkWrap (map mkInline tauEffCutMSing) )
             , ( "TauEffCutTSing", mkWrap (map mkInline tauEffCutTSing) )
@@ -223,8 +273,8 @@ mkTauEfficiency TauEfficiency {..} =
             , ( "TauEffBdtTMult", mkWrap (map mkInline tauEffBdtTMult) ) 
             , ( "TauRejPtBins", mkInline tauRejPtBins )
             , ( "TauRejEtaBins", mkInline tauRejEtaBins )
-            , ( "nTRPt", (YPrim . YInteger) nTRPt )
-            , ( "nTREta", (YPrim . YInteger) nTREta )
+            -- , ( "nTRPt", (YPrim . YInteger) nTRPt )
+            -- , ( "nTREta", (YPrim . YInteger) nTREta )
             , ( "TauRejCutLSing", mkWrap (map mkInline tauRejCutLSing) )
             , ( "TauRejCutMSing", mkWrap (map mkInline tauRejCutMSing) )
             , ( "TauRejCutTSing", mkWrap (map mkInline tauRejCutTSing) )
@@ -258,25 +308,53 @@ mkPTThresholds PTThresholds {..} =
             ]
 
 
-mkATLAS :: ATLASInfo -> YamlValue 
-mkATLAS ATLASInfo {..} = 
-    YObject $ [ ( "ElectronEfficiency", mkElectronEfficiency elecEfficiency )  
-              , ( "PhotonEfficiency", mkPhotonEfficiency phoEfficiency ) 
-              , ( "BJetEfficiency", mkBJetEfficiency bJetEfficiency )
+mkDetector :: DetectorDescription -> YamlValue 
+mkDetector DetectorDescription {..} = 
+    YObject $ [ ( "Name", (YPrim . YString) detectorName )
+              , ( "Description", (YPrim . YString) detectorDescription )
+              , ( "Reference", (YPrim . YString) detectorReference )
+              , ( "Comment", (YPrim . YString) detectorComment )
+              , ( "Efficiency", mkEfficiency detectorEfficiency ) 
+              ]
+
+mkEfficiency :: EfficiencyDescription -> YamlValue
+mkEfficiency EfficiencyDescription {..} = 
+    YObject $ [ ( "Electron", mkElectronEfficiency elecEfficiency )  
+              , ( "Photon", mkPhotonEfficiency phoEfficiency ) 
+              , ( "BJet", mkBJetEfficiency bJetEfficiency )
               , ( "MuonEfficiency", mkMuonEfficiency muonEfficiency ) 
               , ( "JetEfficiency", mkJetEfficiency jetEfficiency )
               , ( "TauEfficiency", mkTauEfficiency tauEfficiency )
               , ( "PTThresholds", mkPTThresholds ptThresholds )
               ] 
 
-
-
 atlasElecEff :: ElectronEfficiency
-atlasElecEff = ElectronEfficiency 
+atlasElecEff = ElectronEfficiency { elecEffFile = ExtFile "Atlas2011_ElecEff.yaml" }
+
+atlasPhoEff :: PhotonEfficiency
+atlasPhoEff = PhotonEfficiency { phoEffFile = ExtFile "Atlas2011_PhoEff.yaml" }
+
+atlasBJetEff :: BJetEfficiency
+atlasBJetEff = BJetEfficiency { bJetEffFile = ExtFile "Atlas2011_BJetEff.yaml" }
+
+atlasMuonEff :: MuonEfficiency
+atlasMuonEff = MuonEfficiency { muonEffFile = ExtFile "Atlas2011_MuonEff.yaml" }
+
+atlasJetEff :: JetEfficiency
+atlasJetEff = JetEfficiency { jetEffFile = ExtFile "Atlas2011_JetEff.yaml" }
+
+atlasTauEff :: TauEfficiency
+atlasTauEff = TauEfficiency { tauEffFile = ExtFile "Atlas2011_TauEff.yaml" }
+
+
+
+
+atlasElecEffData :: ElectronEffData
+atlasElecEffData = ElectronEffData
   { elePtBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
   , eleEtaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
-  , nEleEta = 10
-  , nElePt = 12 
+  -- , nEleEta = 10
+  -- , nElePt = 12 
   , tightEleEff = 
       [ [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
@@ -313,14 +391,14 @@ atlasElecEff = ElectronEfficiency
 
   }
 
-atlasPhoEff :: PhotonEfficiency
-atlasPhoEff = PhotonEfficiency 
+atlasPhoEffData :: PhotonEffData
+atlasPhoEffData = PhotonEffData 
   { phoLowPtBins = [15.0, 18.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 60.0, 80.0, 100.0]
   , phoHighPtBins = [150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0] 
   , phoEtaBins = [ -2.4, -2.2, -2.0, -1.8, -1.52, -1.37, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, -0.1, 0.0, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.37, 1.52, 1.8, 2.0, 2.2, 2.4 ] 
-  , nPhoEta = 26
-  , nPhoPtLo = 11
-  , nPhoPtHi = 8 
+  -- , nPhoEta = 26
+  -- , nPhoPtLo = 11
+  -- , nPhoPtHi = 8 
   , loosePhoEffLow = 
       [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
@@ -431,16 +509,16 @@ atlasPhoEff = PhotonEfficiency
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0] ]
   }
 
-atlasBJetEff :: BJetEfficiency
-atlasBJetEff = BJetEfficiency 
+atlasBJetEffData :: BJetEffData
+atlasBJetEffData = BJetEffData
   { bTagEffPtBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ] 
   , bTagRejPtBins = [ 20.0, 25.0, 40.0, 60.0, 90.0, 140.0, 200.0, 300.0, 500.0 ] 
   , bTagEffEtaBins = [ 0.0, 1.2, 2.5 ] 
   , bTagRejEtaBins = [ 0.0, 1.2, 2.5 ] 
-  , nBEeta = 2
-  , nBReta = 2
-  , nBEpt = 14
-  , nBRpt = 8
+  -- , nBEeta = 2
+  -- , nBReta = 2
+  -- , nBEpt = 14
+  -- , nBRpt = 8
   , bTagEffSV50 = 
       [ [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
       , [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ] ]
@@ -462,12 +540,12 @@ atlasBJetEff = BJetEfficiency
 
   } 
 
-atlasMuonEff :: MuonEfficiency 
-atlasMuonEff = MuonEfficiency
+atlasMuonEffData :: MuonEffData
+atlasMuonEffData = MuonEffData
   { muPtBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
   , muEtaBins = [ -2.5, -2.25, -2.0, -1.75, -1.50, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5 ]
-  , nMuPt = 8
-  , nMuEta = 20 
+  -- , nMuPt = 8
+  -- , nMuEta = 20 
   , cB1MuEff = 
       [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
@@ -554,12 +632,12 @@ atlasMuonEff = MuonEfficiency
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
   } 
 
-atlasJetEff :: JetEfficiency 
-atlasJetEff = JetEfficiency
+atlasJetEffData :: JetEffData 
+atlasJetEffData = JetEffData
   { jetPtBins = [ 20.0, 30.0, 40.0, 60.0, 80.0, 120.0, 160.0, 200.0, 280.0, 360.0, 500.0, 600.0, 900.0, 1200.0, 2000.0 ] 
   , jetEtaBins = [ -4.5, -3.6, -2.8, -2.5, -2.0, -1.2, -0.8, -0.3, 0.0, 0.3, 0.8, 1.2, 2.0, 2.5, 2.8, 3.6, 4.5 ]
-  , nJetPt = 14
-  , nJetEta = 16 
+  -- , nJetPt = 14
+  -- , nJetEta = 16 
   , jetEff = 
       [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
@@ -579,12 +657,12 @@ atlasJetEff = JetEfficiency
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
   } 
 
-atlasTauEff :: TauEfficiency 
-atlasTauEff = TauEfficiency 
+atlasTauEffData :: TauEffData 
+atlasTauEffData = TauEffData 
   { tauEffPtBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
   , tauEffEtaBins = [ 0.0, 1.3, 1.6, 2.5 ] 
-  , nTEPt = 9
-  , nTEEta = 3 
+  -- , nTEPt = 9
+  -- , nTEEta = 3 
   , tauEffCutLSing = 
       [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
@@ -659,8 +737,8 @@ atlasTauEff = TauEfficiency
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
   , tauRejPtBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
   , tauRejEtaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-  , nTRPt = 9 
-  , nTREta = 3
+  -- , nTRPt = 9 
+  -- , nTREta = 3
   , tauRejCutLSing = 
       [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]

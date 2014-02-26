@@ -6,15 +6,21 @@ import qualified Data.Text.Lazy.IO as TIO
 import ATLAS
 import YAML
 
-atlas2011 = 
-  YObject [ ( "ATLAS2011", mkATLAS (ATLASInfo { elecEfficiency = atlasElecEff 
-                                   , phoEfficiency = atlasPhoEff 
-                                   , bJetEfficiency = atlasBJetEff
-                                   , muonEfficiency = atlasMuonEff
-                                   , jetEfficiency = atlasJetEff
-                                   , tauEfficiency = atlasTauEff
-                                   , ptThresholds = atlasPTThresholds 
-                                   }) ) ]
+atlas2011 = mkDetector $ DetectorDescription 
+                           { detectorName = "ATLAS2011"
+                           , detectorDescription = "Topo jets used in .."
+                           , detectorReference = "arXiv:xxxx.yyyy"
+                           , detectorComment = "extracted the efficiencies from the plot 3,4,5 in the reference" 
+                           , detectorEfficiency = atlas2011Eff }
+
+atlas2011Eff = EfficiencyDescription { elecEfficiency = atlasElecEff 
+                                     , phoEfficiency = atlasPhoEff 
+                                     , bJetEfficiency = atlasBJetEff
+                                     , muonEfficiency = atlasMuonEff
+                                     , jetEfficiency = atlasJetEff
+                                     , tauEfficiency = atlasTauEff
+                                     , ptThresholds = atlasPTThresholds 
+                                     }
 
 
 
