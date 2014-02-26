@@ -16,7 +16,7 @@ atlas2011 = DetectorDescription
             , detectorReference = "arXiv:xxxx.yyyy"
             , detectorComment = "extracted the efficiencies from the plot 3,4,5 in the reference" 
             , detectorValidationInfo = "Validated on 2014/02" 
-            , detectorEfficiency = atlas2011Eff }
+            , detectorObject = atlas2011Object }
 
 -- atlas2011elec_tight_yaml = mkElectronEffData atlasEleDataTight
 -- atlas2011pho_tight_yaml = mkPhotonEffData atlasPhoDataTight

@@ -17,7 +17,7 @@ data DetectorDescription =
                       , detectorReference :: Text
                       , detectorComment :: Text
                       , detectorValidationInfo :: Text 
-                      , detectorEfficiency :: EfficiencyDescription
+                      , detectorObject :: ObjectDescription
                       }
 
 instance Nameable DetectorDescription where
@@ -25,14 +25,14 @@ instance Nameable DetectorDescription where
 
 data Import = Import { fileName :: Text }
 
-data EfficiencyDescription = 
-  EfficiencyDescription { electron :: Either Import ElectronEffData 
-                        , photon :: Either Import PhotonEffData 
-                        , bJet :: Either Import BJetEffData 
-                        , muon :: Either Import MuonEffData 
-                        , jet :: Either Import JetEffData 
-                        , tau :: Either Import TauEffData
-                        , ptThresholds :: PTThresholds }
+data ObjectDescription = 
+  ObjectDescription { electron :: Either Import ElectronEffData 
+                    , photon :: Either Import PhotonEffData 
+                    , bJet :: Either Import BJetEffData 
+                    , muon :: Either Import MuonEffData 
+                    , jet :: Either Import JetEffData 
+                    , tau :: Either Import TauEffData
+                    , ptThresholds :: PTThresholds }
 
 
 data MetaInfo = MetaInfo { tag :: Text
@@ -52,8 +52,6 @@ data PTEtaData = PTEtaGrid
                | PTEtaInterpolation
                    { interpolationFunction :: Text
                    }
-
-data ElectronEfficiency = ElectronEfficiency { elecEffFile :: Import }
 			  
 data ElectronEffData = ElectronEffData
                             { eleName :: Text
@@ -64,8 +62,6 @@ data ElectronEffData = ElectronEffData
 instance Nameable ElectronEffData where
   name = eleName
 			    
-data PhotonEfficiency = PhotonEfficiency { phoEffFile :: Import }
-
 data PhotonEffData = PhotonEffData
                           { phoName :: Text
                           , phoMetaInfo :: MetaInfo
@@ -74,8 +70,6 @@ data PhotonEffData = PhotonEffData
 instance Nameable PhotonEffData where
   name = phoName
                        
-data BJetEfficiency = BJetEfficiency { bJetEffFile :: Import }
-
 data BJetEffData = BJetEffData
                      { bJetName :: Text 
                      , bJetMetaInfo :: MetaInfo
@@ -85,9 +79,7 @@ data BJetEffData = BJetEffData
 
 instance Nameable BJetEffData where
   name = bJetName
-
-data MuonEfficiency = MuonEfficiency { muonEffFile :: Import }
-
+ 
 data MuonEffData = MuonEffData 
                      { muonName :: Text
                      , muonMetaInfo :: MetaInfo
@@ -96,8 +88,6 @@ data MuonEffData = MuonEffData
 instance Nameable MuonEffData where
   name = muonName
 
-data JetEfficiency = JetEfficiency { jetEffFile :: Import }
-
 data JetEffData = JetEffData 
                        { jetName :: Text 
                        , jetMetaInfo :: MetaInfo 
@@ -105,9 +95,6 @@ data JetEffData = JetEffData
 
 instance Nameable JetEffData where
   name = jetName
-
-
-data TauEfficiency = TauEfficiency { tauEffFile :: Import }
 
 data TauEffData = TauEffData
                     { tauName :: Text
@@ -232,15 +219,16 @@ instance MakeYaml PTThresholds where
 instance MakeYaml DetectorDescription where
   makeYaml DetectorDescription {..} = 
     YObject $ [ ( "Name", mkString detectorName )
+              , ( "Class", mkString "TopLevel" )
               , ( "Description", mkString detectorDescription )
               , ( "Reference", mkString detectorReference )
               , ( "Comment", mkString detectorComment )
               , ( "ValidationInfo", mkString detectorValidationInfo )
-              , ( "Efficiency", makeYaml detectorEfficiency ) 
+              , ( "Object", makeYaml detectorObject ) 
               ]
 
-instance MakeYaml EfficiencyDescription where
-  makeYaml EfficiencyDescription {..} = 
+instance MakeYaml ObjectDescription where
+  makeYaml ObjectDescription {..} = 
     YObject $ [ ( "Electron", importOrEmbed electron )  
               , ( "Photon", importOrEmbed photon ) 
               , ( "BJet", importOrEmbed bJet )
@@ -250,7 +238,7 @@ instance MakeYaml EfficiencyDescription where
               , ( "PTThresholds", makeYaml ptThresholds )
               ] 
 
-atlas2011Eff = EfficiencyDescription 
+atlas2011Object = ObjectDescription 
   { electron = Left (Import "Electron_Loose_ATLAS")
   , photon = Left (Import "Photon_Tight_ATLAS")
   , bJet = Left (Import "BJet_JP50_ATLAS")
