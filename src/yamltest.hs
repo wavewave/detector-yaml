@@ -6,24 +6,37 @@ import qualified Data.Text.Lazy.IO as TIO
 import ATLAS
 import YAML
 
-atlas2011 = mkDetector $ DetectorDescription 
+atlas2011yaml = mkDetector $ DetectorDescription 
                            { detectorName = "ATLAS2011"
                            , detectorDescription = "Topo jets used in .."
                            , detectorReference = "arXiv:xxxx.yyyy"
                            , detectorComment = "extracted the efficiencies from the plot 3,4,5 in the reference" 
                            , detectorEfficiency = atlas2011Eff }
 
-atlas2011Eff = EfficiencyDescription { elecEfficiency = atlasElecEff 
-                                     , phoEfficiency = atlasPhoEff 
-                                     , bJetEfficiency = atlasBJetEff
-                                     , muonEfficiency = atlasMuonEff
-                                     , jetEfficiency = atlasJetEff
-                                     , tauEfficiency = atlasTauEff
-                                     , ptThresholds = atlasPTThresholds 
-                                     }
+
+atlas2011elecyaml = mkElectronEffData atlasElecEffData
+atlas2011phoyaml = mkPhotonEffData atlasPhoEffData
+atlas2011bjetyaml= mkBJetEffData atlasBJetEffData
+atlas2011muonyaml = mkMuonEffData atlasMuonEffData
+atlas2011jetyaml = mkJetEffData atlasJetEffData
+atlas2011tauyaml = mkTauEffData atlasTauEffData
+
+
+
 
 
 
 main :: IO ()
 main = do 
-  TIO.putStrLn $ toLazyText (buildYaml 0 atlas2011)
+  let f (x,y) = TIO.writeFile x $ toLazyText (buildYaml 0 y)
+  
+  mapM_ f [ ("Atlas2011.yaml", atlas2011yaml)
+          , ("Atlas2011_ElecEff.yaml", atlas2011elecyaml)
+          , ("Atlas2011_PhoEff.yaml", atlas2011phoyaml)
+          , ("Atlas2011_BJetEff.yaml", atlas2011bjetyaml)
+          , ("Atlas2011_MuonEff.yaml", atlas2011muonyaml)
+          , ("Atlas2011_JetEff.yaml", atlas2011jetyaml) 
+          , ("Atlas2011_TauEff.yaml", atlas2011tauyaml)
+          ]
+  
+

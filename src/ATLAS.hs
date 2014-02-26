@@ -346,6 +346,14 @@ atlasJetEff = JetEfficiency { jetEffFile = ExtFile "Atlas2011_JetEff.yaml" }
 atlasTauEff :: TauEfficiency
 atlasTauEff = TauEfficiency { tauEffFile = ExtFile "Atlas2011_TauEff.yaml" }
 
+atlas2011Eff = EfficiencyDescription { elecEfficiency = atlasElecEff 
+                                     , phoEfficiency = atlasPhoEff 
+                                     , bJetEfficiency = atlasBJetEff
+                                     , muonEfficiency = atlasMuonEff
+                                     , jetEfficiency = atlasJetEff
+                                     , tauEfficiency = atlasTauEff
+                                     , ptThresholds = atlasPTThresholds 
+                                     }
 
 
 
