@@ -52,9 +52,10 @@ buildList Inline n xs = fromLazyText "[ "
 buildList Wrapped n xs = fromLazyText "\n" <> makeIndent n 
                          <> fromLazyText "[ " 
                          <> ( mconcat 
-                            . intersperse (makeIndent n <> fromLazyText ", ") 
-                            . map (\x -> buildYaml n x <> fromLazyText "\n") ) xs
-                         <> makeIndent n <> fromLazyText "] "
+                            . intersperse (fromLazyText "\n" <> makeIndent n <> fromLazyText ", ")
+                            . map (buildYaml n)) xs 
+                         <> fromLazyText " ]"
+                         -- <> makeIndent n <> fromLazyText "] "
 
 buildPrim (YNumber s) = scientificBuilder s 
 buildPrim (YInteger s) = (fromLazyText . T.pack . show) s
