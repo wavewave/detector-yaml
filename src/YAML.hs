@@ -2,7 +2,7 @@
 
 module YAML where
 
-import           Data.Attoparsec
+-- import           Data.Attoparsec
 import qualified Data.ByteString.Lazy.Char8 as L
 import           Data.List (intersperse)
 import           Data.Monoid ((<>), mconcat, mempty)
@@ -12,7 +12,7 @@ import qualified Data.Text.Lazy as T
 import           Data.Text.Lazy.Builder 
 
 -- import qualified Data.Text.Lazy.IO as TIO
-import qualified Data.Vector as V
+-- import qualified Data.Vector as V
 
 data ListStyle = Inline | Wrapped 
 
