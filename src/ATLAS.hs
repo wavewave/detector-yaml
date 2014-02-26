@@ -19,12 +19,12 @@ data DetectorDescription =
 
 
 data EfficiencyDescription = 
-  EfficiencyDescription { elecEfficiency :: ElectronEfficiency 
-                        , phoEfficiency :: PhotonEfficiency 
-                        , bJetEfficiency :: BJetEfficiency 
-                        , muonEfficiency :: MuonEfficiency
-                        , jetEfficiency :: JetEfficiency
-                        , tauEfficiency :: TauEfficiency 
+  EfficiencyDescription { electron :: ElectronEfficiency 
+                        , photon :: PhotonEfficiency 
+                        , bJet :: BJetEfficiency 
+                        , muon :: MuonEfficiency
+                        , jet :: JetEfficiency
+                        , tau :: TauEfficiency 
                         , ptThresholds :: PTThresholds }
 
 data ExtFile = ExtFile { fileName :: Text }
@@ -57,23 +57,23 @@ data ElectronEffData = ElectronEffData
 			    
 data PhotonEfficiency = PhotonEfficiency { phoEffFile :: ExtFile }
 
-data PhotonEffData = PhotonEffDataGrid
+data PhotonEffData = PhotonEffData
                           { phoName :: Text
                           , phoMetaInfo :: MetaInfo
-                          , phoPtBins :: [Scientific] 
-                          , phoEtaBins :: [Scientific] 
-                          , phoGrid :: Grid }
-                   | PhotonEffDataInterpolation
-                          { phoName :: Text
-                          , phoMetaInfo :: MetaInfo
-                          , phoFunc :: Text }
+                          , phoEfficiency :: PTEtaData }
                        
 data BJetEfficiency = BJetEfficiency { bJetEffFile :: ExtFile }
 
 data BJetEffData = BJetEffData
-                     -- { bJetName :: Text 
-                     -- , bJetMetaInfo :: MetaInfo
-                     { bTagEffPtBins :: [ Scientific ] 
+                     { bJetName :: Text 
+                     , bJetMetaInfo :: MetaInfo
+                     , bJetEfficiency :: PTEtaData
+                     , bJetRejection :: PTEtaData
+                     } 
+
+{-
+
+{ bTagEffPtBins :: [ Scientific ] 
                      , bTagRejPtBins :: [ Scientific ] 
                      , bTagEffEtaBins :: [ Scientific ] 
                      , bTagRejEtaBins :: [ Scientific ]
@@ -84,6 +84,7 @@ data BJetEffData = BJetEffData
                      , bTagRejJP50 :: Grid
                      , bTagRejJP70 :: Grid
                      } 
+-}
 
 data MuonEfficiency = MuonEfficiency { muonEffFile :: ExtFile }
 
@@ -224,21 +225,21 @@ mkPTEtaData PTEtaInterpolation {..} =
 
 
 mkPhotonEffData :: PhotonEffData -> YamlValue
-mkPhotonEffData PhotonEffDataGrid {..} = 
-    YObject $ [ ("Name", mkString phoName)
-              , ("Type", mkString "Grid") ]
-              <> mkMetaInfoPairs phoMetaInfo <> 
-              [ ("PtBins", mkInline phoPtBins)
-              , ("EtaBins", mkInline phoEtaBins) 
-              , ("EfficiencyData", mkGrid  phoGrid ) 
-              ] 
-
-
+mkPhotonEffData PhotonEffData {..} = 
+    YObject $ [ ("Name", mkString phoName) ] 
+              <> mkMetaInfoPairs phoMetaInfo 
+              <> [ ("Efficiency", mkPTEtaData phoEfficiency ) ] 
 
 
 mkBJetEffData :: BJetEffData -> YamlValue
 mkBJetEffData BJetEffData {..} = 
-    YObject $ [ ( "BtagEffPtBins", mkInline bTagEffPtBins )
+    YObject $ [ ("Name", mkString bJetName) ]
+              <> mkMetaInfoPairs bJetMetaInfo
+              <> [ ("Efficiency", mkPTEtaData bJetEfficiency) 
+                 , ("Rejection", mkPTEtaData bJetRejection) ]
+
+{-
+( "BtagEffPtBins", mkInline bTagEffPtBins )
               , ( "BTagRejPtBins", mkInline bTagRejPtBins )
               , ( "BTagEffEtaBins", mkInline bTagEffEtaBins )
               , ( "BTagRejEtaBins", mkInline bTagRejEtaBins ) 
@@ -249,6 +250,7 @@ mkBJetEffData BJetEffData {..} =
               , ( "BtagRejJP50", (mkGrid  bTagRejJP50) )
               , ( "BtagRejJP70", (mkGrid  bTagRejJP70) )
               ] 
+-}
 
 -- charm rejection
 
@@ -338,12 +340,12 @@ mkDetector DetectorDescription {..} =
 
 mkEfficiency :: EfficiencyDescription -> YamlValue
 mkEfficiency EfficiencyDescription {..} = 
-    YObject $ [ ( "Electron", mkElectronEfficiency elecEfficiency )  
-              , ( "Photon", mkPhotonEfficiency phoEfficiency ) 
-              , ( "BJet", mkBJetEfficiency bJetEfficiency )
-              , ( "MuonEfficiency", mkMuonEfficiency muonEfficiency ) 
-              , ( "JetEfficiency", mkJetEfficiency jetEfficiency )
-              , ( "TauEfficiency", mkTauEfficiency tauEfficiency )
+    YObject $ [ ( "Electron", mkElectronEfficiency electron )  
+              , ( "Photon", mkPhotonEfficiency photon ) 
+              , ( "BJet", mkBJetEfficiency bJet )
+              , ( "MuonEfficiency", mkMuonEfficiency muon ) 
+              , ( "JetEfficiency", mkJetEfficiency jet )
+              , ( "TauEfficiency", mkTauEfficiency tau )
               , ( "PTThresholds", mkPTThresholds ptThresholds )
               ] 
 
@@ -365,12 +367,12 @@ atlasJetEff = JetEfficiency { jetEffFile = ExtFile "Atlas2011_JetEff.yaml" }
 atlasTauEff :: TauEfficiency
 atlasTauEff = TauEfficiency { tauEffFile = ExtFile "Atlas2011_TauEff.yaml" }
 
-atlas2011Eff = EfficiencyDescription { elecEfficiency = atlasElecEff 
-                                     , phoEfficiency = atlasPhoEff 
-                                     , bJetEfficiency = atlasBJetEff
-                                     , muonEfficiency = atlasMuonEff
-                                     , jetEfficiency = atlasJetEff
-                                     , tauEfficiency = atlasTauEff
+atlas2011Eff = EfficiencyDescription { electron = atlasElecEff 
+                                     , photon = atlasPhoEff 
+                                     , bJet = atlasBJetEff
+                                     , muon = atlasMuonEff
+                                     , jet = atlasJetEff
+                                     , tau = atlasTauEff
                                      , ptThresholds = atlasPTThresholds 
                                      }
 
@@ -461,47 +463,94 @@ atlasElecLooseEff = GridFull { gridData =
     }
 
 atlasPhoDataLoose :: PhotonEffData
-atlasPhoDataLoose = PhotonEffDataGrid
+atlasPhoDataLoose = PhotonEffData
   { phoName = "PhotonLooseATLAS"
   , phoMetaInfo = MetaInfo 
       { tag = "ATLAS"
       , description = "Loose photon object 2011 ATLAS"
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
-  , phoPtBins = [15.0, 18.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 60.0, 80.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0] 
-  , phoEtaBins = [ -2.4, -2.2, -2.0, -1.8, -1.52, -1.37, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, -0.1, 0.0, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.37, 1.52, 1.8, 2.0, 2.2, 2.4 ] 
-  , phoGrid = GridConst { gridConst = 1.0 }
+  , phoEfficiency = PTEtaGrid 
+      { ptBins = [15.0, 18.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 60.0, 80.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0] 
+      , etaBins = [ -2.4, -2.2, -2.0, -1.8, -1.52, -1.37, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, -0.1, 0.0, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.37, 1.52, 1.8, 2.0, 2.2, 2.4 ] 
+      , grid = GridConst { gridConst = 1.0 } }
   }
 
 atlasPhoDataTight :: PhotonEffData
-atlasPhoDataTight = PhotonEffDataGrid
+atlasPhoDataTight = PhotonEffData
   { phoName = "PhotonTightATLAS"
   , phoMetaInfo = MetaInfo 
       { tag = "ATLAS"
       , description = "Tight photon object 2011 ATLAS"
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
-  , phoPtBins = [15.0, 18.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 60.0, 80.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0] 
-  , phoEtaBins = [ -2.4, -2.2, -2.0, -1.8, -1.52, -1.37, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, -0.1, 0.0, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.37, 1.52, 1.8, 2.0, 2.2, 2.4 ] 
-  , phoGrid = GridConst { gridConst = 1.0 }
+  , phoEfficiency = PTEtaGrid 
+      { ptBins = [15.0, 18.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 60.0, 80.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0] 
+      , etaBins = [ -2.4, -2.2, -2.0, -1.8, -1.52, -1.37, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, -0.1, 0.0, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.37, 1.52, 1.8, 2.0, 2.2, 2.4 ] 
+      , grid = GridConst { gridConst = 1.0 } }
   }
 
-atlasBJetEffData :: BJetEffData
-atlasBJetEffData = BJetEffData
-  { bTagEffPtBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ] 
-  , bTagRejPtBins = [ 20.0, 25.0, 40.0, 60.0, 90.0, 140.0, 200.0, 300.0, 500.0 ] 
-  , bTagEffEtaBins = [ 0.0, 1.2, 2.5 ] 
-  , bTagRejEtaBins = [ 0.0, 1.2, 2.5 ] 
-  , bTagEffSV50 = GridConst { gridConst = 0.5 } 
-  , bTagEffJP50 = GridFull { gridData =  
-      [ [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
-      , [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ] ]
-    }
-  , bTagEffJP70 = GridConst { gridConst = 0.7 }
-  , bTagRejSV50 = GridConst { gridConst = 100.0 }
-  , bTagRejJP50 = GridConst { gridConst = 100.0 }
-  , bTagRejJP70 = GridConst { gridConst = 100.0 }
-  } 
+atlasBJetDataSV50 :: BJetEffData
+atlasBJetDataSV50 = BJetEffData
+  { bJetName = "BJet_SV50_ATLAS"
+  , bJetMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "SV50 ATLAS BJet Tagging"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , bJetEfficiency = PTEtaGrid 
+      { ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ] 
+      , etaBins = [ 0.0, 1.2, 2.5 ] 
+      , grid = GridConst { gridConst = 0.5 } }
+  , bJetRejection = PTEtaGrid
+      { ptBins = [ 20.0, 25.0, 40.0, 60.0, 90.0, 140.0, 200.0, 300.0, 500.0 ]
+      , etaBins = [ 0.0, 1.2, 2.5 ]
+      , grid = GridConst { gridConst = 100.0 } }
+  }
+
+
+atlasBJetDataJP50 :: BJetEffData
+atlasBJetDataJP50 = BJetEffData
+  { bJetName = "BJet_JP50_ATLAS"
+  , bJetMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "JP50 ATLAS BJet Tagging"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , bJetEfficiency = PTEtaGrid 
+      { ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ] 
+      , etaBins = [ 0.0, 1.2, 2.5 ] 
+      , grid =  GridFull 
+          { gridData =  
+              [ [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
+              , [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ] ] } }
+  , bJetRejection = PTEtaGrid
+      { ptBins = [ 20.0, 25.0, 40.0, 60.0, 90.0, 140.0, 200.0, 300.0, 500.0 ]
+      , etaBins = [ 0.0, 1.2, 2.5 ]
+      , grid = GridConst { gridConst = 100.0 } }
+  }
+
+atlasBJetDataJP70 :: BJetEffData
+atlasBJetDataJP70 = BJetEffData
+  { bJetName = "BJet_JP70_ATLAS"
+  , bJetMetaInfo = MetaInfo 
+      { tag = "ATLAS"
+      , description = "JP70 ATLAS BJet Tagging"
+      , comment = "We use table from reference"
+      , reference = "arXiv:xxxx.yyyy" }
+  , bJetEfficiency = PTEtaGrid 
+      { ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ] 
+      , etaBins = [ 0.0, 1.2, 2.5 ] 
+      , grid =  GridConst { gridConst = 0.7 } }
+  , bJetRejection = PTEtaGrid
+      { ptBins = [ 20.0, 25.0, 40.0, 60.0, 90.0, 140.0, 200.0, 300.0, 500.0 ]
+      , etaBins = [ 0.0, 1.2, 2.5 ]
+      , grid = GridConst { gridConst = 100.0 } }
+  }
+
+
+
+
 
 atlasMuonEffData :: MuonEffData
 atlasMuonEffData = MuonEffData

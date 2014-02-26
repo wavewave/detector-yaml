@@ -17,7 +17,7 @@ atlas2011yaml = mkDetector $ DetectorDescription
 
 atlas2011elec_tight_yaml = mkElectronEffData atlasEleDataTight
 atlas2011pho_tight_yaml = mkPhotonEffData atlasPhoDataTight
-atlas2011bjetyaml= mkBJetEffData atlasBJetEffData
+atlas2011bjet_sv50_yaml= mkBJetEffData atlasBJetDataSV50
 atlas2011muonyaml = mkMuonEffData atlasMuonEffData
 atlas2011jetyaml = mkJetEffData atlasJetEffData
 atlas2011tauyaml = mkTauEffData atlasTauEffData
@@ -34,7 +34,7 @@ main = do
   mapM_ f [ ("Atlas2011.yaml", atlas2011yaml)
           , ("Atlas2011_ElecEff_Tight.yaml", atlas2011elec_tight_yaml)
           , ("Atlas2011_PhoEff_Tight.yaml", atlas2011pho_tight_yaml)
-          , ("Atlas2011_BJetEff.yaml", atlas2011bjetyaml)
+          , ("Atlas2011_BJetEff_SV50.yaml", atlas2011bjet_sv50_yaml)
           , ("Atlas2011_MuonEff.yaml", atlas2011muonyaml)
           , ("Atlas2011_JetEff.yaml", atlas2011jetyaml) 
           , ("Atlas2011_TauEff.yaml", atlas2011tauyaml)
