@@ -38,19 +38,22 @@ data Grid = GridFull { gridData :: [ [ Scientific ] ]
                                   }
           | GridConst { gridConst :: Scientific } 
 
+data PTEtaData = PTEtaGrid 
+                   { ptBins :: [Scientific]
+                   , etaBins :: [Scientific]
+                   , grid :: Grid
+                   } 
+               | PTEtaInterpolation
+                   { interpolationFunction :: Text
+                   }
 
 data ElectronEfficiency = ElectronEfficiency { elecEffFile :: ExtFile }
 			  
-data ElectronEffData = ElectronEffDataGrid    
+data ElectronEffData = ElectronEffData
                             { eleName :: Text
                             , eleMetaInfo :: MetaInfo 
-                            , elePtBins :: [Scientific] 
-			    , eleEtaBins :: [Scientific] 
-                            , eleGrid :: Grid }
-                     | ElectronEffDataInterpolation
-                            { eleName :: Text
-                            , eleMetaInfo :: MetaInfo
-                            , eleFunc :: Text }
+                            , eleEfficiency :: PTEtaData
+                            }
 			    
 data PhotonEfficiency = PhotonEfficiency { phoEffFile :: ExtFile }
 
@@ -159,8 +162,8 @@ data PTThresholds = PTThresholds
 
 mkExtFile :: ExtFile -> YamlValue
 mkExtFile ExtFile {..} = 
-  YObject $ [ ("Type", (YPrim . YString) "ExternalFile")
-            , ("FileName", (YPrim . YString) fileName) ] 
+  YObject $ [ ("Type", mkString "ExternalFile")
+            , ("FileName", mkString fileName) ] 
 
 mkElectronEfficiency :: ElectronEfficiency -> YamlValue
 mkElectronEfficiency ElectronEfficiency {..} = mkExtFile elecEffFile
@@ -203,20 +206,21 @@ mkMetaInfoPairs MetaInfo {..} =
 
 
 mkElectronEffData :: ElectronEffData -> YamlValue
-mkElectronEffData ElectronEffDataGrid {..} = 
-    YObject $ [ ("Name", mkString eleName) 
-              , ("Type", mkString "Grid") ] 
-              <> mkMetaInfoPairs eleMetaInfo <>
-              [ ("PtBins", mkInline elePtBins)
-              , ("EtaBins", mkInline eleEtaBins)
-              , ("EfficiencyGrid", mkGrid eleGrid )
-              ]
-mkElectronEffData ElectronEffDataInterpolation {..} = 
-    YObject $ [ ("Name", mkString eleName)
-              , ("Type", mkString "Interpolation") ]
-              <> mkMetaInfoPairs eleMetaInfo <>
-              [ ("Function", mkString eleFunc)
-              ]
+mkElectronEffData ElectronEffData {..} = 
+    YObject $ [ ("Name", mkString eleName) ]
+              <> mkMetaInfoPairs eleMetaInfo 
+              <> [ ("Efficiency", mkPTEtaData eleEfficiency) ]
+
+
+mkPTEtaData :: PTEtaData -> YamlValue
+mkPTEtaData PTEtaGrid {..} = 
+    YObject $ [ ("Type", mkString "Grid" )
+              , ("PtBins", mkInline ptBins)
+              , ("EtaBins", mkInline etaBins)
+              , ("Grid", mkGrid grid ) ]
+mkPTEtaData PTEtaInterpolation {..} =
+    YObject $ [ ("Type", mkString "Interpolation")
+              , ("Function", mkString interpolationFunction ) ] 
 
 
 mkPhotonEffData :: PhotonEffData -> YamlValue
@@ -373,44 +377,49 @@ atlas2011Eff = EfficiencyDescription { elecEfficiency = atlasElecEff
 
 
 atlasEleDataTight :: ElectronEffData
-atlasEleDataTight = ElectronEffDataGrid
+atlasEleDataTight = ElectronEffData
   { eleName = "ElectronTightATLAS"
   , eleMetaInfo = MetaInfo 
       { tag = "ATLAS"
       , description = "Tight electron object 2011 ATLAS"
       , comment = "We use table from reference" 
       , reference = "arXiv:xxxx.yyyy" }
-  , elePtBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
-  , eleEtaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
-  , eleGrid = atlasElecTightEff
-
+  , eleEfficiency = PTEtaGrid 
+      { ptBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
+      , etaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
+      , grid = atlasElecTightEff
+      }
 
   } 
 
 atlasEleDataMedium :: ElectronEffData
-atlasEleDataMedium = ElectronEffDataGrid
+atlasEleDataMedium = ElectronEffData
   { eleName = "ElectronMediumATLAS"
   , eleMetaInfo = MetaInfo 
       { tag = "ATLAS"
       , description = "Medium electron object 2011 ATLAS"
       , comment = "We use table from reference" 
       , reference = "arXiv:xxxx.yyyy" }
-  , elePtBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
-  , eleEtaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
-  , eleGrid = atlasElecMediumEff
+  , eleEfficiency = PTEtaGrid
+      { ptBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
+      , etaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
+      , grid = atlasElecMediumEff
+      }
   } 
 
 atlasEleDataLoose :: ElectronEffData
-atlasEleDataLoose = ElectronEffDataGrid
+atlasEleDataLoose = ElectronEffData
   { eleName = "ElectronLooseATLAS"
   , eleMetaInfo = MetaInfo 
       { tag = "ATLAS"
       , description = "Loose electron object 2011 ATLAS"
       , comment = "We use table from reference" 
       , reference = "arXiv:xxxx.yyyy" }
-  , elePtBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
-  , eleEtaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
-  , eleGrid = atlasElecLooseEff
+  , eleEfficiency = PTEtaGrid
+      { ptBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
+      , etaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
+      , grid = atlasElecLooseEff
+      }
   } 
 
 atlasElecTightEff = GridFull { gridData =
