@@ -18,7 +18,7 @@ data ListStyle = Inline | Wrapped
 
 data YamlValue = YObject [(T.Text, YamlValue)]
                | YLArray ListStyle [YamlValue]
-               --  | YIArray [YamlValue]
+               | YIArray [YamlValue]
                | YPrim YamlPrimValue 
 
 data YamlPrimValue = YNumber Scientific
@@ -43,7 +43,14 @@ defIndent = 4
 buildYaml :: Int -> YamlValue -> Builder 
 buildYaml n (YObject m) = (mconcat . map (buildPair n) ) m
 buildYaml n (YLArray sty xs) = buildList sty n xs 
+buildYaml n (YIArray xs) = buildItemList n xs
 buildYaml n (YPrim p) = buildPrim p 
+
+buildItemList :: Int -> [YamlValue] -> Builder
+buildItemList n xs = makeIndent n <> fromLazyText "\n"
+                     <> mconcat (map buildItem xs)
+  where buildItem x = 
+          makeIndent n <> fromLazyText "- " <> buildYaml (n+2) x <> fromLazyText "\n"
 
 buildList :: ListStyle -> Int -> [YamlValue] -> Builder 
 buildList Inline n xs = fromLazyText "[ "
@@ -79,3 +86,4 @@ mkInline = YLArray Inline . map (YPrim . YNumber)
 
 mkWrap :: [YamlValue] -> YamlValue 
 mkWrap = YLArray Wrapped 
+

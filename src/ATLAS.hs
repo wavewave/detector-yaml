@@ -186,7 +186,7 @@ mkElectronEffData ElectronEffData {..} =
             , ("EleEtaBins", mkInline eleEtaBins)
             -- , ("nEleEta", (YPrim . YInteger) nEleEta) 
             -- , ("nElePt" , (YPrim . YInteger) nElePt)
-            , ("TightEleEff", mkWrap (map mkInline tightEleEff) ) 
+            , ("TightEleEff", YIArray (map mkInline tightEleEff) ) 
             , ("MediumEleEff", mkWrap (map mkInline mediumEleEff) )
             , ("LooseEleEff", mkWrap (map mkInline looseEleEff) )
             ]
