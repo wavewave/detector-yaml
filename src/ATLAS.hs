@@ -32,12 +32,16 @@ data ElectronEfficiency = ElectronEfficiency { elecEffFile :: ExtFile }
 data ElectronEffData = ElectronEffData    
                             { elePtBins :: [Scientific] 
 			    , eleEtaBins :: [Scientific] 
-			    -- , nEleEta :: Int
-			    -- , nElePt :: Int 
-			    , tightEleEff :: [ [ Scientific ] ]
-			    , mediumEleEff :: [ [ Scientific ] ] 
-			    , looseEleEff :: [ [ Scientific ] ] 
+                            , eleGrids :: [ EfficiencyGrid ] 
+			    -- , tightEleEff :: [ [ Scientific ] ]
+			    -- , mediumEleEff :: [ [ Scientific ] ] 
+			    -- , looseEleEff :: [ [ Scientific ] ] 
 			    }
+
+data EfficiencyGrid = EfficiencyGrid { effGridName :: Text
+                                     , effGridData :: [ [ Scientific ] ] 
+                                     }
+
 
 data PhotonEfficiency = PhotonEfficiency { phoEffFile :: ExtFile }
 
@@ -179,6 +183,11 @@ mkJetEfficiency JetEfficiency {..} = mkExtFile jetEffFile
 mkTauEfficiency :: TauEfficiency -> YamlValue
 mkTauEfficiency TauEfficiency {..} = mkExtFile tauEffFile
 
+mkGrid :: EfficiencyGrid -> YamlValue
+mkGrid EfficiencyGrid {..} = 
+  YObject $ [ ("Name", (YPrim . YString) effGridName)
+            , ("Data", mkWrap (map mkInline effGridData))
+            ]
 
 mkElectronEffData :: ElectronEffData -> YamlValue
 mkElectronEffData ElectronEffData {..} = 
@@ -186,9 +195,10 @@ mkElectronEffData ElectronEffData {..} =
             , ("EleEtaBins", mkInline eleEtaBins)
             -- , ("nEleEta", (YPrim . YInteger) nEleEta) 
             -- , ("nElePt" , (YPrim . YInteger) nElePt)
-            , ("TightEleEff", YIArray (map mkInline tightEleEff) ) 
-            , ("MediumEleEff", mkWrap (map mkInline mediumEleEff) )
-            , ("LooseEleEff", mkWrap (map mkInline looseEleEff) )
+            , ("EfficiencyGrid", YIArray (map mkGrid eleGrids) )
+            -- , ("TightEleEff", mkWrap (map mkInline tightEleEff) ) 
+            -- , ("MediumEleEff", mkWrap (map mkInline mediumEleEff) )
+            -- , ("LooseEleEff", mkWrap (map mkInline looseEleEff) )
             ]
 
 mkPhotonEffData :: PhotonEffData -> YamlValue
@@ -363,7 +373,12 @@ atlasElecEffData = ElectronEffData
   , eleEtaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
   -- , nEleEta = 10
   -- , nElePt = 12 
-  , tightEleEff = 
+  , eleGrids = [ atlasElecTightEff, atlasElecMediumEff, atlasElecLooseEff ]
+  } 
+
+atlasElecTightEff = EfficiencyGrid 
+  { effGridName = "Tight"
+  , effGridData =
       [ [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
@@ -374,7 +389,11 @@ atlasElecEffData = ElectronEffData
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ] ]
-  , mediumEleEff = 
+  }
+
+atlasElecMediumEff = EfficiencyGrid
+  { effGridName = "Medium"
+  , effGridData = 
       [ [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
       , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
       , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
@@ -385,7 +404,10 @@ atlasElecEffData = ElectronEffData
       , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
       , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
       , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ] ]
-  , looseEleEff = 
+  }
+atlasElecLooseEff = EfficiencyGrid 
+  { effGridName = "Loose"
+  , effGridData =  
       [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
@@ -396,7 +418,6 @@ atlasElecEffData = ElectronEffData
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]
-
   }
 
 atlasPhoEffData :: PhotonEffData
