@@ -27,9 +27,16 @@ data YamlPrimValue = YNumber Scientific
                    | YBool Bool 
                    | YNull 
 
+isObject :: YamlValue -> Bool 
+isObject (YObject _) = True
+isObject _ = False
+
 isPrim :: YamlValue -> Bool 
 isPrim (YPrim _) = True
 isPrim _ = False 
+
+newLine :: Builder
+newLine = fromLazyText "\n"
 
 instance S.IsString YamlPrimValue where
   fromString str = YString (T.pack str) 
@@ -41,25 +48,28 @@ defIndent :: Int
 defIndent = 4 
 
 buildYaml :: Int -> YamlValue -> Builder 
-buildYaml n (YObject m) = (mconcat . map (buildPair n) ) m
+buildYaml n (YObject m) = (mconcat . intersperse (newLine <> makeIndent n) . map (buildPair n) ) m
 buildYaml n (YLArray sty xs) = buildList sty n xs 
 buildYaml n (YIArray xs) = buildItemList n xs
 buildYaml n (YPrim p) = buildPrim p 
 
 buildItemList :: Int -> [YamlValue] -> Builder
-buildItemList n xs = makeIndent n <> fromLazyText "\n"
-                     <> mconcat (map buildItem xs)
+buildItemList n (x:xs) = makeIndent n <> newLine
+                         <> makeIndent n <> fromLazyText "- " 
+                         <> buildYaml (n+2) x <> newLine
+                         <> mconcat (map buildItem xs)
   where buildItem x = 
-          makeIndent n <> fromLazyText "- " <> buildYaml (n+2) x <> fromLazyText "\n"
+          makeIndent n <> fromLazyText "- " <> buildYaml (n+2) x <> newLine
+buildItemList n _ = mempty
 
 buildList :: ListStyle -> Int -> [YamlValue] -> Builder 
 buildList Inline n xs = fromLazyText "[ "
                         <> (mconcat . intersperse (fromLazyText ", ") . map (buildYaml n)) xs 
                         <> fromLazyText " ]"
-buildList Wrapped n xs = fromLazyText "\n" <> makeIndent n 
+buildList Wrapped n xs = newLine <> makeIndent n 
                          <> fromLazyText "[ " 
                          <> ( mconcat 
-                            . intersperse (fromLazyText "\n" <> makeIndent n <> fromLazyText ", ")
+                            . intersperse (newLine <> makeIndent n <> fromLazyText ", ")
                             . map (buildYaml n)) xs 
                          <> fromLazyText " ]"
                          -- <> makeIndent n <> fromLazyText "] "
@@ -72,10 +82,11 @@ buildPrim YNull = mempty
 
 
 
+
 buildPair :: Int -> (T.Text, YamlValue) -> Builder
-buildPair n (k,v) = fromLazyText "\n" <> makeIndent n 
-                    <> fromLazyText k 
+buildPair n (k,v) = fromLazyText k 
                     <> fromLazyText ": "
+                    <> (if isObject v then newLine <> makeIndent (n+defIndent) else mempty)
                     <> buildYaml (n+defIndent) v
 
 makeIndent :: Int -> Builder 
