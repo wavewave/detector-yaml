@@ -21,6 +21,9 @@ Executable yamltest
                    scientific, 
                    bytestring, 
                    filepath
-                   -- attoparsec
-
+  Other-Modules: 
+                   ATLAS
+                   CMS
+                   Detector
+                   YAML
 

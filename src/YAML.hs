@@ -14,6 +14,9 @@ import           Data.Text.Lazy.Builder
 -- import qualified Data.Text.Lazy.IO as TIO
 -- import qualified Data.Vector as V
 
+class Nameable a where
+  name :: a -> T.Text
+
 data ListStyle = Inline | Wrapped 
 
 data YamlValue = YObject [(T.Text, YamlValue)]

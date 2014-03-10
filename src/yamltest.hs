@@ -8,6 +8,8 @@ import qualified Data.Text.Lazy.IO as TIO
 import           System.FilePath
 --
 import ATLAS
+import CMS
+import Detector
 import YAML
 
 atlas2011 = DetectorDescription 
