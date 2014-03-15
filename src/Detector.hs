@@ -5,7 +5,7 @@ module Detector where
 
 import Data.Monoid ((<>))
 import Data.Scientific
-import Data.Text.Lazy (Text(..))
+import Data.Text.Lazy (Text)
 import YAML
 
 data DetectorDescription = 
@@ -29,7 +29,8 @@ data ObjectDescription =
                     , muon :: Either Import MuonEffData 
                     , jet :: Either Import JetEffData 
                     , tau :: Either Import TauEffData
-                    , ptThresholds :: PTThresholds }
+                    , track :: Maybe (Either Import TrackEffData)
+                    , ptThresholds :: Either Import PTThresholds }
 
 
 data MetaInfo = MetaInfo { tag :: Text
@@ -97,17 +98,28 @@ data TauEffData = TauEffData
                     { tauName :: Text
                     , tauMetaInfo :: MetaInfo
                     , tauTagMethod :: Text
-                    , tauEfficiency1Prong :: PTEtaData
-                    , tauRejection1Prong :: PTEtaData 
-                    , tauEfficiency3Prong :: PTEtaData
-                    , tauRejection3Prong :: PTEtaData
+                    , tauEfficiency :: TauEffDetail
                     } 
+
+data TauEffDetail = Tau1or3Prong
+                      { tau1ProngEff :: PTEtaData
+                      , tau1ProngRej :: PTEtaData 
+                      , tau3ProngEff :: PTEtaData
+                      , tau3ProngRej :: PTEtaData
+                      } 
+                  | TauCombined 
+                      { tauCombEff :: PTEtaData
+                      , tauCombRej :: PTEtaData
+                      } 
+
+
 
 instance Nameable TauEffData where
   name = tauName
 
 data PTThresholds = PTThresholds 
-                      { muPTMin :: Scientific
+                      { pTThreName :: Text
+                      , muPTMin :: Scientific
                       , elePTMin :: Scientific
                       , phoPTMin :: Scientific
                       , jetPTMin :: Scientific
@@ -116,12 +128,30 @@ data PTThresholds = PTThresholds
                       , tauPTMin :: Scientific
                       }
 
+instance Nameable PTThresholds where
+  name = pTThreName 
+
+
+data TrackEffData = TrackEffData 
+                       { trackName :: Text 
+                       , trackMetaInfo :: MetaInfo 
+                       , trackEfficiency :: PTEtaData }
+
+instance Nameable TrackEffData where
+  name = trackName 
+
+instance MakeYaml TrackEffData where
+  makeYaml TrackEffData {..} = 
+    YObject $ [ ("Name", mkString trackName) ]
+              <> mkMetaInfoPairs trackMetaInfo
+              <> [ ("Efficiency", makeYaml trackEfficiency) ]
+             
 
 mkImport :: Import -> YamlValue
 mkImport Import {..} = 
   YObject $ [ ("Import", mkString fileName) ] 
 
-
+mkString :: Text -> YamlValue
 mkString = YPrim . YString
 
 mkMetaInfoPairs :: MetaInfo -> [ (Text, YamlValue) ]
@@ -195,13 +225,23 @@ instance MakeYaml TauEffData where
   makeYaml TauEffData {..} = 
     YObject $ [ ("Name", mkString tauName) ] 
               <> mkMetaInfoPairs tauMetaInfo 
-              <> [ ("TaggingMethod", mkString tauTagMethod) 
-                 , ("Efficiency1Prong", makeYaml tauEfficiency1Prong)
-                 , ("Rejection1Prong", makeYaml tauRejection1Prong)
-                 , ("Efficiency3Prong", makeYaml tauEfficiency3Prong)
-                 , ("Rejection3Prong", makeYaml tauRejection3Prong)
-                 ] 
+              <> [ ("TaggingMethod", mkString tauTagMethod) ] 
+              <> [ ("Efficiency", makeYaml tauEfficiency) ]
 
+instance MakeYaml TauEffDetail where
+  makeYaml Tau1or3Prong {..} = 
+    YObject $ [ ("Type", mkString "Tau1or3Prong")
+              , ("Efficiency1Prong", makeYaml tau1ProngEff)
+              , ("Rejection1Prong" , makeYaml tau1ProngRej)
+              , ("Efficiency3Prong", makeYaml tau3ProngEff)
+              , ("Rejection3Prong" , makeYaml tau3ProngRej)
+              ]
+  makeYaml TauCombined {..} = 
+    YObject $ [ ("Type", mkString "TauCombined")
+              , ("Efficiency", makeYaml tauCombEff)
+              , ("Rejection" , makeYaml tauCombRej)
+              ]
+     
 instance MakeYaml PTThresholds where
   makeYaml PTThresholds {..} = 
     YObject $ [ ( "MuPTMIN", (YPrim . YNumber) muPTMin )  
@@ -231,6 +271,7 @@ instance MakeYaml ObjectDescription where
               , ( "BJet", importOrEmbed bJet )
               , ( "Muon", importOrEmbed muon ) 
               , ( "Jet", importOrEmbed jet )
-              , ( "Tau", importOrEmbed tau )
-              , ( "PTThresholds", makeYaml ptThresholds )
-              ] 
+              , ( "Tau", importOrEmbed tau ) ] 
+              <> maybe [] (\trk -> [("Track", importOrEmbed trk)]) track
+              <> [ ( "PTThresholds", importOrEmbed ptThresholds ) ]
+              

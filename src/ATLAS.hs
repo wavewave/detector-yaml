@@ -3,12 +3,12 @@
 
 module ATLAS where
 
-import Data.Monoid ((<>))
-import Data.Scientific
-import Data.Text.Lazy (Text(..))
+-- import Data.Monoid ((<>))
+-- import Data.Scientific
+-- import Data.Text.Lazy (Text(..))
 --
 import Detector
-import YAML
+-- import YAML
 
 
 atlas2011Object :: ObjectDescription
@@ -20,7 +20,8 @@ atlas2011Object = ObjectDescription
   , jet = Left (Import "Jet_ATLAS")
   , tau = Right atlasTauDataCutLoose 
            -- Left (Import "Tau_BDT_Tight_ATLAS")
-  , ptThresholds = atlasPTThresholds 
+  , track = Nothing
+  , ptThresholds = Right atlasPTThresholds 
   }
 
 
@@ -69,6 +70,7 @@ atlasEleDataLoose = ElectronEffData
       }
   } 
 
+atlasElecTightEff :: Grid
 atlasElecTightEff = GridFull { gridData =
       [ [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ]
@@ -82,6 +84,7 @@ atlasElecTightEff = GridFull { gridData =
       , [ 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 ] ]
  }
 
+atlasElecMediumEff :: Grid
 atlasElecMediumEff = GridFull { gridData = 
       [ [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
       , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
@@ -94,6 +97,8 @@ atlasElecMediumEff = GridFull { gridData =
       , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ]
       , [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.98, 0.98, 0.98, 0.98 ] ]
     }
+
+atlasElecLooseEff :: Grid
 atlasElecLooseEff = GridFull { gridData = 
       [ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
       , [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
@@ -275,23 +280,24 @@ atlasTauDataCutLoose = TauEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , tauTagMethod = "Cut"
-  , tauEfficiency1Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection1Prong = PTEtaGrid 
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauEfficiency3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
-
+  , tauEfficiency = Tau1or3Prong 
+      { tau1ProngEff = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+         , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+         , grid = GridConst { gridConst = 1.0 } }
+      , tau1ProngRej = PTEtaGrid 
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngEff = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngRej = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+          , grid = GridConst { gridConst = 1.0 } }
+      }
   }
 
 atlasTauDataCutMedium :: TauEffData 
@@ -303,23 +309,24 @@ atlasTauDataCutMedium = TauEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , tauTagMethod = "Cut"
-  , tauEfficiency1Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection1Prong = PTEtaGrid 
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauEfficiency3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
-
+  , tauEfficiency = Tau1or3Prong 
+      { tau1ProngEff = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau1ProngRej = PTEtaGrid 
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngEff = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngRej = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+          , grid = GridConst { gridConst = 1.0 } }
+      }
   }
 
 atlasTauDataCutTight :: TauEffData 
@@ -331,23 +338,24 @@ atlasTauDataCutTight = TauEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , tauTagMethod = "Cut"
-  , tauEfficiency1Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection1Prong = PTEtaGrid 
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauEfficiency3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
-
+  , tauEfficiency = Tau1or3Prong 
+      { tau1ProngEff = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau1ProngRej = PTEtaGrid 
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngEff = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngRej = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+          , grid = GridConst { gridConst = 1.0 } }
+      } 
   }
 
 atlasTauDataLikLoose :: TauEffData 
@@ -359,23 +367,24 @@ atlasTauDataLikLoose = TauEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , tauTagMethod = "Likelihood"
-  , tauEfficiency1Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection1Prong = PTEtaGrid 
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauEfficiency3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
-
+  , tauEfficiency = Tau1or3Prong 
+      { tau1ProngEff = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau1ProngRej = PTEtaGrid 
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngEff = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngRej = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+          , grid = GridConst { gridConst = 1.0 } }
+      }
   }
 
 atlasTauDataLikMedium :: TauEffData 
@@ -387,23 +396,24 @@ atlasTauDataLikMedium = TauEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , tauTagMethod = "Likelihood"
-  , tauEfficiency1Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection1Prong = PTEtaGrid 
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauEfficiency3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
-
+  , tauEfficiency = Tau1or3Prong 
+      { tau1ProngEff = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau1ProngRej = PTEtaGrid 
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngEff = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngRej = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+          , grid = GridConst { gridConst = 1.0 } }
+      }
   }
 
 atlasTauDataLikTight :: TauEffData 
@@ -415,23 +425,24 @@ atlasTauDataLikTight = TauEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , tauTagMethod = "Likelihood"
-  , tauEfficiency1Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection1Prong = PTEtaGrid 
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauEfficiency3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
-
+  , tauEfficiency = Tau1or3Prong 
+      { tau1ProngEff = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau1ProngRej = PTEtaGrid 
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngEff = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngRej = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+          , grid = GridConst { gridConst = 1.0 } }
+      }
   }
 
 atlasTauDataBDTLoose :: TauEffData 
@@ -443,22 +454,24 @@ atlasTauDataBDTLoose = TauEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , tauTagMethod = "BoostedDecisionTree"
-  , tauEfficiency1Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection1Prong = PTEtaGrid 
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauEfficiency3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
+  , tauEfficiency = Tau1or3Prong 
+      { tau1ProngEff = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau1ProngRej = PTEtaGrid 
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngEff = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngRej = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+          , grid = GridConst { gridConst = 1.0 } }
+      }
 
   }
 
@@ -471,22 +484,24 @@ atlasTauDataBDTMedium = TauEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , tauTagMethod = "BoostedDecisionTree"
-  , tauEfficiency1Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection1Prong = PTEtaGrid 
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauEfficiency3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
+  , tauEfficiency = Tau1or3Prong 
+      { tau1ProngEff = PTEtaGrid
+          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+          , grid = GridConst { gridConst = 1.0 } }
+      , tau1ProngRej = PTEtaGrid 
+	  { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+	  , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+	  , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngEff = PTEtaGrid
+	  { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+	  , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+	  , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngRej = PTEtaGrid
+	  { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+	  , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+	  , grid = GridConst { gridConst = 1.0 } }
+      }
 
   }
 
@@ -499,29 +514,31 @@ atlasTauDataBDTTight = TauEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , tauTagMethod = "BoostedDecisionTree"
-  , tauEfficiency1Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection1Prong = PTEtaGrid 
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauEfficiency3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-      , grid = GridConst { gridConst = 1.0 } }
-  , tauRejection3Prong = PTEtaGrid
-      { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-      , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
-      , grid = GridConst { gridConst = 1.0 } }
-
+  , tauEfficiency = Tau1or3Prong 
+      { tau1ProngEff = PTEtaGrid
+	  { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+	  , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+	  , grid = GridConst { gridConst = 1.0 } }
+      , tau1ProngRej = PTEtaGrid 
+	  { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+	  , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+	  , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngEff = PTEtaGrid
+	  { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+	  , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+	  , grid = GridConst { gridConst = 1.0 } }
+      , tau3ProngRej = PTEtaGrid
+	  { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+	  , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
+	  , grid = GridConst { gridConst = 1.0 } }
+      }
   }
 
 
 atlasPTThresholds :: PTThresholds
 atlasPTThresholds = PTThresholds  
-  { muPTMin = 20.0
+  { pTThreName = "ATLAS_PTThreshold"
+  , muPTMin = 20.0
   , elePTMin = 5.0
   , phoPTMin = 20.0
   , jetPTMin = 20.0

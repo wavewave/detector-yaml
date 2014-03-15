@@ -12,6 +12,7 @@ import CMS
 import Detector
 import YAML
 
+atlas2011 :: DetectorDescription
 atlas2011 = DetectorDescription 
             { detectorName = "ATLAS2011"
             , detectorDescription = "ATLAS 2011 detector description"
@@ -20,12 +21,16 @@ atlas2011 = DetectorDescription
             , detectorValidationInfo = "Validated on 2014/02" 
             , detectorObject = atlas2011Object }
 
--- atlas2011elec_tight_yaml = mkElectronEffData atlasEleDataTight
--- atlas2011pho_tight_yaml = mkPhotonEffData atlasPhoDataTight
--- atlas2011bjet_sv50_yaml= mkBJetEffData atlasBJetDataSV50
--- atlas2011muon_cb1_yaml = mkMuonEffData atlasMuonDataCB1
--- atlas2011jet_yaml = mkJetEffData atlasJetData
--- atlas2011tau_yaml = mkTauEffData atlasTauDataCutLoose
+cms2011 :: DetectorDescription
+cms2011 = DetectorDescription 
+            { detectorName = "CMS2011"
+            , detectorDescription = "CMS 2011 detector description"
+            , detectorReference = "arXiv:xxxx.yyyy"
+            , detectorComment = "extracted the efficiencies from the plot 3,4,5 in the reference" 
+            , detectorValidationInfo = "Validated on 2014/02" 
+            , detectorObject = cms2011Object }
+
+
 
 data YamlBox = forall a. (MakeYaml a, Nameable a) => MkYamlBox a 
 
@@ -57,7 +62,35 @@ main = do
           , MkYamlBox atlasTauDataBDTLoose
           , MkYamlBox atlasTauDataBDTMedium
           , MkYamlBox atlasTauDataBDTTight
+          ]
 
+
+  mapM_ f [ MkYamlBox cms2011
+          , MkYamlBox cmsBTagTCHEL
+          , MkYamlBox cmsBTagSSVHPT
+          , MkYamlBox cmsBTagSSVHEM
+          , MkYamlBox cmsMuonS
+          , MkYamlBox cmsMuonP
+          , MkYamlBox cmsMuonT
+          , MkYamlBox cmsElePF
+          , MkYamlBox cmsEleCicSTight
+          , MkYamlBox cmsEleCicLoose
+          , MkYamlBox cmsEleWP80
+          , MkYamlBox cmsEleWP95
+          , MkYamlBox cmsPhoPF
+          , MkYamlBox cmsPhoTight
+          , MkYamlBox cmsPhoLoose
+          , MkYamlBox cmsTrack
+          , MkYamlBox cmsTauTaNCL
+          , MkYamlBox cmsTauTaNCM
+          , MkYamlBox cmsTauTaNCT
+          , MkYamlBox cmsTauHPSL
+          , MkYamlBox cmsTauHPSM
+          , MkYamlBox cmsTauHPST
+          , MkYamlBox cmsTauTCT
+          , MkYamlBox cmsJetPF
+          , MkYamlBox cmsJetCalo
+          , MkYamlBox cmsPTThresholds
           ]
  
 

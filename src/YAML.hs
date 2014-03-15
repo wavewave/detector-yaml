@@ -2,17 +2,13 @@
 
 module YAML where
 
--- import           Data.Attoparsec
-import qualified Data.ByteString.Lazy.Char8 as L
+-- import qualified Data.ByteString.Lazy.Char8 as L
 import           Data.List (intersperse)
 import           Data.Monoid ((<>), mconcat, mempty)
 import           Data.Scientific
 import qualified Data.String as S (IsString(..), fromString)
 import qualified Data.Text.Lazy as T
 import           Data.Text.Lazy.Builder 
-
--- import qualified Data.Text.Lazy.IO as TIO
--- import qualified Data.Vector as V
 
 class Nameable a where
   name :: a -> T.Text
@@ -57,16 +53,16 @@ buildYaml :: Int -> YamlValue -> Builder
 buildYaml n (YObject m) = (mconcat . intersperse (newLine <> makeIndent n) . map (buildPair n) ) m
 buildYaml n (YLArray sty xs) = buildList sty n xs 
 buildYaml n (YIArray xs) = buildItemList n xs
-buildYaml n (YPrim p) = buildPrim p 
+buildYaml _ (YPrim p) = buildPrim p 
 
 buildItemList :: Int -> [YamlValue] -> Builder
 buildItemList n (x:xs) = makeIndent n <> newLine
                          <> makeIndent n <> fromLazyText "- " 
                          <> buildYaml (n+2) x <> newLine
                          <> mconcat (map buildItem xs)
-  where buildItem x = 
-          makeIndent n <> fromLazyText "- " <> buildYaml (n+2) x <> newLine
-buildItemList n _ = mempty
+  where buildItem y = 
+          makeIndent n <> fromLazyText "- " <> buildYaml (n+2) y <> newLine
+buildItemList _ _ = mempty
 
 buildList :: ListStyle -> Int -> [YamlValue] -> Builder 
 buildList Inline n xs = fromLazyText "[ "
@@ -80,6 +76,7 @@ buildList Wrapped n xs = newLine <> makeIndent n
                          <> fromLazyText " ]"
                          -- <> makeIndent n <> fromLazyText "] "
 
+buildPrim :: YamlPrimValue -> Builder
 buildPrim (YNumber s) = scientificBuilder s 
 buildPrim (YInteger s) = (fromLazyText . T.pack . show) s
 buildPrim (YString txt) = fromLazyText txt
