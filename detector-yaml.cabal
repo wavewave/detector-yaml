@@ -10,10 +10,31 @@ Build-Type: 	Simple
 Cabal-Version:  >= 1.8
 data-files:     
 
-Executable yamltest
-  Main-is: yamltest.hs
-  hs-source-dirs: src
+Executable mkyaml
+  Main-is: mkyaml.hs
+  hs-source-dirs: exe
   ghc-options: 	-Wall -Werror -O2 -threaded -funbox-strict-fields -fno-warn-unused-do-bind -rtsopts
+  ghc-prof-options: -caf-all -auto-all
+  Build-Depends: 
+                   base>4, 
+                   text,  
+                   filepath,
+                   detector-yaml
+
+Executable parseyaml
+  Main-is: parseyaml.hs
+  hs-source-dirs: exe
+  ghc-options: 	-Wall -Werror -O2 -threaded -funbox-strict-fields -fno-warn-unused-do-bind -rtsopts
+  ghc-prof-options: -caf-all -auto-all
+  Build-Depends: 
+                   base>4, 
+                   text, 
+                   detector-yaml
+
+
+Library
+  hs-source-dirs: lib
+  ghc-options: 	-Wall -Werror -funbox-strict-fields -fno-warn-unused-do-bind -fno-warn-orphans
   ghc-prof-options: -caf-all -auto-all
   Build-Depends: 
                    base>4, 
@@ -21,9 +42,11 @@ Executable yamltest
                    scientific, 
                    bytestring, 
                    filepath
-  Other-Modules: 
+
+  Exposed-Modules: 
                    ATLAS
                    CMS
                    Detector
+                   Parser
                    YAML
 
