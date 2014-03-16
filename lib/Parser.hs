@@ -7,20 +7,24 @@ import Control.Applicative
 import Control.Monad (replicateM)
 import Data.Attoparsec.Combinator
 import Data.Attoparsec.Text 
--- import qualified Data.ByteString.Char8 as B
--- import Data.Char (isSpace)
 import Data.Monoid
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 --
+import Prelude hiding (takeWhile)
 -- import Debug.Trace
 
-data PYaml = PYObject [ (T.Text, T.Text) ]
+data PYaml = PYObject [ (T.Text, PYaml) ]
+           | PYText T.Text 
            deriving (Show, Eq)
 
 p_text :: [Char] -> Parser T.Text
 p_text delim = 
     T.strip <$> takeTill (\x -> x `elem` delim) 
+
+p_indent :: Parser Int 
+p_indent = T.length <$> takeWhile (== ' ') 
+
 
 p_comment :: Parser T.Text
 p_comment = char '#' *> takeTill (== '\n') <* char '\n'
@@ -43,14 +47,35 @@ p_itemlist n p = many line
   where line = replicateM n (char ' ') 
                *> char '-'
                *> p  
-               <* ((p_comment *> return ()) 
-                   <|> (char '\n' *> return ()))
+               <* p_linebreaker
+-- ((p_comment *> return ()) 
+--                    <|> (char '\n' *> return ()))
 
-p_keyvalue :: Parser a -> Parser b -> Parser (a,b)
-p_keyvalue pk pv = do k <- pk 
-                      char ':' 
-                      v <- pv
-                      return (k,v)
+p_keyvalue :: (Int -> Parser b) 
+           -> Parser (T.Text,b)
+p_keyvalue pv = do 
+    (n1,k) <- p_key 
+    char ':' 
+    spcs <- Data.Attoparsec.Text.takeWhile (== ' ')
+    v <- (try (char '\n' *> (p_indent >>= pv)))
+          <|> (let n2 = T.length spcs + 1
+               in pv (n1 + n2))
+    return (k,v)
+
+p_key :: Parser (Int,T.Text)
+p_key = do
+    c1 <- notChar ' ' 
+    txt' <- takeTill (`elem` [':','\n','#'])
+    let txt = c1 `T.cons` txt' 
+    return (T.length txt, T.strip txt) 
+
+p_ptext :: Parser T.Text
+p_ptext = do 
+    c1 <- notChar ' ' 
+    txt' <- takeTill (`elem` [':','#','\n'] )
+    let txt = c1 `T.cons` txt' 
+    return (T.strip txt) 
+
 
 p_linebreaker :: Parser ()
 p_linebreaker = (p_comment >> return ()) 
@@ -58,13 +83,14 @@ p_linebreaker = (p_comment >> return ())
 
 p_object :: Int -> Parser PYaml 
 p_object n = do 
-    spcs <- Data.Attoparsec.Text.takeWhile (== ' ')
-    let m = T.length spcs
-    kvlst <- 
-      content `sepBy` (p_linebreaker >> spaces (n+m)) 
-    return (PYObject kvlst)
+    kvlst <- content `sepBy` (p_linebreaker >> spaces n)
+    if (not.null) kvlst 
+      then return (PYObject kvlst) 
+      else PYText <$> p_ptext
+
+
   where 
-    content = p_keyvalue (p_text ['\n','#',':']) (p_text ['\n','#']) 
+    content = p_keyvalue p_object
     spaces x = replicateM x (char ' ')
 
 
@@ -72,20 +98,7 @@ p_object n = do
 test :: FilePath -> IO ()
 test fp = do    
     txt <- TIO.readFile fp 
-    {- 
-    let r1 = parseOnly (p_list (p_textNoComment [',',']']))
-               "[ hello #this is a comment \n , world ]"
-        r2 = parseOnly 
-               (p_keyvalue (p_text ['\n',':']) (p_text ['\n']))
-               " hello : world "
-        r3 = parseOnly 
-               (p_itemlist 2 (p_text ['\n','#']))
-               "  - test \n  - test2  \n  - test3 #hello \n"
-        r4 = parseOnly (p_object 4)
-               "      test : okay \n      test2 : true \n" 
-    -} 
-    print (parseOnly (p_object 0) txt)
-    -- print r1
-    -- print r2
-    -- print r3
-    -- print r4
+    print (parseOnly (p_indent >>= p_object) txt)
+    let content = p_keyvalue (const (p_text ['\n','#']))
+
+    print (parseOnly (replicateM 4 (char ' ') *> content) txt) 
