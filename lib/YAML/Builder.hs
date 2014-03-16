@@ -2,6 +2,7 @@
 
 module YAML.Builder where
 
+import qualified Data.Foldable as F
 import           Data.List (intersperse)
 import           Data.Monoid ((<>), mconcat, mempty)
 import           Data.Scientific
@@ -22,6 +23,7 @@ data YamlValue = YObject [(T.Text, YamlValue)]
 data YamlPrimValue = YNumber Scientific
                    | YInteger Int 
                    | YString T.Text
+                   | YLiteralBlock Int [T.Text]
                    | YBool Bool 
                    | YNull 
 
@@ -43,7 +45,7 @@ instance S.IsString YamlValue where
   fromString = YPrim . S.fromString
 
 class MakeYaml a where
-  makeYaml :: a -> YamlValue
+  makeYaml :: Int -> a -> YamlValue
 
 defIndent :: Int
 defIndent = 4 
@@ -79,10 +81,13 @@ buildPrim :: YamlPrimValue -> Builder
 buildPrim (YNumber s) = scientificBuilder s 
 buildPrim (YInteger s) = (fromLazyText . T.pack . show) s
 buildPrim (YString txt) = fromLazyText txt
+buildPrim (YLiteralBlock n txts) = 
+    (fromLazyText "|\n") 
+    <> ( F.fold 
+       . intersperse (fromLazyText "\n")
+       . map (\txt -> makeIndent n <> fromLazyText txt) ) txts
 buildPrim (YBool b) = (fromLazyText . T.pack . show) b 
 buildPrim YNull = mempty 
-
-
 
 
 buildPair :: Int -> (T.Text, YamlValue) -> Builder
@@ -99,4 +104,7 @@ mkInline = YLArray Inline . map (YPrim . YNumber)
 
 mkWrap :: [YamlValue] -> YamlValue 
 mkWrap = YLArray Wrapped 
+
+makeLiteralBlock :: Int -> T.Text -> YamlPrimValue
+makeLiteralBlock n txt = YLiteralBlock n (T.lines txt)
 

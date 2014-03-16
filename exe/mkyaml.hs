@@ -9,35 +9,15 @@ import           System.FilePath
 --
 import ATLAS
 import CMS
-import Detector
+-- import Detector
 import YAML.Builder
-
-atlas2011 :: DetectorDescription
-atlas2011 = DetectorDescription 
-            { detectorName = "ATLAS2011"
-            , detectorDescription = "ATLAS 2011 detector description"
-            , detectorReference = "arXiv:xxxx.yyyy"
-            , detectorComment = "extracted the efficiencies from the plot 3,4,5 in the reference" 
-            , detectorValidationInfo = "Validated on 2014/02" 
-            , detectorObject = atlas2011Object }
-
-cms2011 :: DetectorDescription
-cms2011 = DetectorDescription 
-            { detectorName = "CMS2011"
-            , detectorDescription = "CMS 2011 detector description"
-            , detectorReference = "arXiv:xxxx.yyyy"
-            , detectorComment = "extracted the efficiencies from the plot 3,4,5 in the reference" 
-            , detectorValidationInfo = "Validated on 2014/02" 
-            , detectorObject = cms2011Object }
-
-
 
 data YamlBox = forall a. (MakeYaml a, Nameable a) => MkYamlBox a 
 
 main :: IO ()
 main = do 
   let f (MkYamlBox x) = 
-       TIO.writeFile (T.unpack (name x) <.> "yaml") $ toLazyText (buildYaml 0 (makeYaml x))
+       TIO.writeFile (T.unpack (name x) <.> "yaml") $ toLazyText (buildYaml 0 (makeYaml 0 x))
   
   mapM_ f [ MkYamlBox atlas2011
           , MkYamlBox atlasEleDataTight

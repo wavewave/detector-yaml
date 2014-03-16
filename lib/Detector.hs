@@ -5,8 +5,10 @@ module Detector where
 
 import Data.Monoid ((<>))
 import Data.Scientific
-import Data.Text.Lazy (Text)
+import Data.Text.Lazy (Text, lines)
 import YAML.Builder
+-- 
+import Prelude hiding (lines)
 
 data DetectorDescription = 
   DetectorDescription { detectorName :: Text
@@ -141,109 +143,116 @@ instance Nameable TrackEffData where
   name = trackName 
 
 instance MakeYaml TrackEffData where
-  makeYaml TrackEffData {..} = 
-    YObject $ [ ("Name", mkString trackName) ]
-              <> mkMetaInfoPairs trackMetaInfo
-              <> [ ("Efficiency", makeYaml trackEfficiency) ]
+  makeYaml n TrackEffData {..} = 
+    YObject $ [ ("Name", mkString (n+defIndent) trackName) ]
+              <> mkMetaInfoPairs (n+defIndent) trackMetaInfo
+              <> [ ("Efficiency", makeYaml (n+defIndent) trackEfficiency) ]
              
 
-mkImport :: Import -> YamlValue
-mkImport Import {..} = 
-  YObject $ [ ("Import", mkString fileName) ] 
+mkImport :: Int -> Import -> YamlValue
+mkImport n Import {..} = 
+  YObject $ [ ("Import", mkString (n+defIndent) fileName) ] 
 
-mkString :: Text -> YamlValue
-mkString = YPrim . YString
+mkString :: Int -> Text -> YamlValue
+mkString n txt = 
+  if length (lines txt) <= 1 
+    then (YPrim . YString) txt
+    else (YPrim . makeLiteralBlock n) txt
+ 
 
-mkMetaInfoPairs :: MetaInfo -> [ (Text, YamlValue) ]
-mkMetaInfoPairs MetaInfo {..} = 
-  [ ("Tag" , mkString tag)
-  , ("Description", mkString description) 
-  , ("Comment", mkString comment )
-  , ("Reference", mkString reference ) ]
+mkMetaInfoPairs :: Int -> MetaInfo -> [ (Text, YamlValue) ]
+mkMetaInfoPairs n MetaInfo {..} = 
+  [ ("Tag" , mkString n tag)
+  , ("Description", mkString n description) 
+  , ("Comment", mkString n comment )
+  , ("Reference", mkString n reference ) ]
 
-importOrEmbed :: (MakeYaml a) => Either Import a -> YamlValue
-importOrEmbed = either mkImport makeYaml
+importOrEmbed :: (MakeYaml a) => 
+                 Int 
+              -> Either Import a 
+              -> YamlValue
+importOrEmbed n = either (mkImport n) (makeYaml n)
 
 
 instance MakeYaml Grid where
-  makeYaml GridFull {..} = 
-    YObject $ [ ("Type", mkString "Full")
+  makeYaml n GridFull {..} = 
+    YObject $ [ ("Type", mkString (n+defIndent) "Full")
               , ("Data", mkWrap (map mkInline gridData))
               ]
-  makeYaml GridConst {..} = 
-    YObject $ [ ("Type", mkString "Const")
+  makeYaml n GridConst {..} = 
+    YObject $ [ ("Type", mkString (n+defIndent) "Const")
               , ("Data", (YPrim . YNumber) gridConst)
               ]
 
 instance MakeYaml ElectronEffData where
-  makeYaml ElectronEffData {..} = 
-    YObject $ [ ("Name", mkString eleName) ]
-              <> mkMetaInfoPairs eleMetaInfo 
-              <> [ ("Efficiency", makeYaml eleEfficiency) ]
+  makeYaml n ElectronEffData {..} = 
+    YObject $ [ ("Name", mkString (n+defIndent) eleName) ]
+              <> mkMetaInfoPairs (n+defIndent) eleMetaInfo 
+              <> [ ("Efficiency", makeYaml (n+defIndent) eleEfficiency) ]
 
 instance MakeYaml PTEtaData where 
-  makeYaml PTEtaGrid {..} = 
-    YObject $ [ ("Type", mkString "Grid" )
+  makeYaml n PTEtaGrid {..} = 
+    YObject $ [ ("Type", mkString (n+defIndent) "Grid" )
               , ("PtBins", mkInline ptBins)
               , ("EtaBins", mkInline etaBins)
-              , ("Grid", makeYaml grid ) ]
-  makeYaml PTEtaInterpolation {..} =
-    YObject $ [ ("Type", mkString "Interpolation")
-              , ("Function", mkString interpolationFunction ) ] 
+              , ("Grid", makeYaml (n+defIndent) grid ) ]
+  makeYaml n PTEtaInterpolation {..} =
+    YObject $ [ ("Type", mkString (n+defIndent) "Interpolation")
+              , ("Function", mkString (n+defIndent) interpolationFunction) ] 
 
 
 instance MakeYaml PhotonEffData where
-  makeYaml PhotonEffData {..} = 
-    YObject $ [ ("Name", mkString phoName) ] 
-              <> mkMetaInfoPairs phoMetaInfo 
-              <> [ ("Efficiency", makeYaml phoEfficiency ) ] 
+  makeYaml n PhotonEffData {..} = 
+    YObject $ [ ("Name", mkString (n+defIndent) phoName) ]
+              <> mkMetaInfoPairs (n+defIndent) phoMetaInfo 
+              <> [ ("Efficiency", makeYaml (n+defIndent) phoEfficiency ) ]
 
 
 instance MakeYaml BJetEffData where
-  makeYaml BJetEffData {..} = 
-    YObject $ [ ("Name", mkString bJetName) ]
-              <> mkMetaInfoPairs bJetMetaInfo
-              <> [ ("Efficiency", makeYaml bJetEfficiency) 
-                 , ("Rejection", makeYaml bJetRejection) ]
+  makeYaml n BJetEffData {..} = 
+    YObject $ [ ("Name", mkString (n+defIndent) bJetName) ]
+              <> mkMetaInfoPairs (n+defIndent) bJetMetaInfo
+              <> [ ("Efficiency", makeYaml (n+defIndent) bJetEfficiency) 
+                 , ("Rejection", makeYaml (n+defIndent) bJetRejection) ]
 
 -- charm rejection
 
 instance MakeYaml MuonEffData where
-  makeYaml MuonEffData {..} = 
-    YObject $ [ ("Name", mkString muonName ) ]
-              <> mkMetaInfoPairs muonMetaInfo
-              <> [ ("Efficiency", makeYaml muonEfficiency) ]
+  makeYaml n MuonEffData {..} = 
+    YObject $ [ ("Name", mkString (n+defIndent) muonName ) ]
+              <> mkMetaInfoPairs (n+defIndent) muonMetaInfo
+              <> [ ("Efficiency", makeYaml (n+defIndent) muonEfficiency) ]
 
 
 instance MakeYaml JetEffData where 
-  makeYaml JetEffData {..} = 
-    YObject $ [ ( "Name", mkString jetName ) ]
-              <> mkMetaInfoPairs jetMetaInfo
-              <> [ ("Efficiency", makeYaml jetEfficiency) ] 
+  makeYaml n JetEffData {..} = 
+    YObject $ [ ( "Name", mkString (n+defIndent) jetName ) ]
+              <> mkMetaInfoPairs (n+defIndent) jetMetaInfo
+              <> [ ("Efficiency", makeYaml (n+defIndent) jetEfficiency) ] 
 
 instance MakeYaml TauEffData where
-  makeYaml TauEffData {..} = 
-    YObject $ [ ("Name", mkString tauName) ] 
-              <> mkMetaInfoPairs tauMetaInfo 
-              <> [ ("TaggingMethod", mkString tauTagMethod) ] 
-              <> [ ("Efficiency", makeYaml tauEfficiency) ]
+  makeYaml n TauEffData {..} = 
+    YObject $ [ ("Name", mkString (n+defIndent) tauName) ]
+              <> mkMetaInfoPairs (n+defIndent) tauMetaInfo 
+              <> [ ("TaggingMethod", mkString (n+defIndent) tauTagMethod) ] 
+              <> [ ("Efficiency", makeYaml (n+defIndent) tauEfficiency) ]
 
 instance MakeYaml TauEffDetail where
-  makeYaml Tau1or3Prong {..} = 
-    YObject $ [ ("Type", mkString "Tau1or3Prong")
-              , ("Efficiency1Prong", makeYaml tau1ProngEff)
-              , ("Rejection1Prong" , makeYaml tau1ProngRej)
-              , ("Efficiency3Prong", makeYaml tau3ProngEff)
-              , ("Rejection3Prong" , makeYaml tau3ProngRej)
+  makeYaml n Tau1or3Prong {..} = 
+    YObject $ [ ("Type", mkString (n+defIndent) "Tau1or3Prong")
+              , ("Efficiency1Prong", makeYaml (n+defIndent) tau1ProngEff)
+              , ("Rejection1Prong" , makeYaml (n+defIndent) tau1ProngRej)
+              , ("Efficiency3Prong", makeYaml (n+defIndent) tau3ProngEff)
+              , ("Rejection3Prong" , makeYaml (n+defIndent) tau3ProngRej)
               ]
-  makeYaml TauCombined {..} = 
-    YObject $ [ ("Type", mkString "TauCombined")
-              , ("Efficiency", makeYaml tauCombEff)
-              , ("Rejection" , makeYaml tauCombRej)
+  makeYaml n TauCombined {..} = 
+    YObject $ [ ("Type", mkString (n+defIndent) "TauCombined")
+              , ("Efficiency", makeYaml (n+defIndent) tauCombEff)
+              , ("Rejection" , makeYaml (n+defIndent) tauCombRej)
               ]
      
 instance MakeYaml PTThresholds where
-  makeYaml PTThresholds {..} = 
+  makeYaml _n PTThresholds {..} = 
     YObject $ [ ( "MuPTMIN", (YPrim . YNumber) muPTMin )  
               , ( "ElePTMIN", (YPrim . YNumber) elePTMin )
               , ( "PhoPTMIN", (YPrim . YNumber) phoPTMin )
@@ -254,24 +263,24 @@ instance MakeYaml PTThresholds where
               ]
 
 instance MakeYaml DetectorDescription where
-  makeYaml DetectorDescription {..} = 
-    YObject $ [ ( "Name", mkString detectorName )
-              , ( "Class", mkString "TopLevel" )
-              , ( "Description", mkString detectorDescription )
-              , ( "Reference", mkString detectorReference )
-              , ( "Comment", mkString detectorComment )
-              , ( "ValidationInfo", mkString detectorValidationInfo )
-              , ( "Object", makeYaml detectorObject ) 
+  makeYaml n DetectorDescription {..} = 
+    YObject $ [ ( "Name", mkString (n+defIndent) detectorName )
+              , ( "Class", mkString (n+defIndent) "TopLevel" )
+              , ( "Description", mkString (n+defIndent) detectorDescription)
+              , ( "Reference", mkString (n+defIndent) detectorReference)
+              , ( "Comment", mkString (n+defIndent) detectorComment )
+              , ( "ValidationInfo", mkString (n+defIndent) detectorValidationInfo )
+              , ( "Object", makeYaml (n+defIndent) detectorObject ) 
               ]
 
 instance MakeYaml ObjectDescription where
-  makeYaml ObjectDescription {..} = 
-    YObject $ [ ( "Electron", importOrEmbed electron )  
-              , ( "Photon", importOrEmbed photon ) 
-              , ( "BJet", importOrEmbed bJet )
-              , ( "Muon", importOrEmbed muon ) 
-              , ( "Jet", importOrEmbed jet )
-              , ( "Tau", importOrEmbed tau ) ] 
-              <> maybe [] (\trk -> [("Track", importOrEmbed trk)]) track
-              <> [ ( "PTThresholds", importOrEmbed ptThresholds ) ]
+  makeYaml n ObjectDescription {..} = 
+    YObject $ [ ( "Electron", importOrEmbed (n+defIndent) electron)  
+              , ( "Photon", importOrEmbed (n+defIndent) photon) 
+              , ( "BJet", importOrEmbed (n+defIndent) bJet)
+              , ( "Muon", importOrEmbed (n+defIndent) muon) 
+              , ( "Jet", importOrEmbed (n+defIndent) jet)
+              , ( "Tau", importOrEmbed (n+defIndent) tau) ] 
+              <> maybe [] (\trk -> [("Track", importOrEmbed (n+defIndent) trk)]) track
+              <> [ ( "PTThresholds", importOrEmbed (n+defIndent) ptThresholds) ]
               

@@ -5,6 +5,15 @@ module CMS where
 
 import Detector
 
+cms2011 :: DetectorDescription
+cms2011 = DetectorDescription 
+            { detectorName = "CMS2011"
+            , detectorDescription = "CMS 2011 detector description"
+            , detectorReference = "arXiv:xxxx.yyyy"
+            , detectorComment = "extracted the efficiencies from the plot 3,4,5 in the reference" 
+            , detectorValidationInfo = "Validated on 2014/02" 
+            , detectorObject = cms2011Object }
+
 cms2011Object :: ObjectDescription 
 cms2011Object = ObjectDescription 
   { electron     = Left (Import "Electron_PF_CMS")

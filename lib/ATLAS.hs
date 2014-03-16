@@ -5,6 +5,15 @@ module ATLAS where
 
 import Detector
 
+atlas2011 :: DetectorDescription
+atlas2011 = DetectorDescription 
+            { detectorName = "ATLAS2011"
+            , detectorDescription = "ATLAS 2011 detector description"
+            , detectorReference = "arXiv:xxxx.yyyy"
+            , detectorComment = "extracted the efficiencies from the plot 3,4,5 in the reference" 
+            , detectorValidationInfo = "Validated on 2014/02" 
+            , detectorObject = atlas2011Object }
+
 atlas2011Object :: ObjectDescription
 atlas2011Object = ObjectDescription 
   { electron = Left (Import "Electron_Loose_ATLAS")
@@ -158,7 +167,7 @@ atlasBJetDataJP50 = BJetEffData
   { bJetName = "BJet_JP50_ATLAS"
   , bJetMetaInfo = MetaInfo 
       { tag = "ATLAS"
-      , description = "JP50 ATLAS BJet Tagging"
+      , description = "JP50 ATLAS BJet Tagging\nthis is next line."
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , bJetEfficiency = PTEtaGrid 
@@ -271,7 +280,7 @@ atlasTauDataCutLoose = TauEffData
   , tauMetaInfo = MetaInfo 
       { tag = "ATLAS"
       , description = "ATLAS Tau Cut Loose"
-      , comment = "We use table from reference"
+      , comment = "We use table from reference\nThis is the next line."
       , reference = "arXiv:xxxx.yyyy" }
   , tauTagMethod = "Cut"
   , tauEfficiency = Tau1or3Prong 
