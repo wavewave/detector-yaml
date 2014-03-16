@@ -1,7 +1,10 @@
 module Main where
 
 import Parser
+import System.Environment 
 
 main :: IO ()
 main = do 
-  test
+  args <- getArgs
+  let fp = args !! 0  
+  test fp
