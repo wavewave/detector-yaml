@@ -41,6 +41,7 @@ Library
                    text, 
                    scientific, 
                    bytestring, 
+                   attoparsec,
                    filepath
 
   Exposed-Modules: 
