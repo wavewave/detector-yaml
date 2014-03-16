@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Parser where 
+module YAML.Parser where 
 
 import Control.Applicative 
 import Control.Monad (replicateM)
@@ -62,6 +62,18 @@ p_itemlist n p = p_sepBy1CommentAndIndent n line
   where line = char '-' *> skipSpace *> p  
 
 
+-- | literal block
+p_literalblock :: Parser T.Text
+p_literalblock = do
+    char '|' 
+    p_emptyline
+    n <- p_indent
+    
+    txts <- takeTill (== '\n') `sepBy1` p_sep n 
+    return (T.unlines txts)
+  where spaces x = replicateM x (char ' ')
+        p_sep n = char '\n' >> spaces n
+
 -- | indentation-aware key value pair parser
 p_keyvalue :: (Int -> Parser b) 
            -> Parser (T.Text,b)
@@ -83,13 +95,16 @@ p_key = do
     let txt = c1 `T.cons` txt' 
     return (T.length txt, T.strip txt) 
 
--- | primary text
-p_ptext :: Parser T.Text
-p_ptext = do 
+-- | primary text with delim
+p_ptext :: [Char] -> Parser T.Text
+p_ptext delim = do 
     c1 <- satisfy (notInClass [ ' ', '#', '\n', '-' ]) 
-    txt' <- takeTill (`elem` [':','#','\n',','] )
+    txt' <- takeTill (`elem` delim )
     let txt = c1 `T.cons` txt' 
     return (T.strip txt) 
+
+-- [':','#','\n',',']
+
 
 -- | line breaker (either a simple newline or comment)
 p_linebreaker :: Parser ()
@@ -107,7 +122,8 @@ p_object n = do
     <|> try (PYList <$> p_itemlist n (p_text ['\n','#']))
     <|> try (do kvlst <- p_sepBy1CommentAndIndent n content 
                 return (PYObject kvlst))
-    <|> PYText <$> p_ptext
+    <|> try (PYText <$> p_literalblock)
+    <|> PYText <$> (p_ptext [':','#','\n'])
   where 
     content = p_keyvalue p_object
 

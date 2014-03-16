@@ -48,6 +48,6 @@ Library
                    ATLAS
                    CMS
                    Detector
-                   Parser
-                   YAML
+                   YAML.Builder
+                   YAML.Parser
 

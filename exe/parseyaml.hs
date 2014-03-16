@@ -1,6 +1,6 @@
 module Main where
 
-import Parser
+import YAML.Parser
 import System.Environment 
 
 main :: IO ()

@@ -1,8 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module YAML where
+module YAML.Builder where
 
--- import qualified Data.ByteString.Lazy.Char8 as L
 import           Data.List (intersperse)
 import           Data.Monoid ((<>), mconcat, mempty)
 import           Data.Scientific

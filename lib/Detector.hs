@@ -6,7 +6,7 @@ module Detector where
 import Data.Monoid ((<>))
 import Data.Scientific
 import Data.Text.Lazy (Text)
-import YAML
+import YAML.Builder
 
 data DetectorDescription = 
   DetectorDescription { detectorName :: Text

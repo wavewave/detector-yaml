@@ -3,12 +3,7 @@
 
 module CMS where
 
--- import Data.Monoid ((<>))
--- import Data.Scientific
--- import Data.Text.Lazy (Text)
--- 
 import Detector
--- import YAML
 
 cms2011Object :: ObjectDescription 
 cms2011Object = ObjectDescription 

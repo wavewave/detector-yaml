@@ -10,3 +10,8 @@
         - 2014-03-15 test # how
         - okay
     tets2 : true  # this is more complicated
+    literaltest : |
+      literal is tested here. 
+        If indentation is correct.
+      Okay. 
+    abc : def

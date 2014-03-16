@@ -3,13 +3,7 @@
 
 module ATLAS where
 
--- import Data.Monoid ((<>))
--- import Data.Scientific
--- import Data.Text.Lazy (Text(..))
---
 import Detector
--- import YAML
-
 
 atlas2011Object :: ObjectDescription
 atlas2011Object = ObjectDescription 

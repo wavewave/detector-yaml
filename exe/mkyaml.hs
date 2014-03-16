@@ -10,7 +10,7 @@ import           System.FilePath
 import ATLAS
 import CMS
 import Detector
-import YAML
+import YAML.Builder
 
 atlas2011 :: DetectorDescription
 atlas2011 = DetectorDescription 
