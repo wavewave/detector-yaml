@@ -11,11 +11,12 @@ import Data.Monoid
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 --
-import Prelude hiding (takeWhile)
+import Prelude hiding (takeWhile,dropWhile)
 -- import Debug.Trace
 
 data PYaml = PYObject [ (T.Text, PYaml) ]
-           | PYText T.Text 
+           | PYText T.Text
+           | PYList [T.Text]
            deriving (Show, Eq)
 
 p_text :: [Char] -> Parser T.Text
@@ -69,10 +70,12 @@ p_key = do
     let txt = c1 `T.cons` txt' 
     return (T.length txt, T.strip txt) 
 
+
+-- | primary text
 p_ptext :: Parser T.Text
 p_ptext = do 
     c1 <- notChar ' ' 
-    txt' <- takeTill (`elem` [':','#','\n'] )
+    txt' <- takeTill (`elem` [':','#','\n',','] )
     let txt = c1 `T.cons` txt' 
     return (T.strip txt) 
 
@@ -83,12 +86,13 @@ p_linebreaker = (p_comment >> return ())
 
 p_object :: Int -> Parser PYaml 
 p_object n = do 
-    kvlst <- content `sepBy` (p_linebreaker >> spaces n)
-    if (not.null) kvlst 
-      then return (PYObject kvlst) 
-      else PYText <$> p_ptext
-
-
+    try (PYList <$> p_list (p_text [',',']']))
+    <|> do 
+      kvlst <- content `sepBy` 
+                 (takeTill (/= ' ')>> p_linebreaker >> spaces n)
+      if (not.null) kvlst 
+        then return (PYObject kvlst) 
+        else PYText <$> p_ptext
   where 
     content = p_keyvalue p_object
     spaces x = replicateM x (char ' ')
@@ -99,6 +103,4 @@ test :: FilePath -> IO ()
 test fp = do    
     txt <- TIO.readFile fp 
     print (parseOnly (p_indent >>= p_object) txt)
-    let content = p_keyvalue (const (p_text ['\n','#']))
 
-    print (parseOnly (replicateM 4 (char ' ') *> content) txt) 
