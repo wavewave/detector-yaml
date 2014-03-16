@@ -12,7 +12,7 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 --
 import Prelude hiding (takeWhile,dropWhile)
-import Debug.Trace
+-- import Debug.Trace
 
 -- | parsed yaml 
 data PYaml = PYObject [ (T.Text, PYaml) ]
@@ -48,7 +48,7 @@ p_textNoComment delim =
 p_sepBy1CommentAndIndent :: Int -> Parser a -> Parser [a]
 p_sepBy1CommentAndIndent n p = p `sepBy1` p_sep
   where spaces x = replicateM x (char ' ')
-        p_sep = takeTill (/= ' ')>> p_linebreaker >> spaces n
+        p_sep = many1 p_emptyline >> spaces n
 
 -- | parser for a list with [ ] flow mode
 p_list :: Parser a -> Parser [a]
@@ -81,8 +81,7 @@ p_key = do
     c1 <- satisfy (notInClass [ ' ', '#', '\n', '-' ])
     txt' <- takeTill (`elem` [':','\n','#'])
     let txt = c1 `T.cons` txt' 
-    trace (show txt) $ 
-      return (T.length txt, T.strip txt) 
+    return (T.length txt, T.strip txt) 
 
 -- | primary text
 p_ptext :: Parser T.Text
@@ -97,6 +96,10 @@ p_linebreaker :: Parser ()
 p_linebreaker = (p_comment >> return ()) 
                 <|> (char '\n' >> return ())
 
+-- | empty line
+p_emptyline :: Parser ()
+p_emptyline = takeTill (/= ' ')>> p_linebreaker
+
 -- | generic parsed yaml object
 p_object :: Int -> Parser PYaml 
 p_object n = do 
@@ -108,9 +111,13 @@ p_object n = do
   where 
     content = p_keyvalue p_object
 
+p_yaml :: Parser PYaml
+p_yaml = do
+  many p_emptyline >> p_indent >>= p_object
+
 -- | testing with a given file
 test :: FilePath -> IO ()
 test fp = do    
     txt <- TIO.readFile fp 
-    print (parseOnly (p_indent >>= p_object) txt)
+    print (parseOnly p_yaml txt)
 
