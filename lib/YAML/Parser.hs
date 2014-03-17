@@ -17,7 +17,7 @@ import Prelude hiding (takeWhile,dropWhile)
 -- | parsed yaml 
 data PYaml = PYObject [ (T.Text, PYaml) ]
            | PYText T.Text
-           | PYList [T.Text]
+           | PYList [PYaml]
            deriving (Show, Eq)
 
 -- | generic text parser with designated delimiters
@@ -53,7 +53,9 @@ p_sepBy1CommentAndIndent n p = p `sepBy1` p_sep
 -- | parser for a list with [ ] flow mode
 p_list :: Parser a -> Parser [a]
 p_list p = char '[' 
-           *> (p `sepBy1` (char ','))
+           *> skipSpace
+           *> (p `sepBy1` (skipSpace >> char ',' >> skipSpace))
+           <* skipSpace
            <* char ']'
 
 -- | list with flow with indentation and - 
@@ -118,12 +120,12 @@ p_emptyline = takeTill (/= ' ')>> p_linebreaker
 -- | generic parsed yaml object
 p_object :: Int -> Parser PYaml 
 p_object n = do 
-    try (PYList <$> p_list (p_text [',',']']))
-    <|> try (PYList <$> p_itemlist n (p_text ['\n','#']))
+    try (PYList <$> p_list (p_object n))
+    <|> try (PYList <$> p_itemlist n (p_object n))
     <|> try (do kvlst <- p_sepBy1CommentAndIndent n content 
                 return (PYObject kvlst))
     <|> try (PYText <$> p_literalblock)
-    <|> PYText <$> (p_ptext [':','#','\n'])
+    <|> PYText <$> (p_ptext [':','#','\n',',','[',']'])
   where 
     content = p_keyvalue p_object
 
@@ -136,4 +138,15 @@ test :: FilePath -> IO ()
 test fp = do    
     txt <- TIO.readFile fp 
     print (parseOnly p_yaml txt)
-
+{-
+    let tester = char '[' 
+                 *> skipSpace
+                 *> ( char '[' 
+                      *> skipSpace
+                      *> p_object 0 `sepBy1` char ',' 
+                      <* char ']'
+                    ) `sepBy1` (char ',' >> skipSpace)
+        tester2 = p_list (p_object 0)
+    print (parseOnly  tester txt)
+    print (parseOnly  tester2 txt)
+-}
