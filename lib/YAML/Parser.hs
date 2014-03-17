@@ -17,6 +17,7 @@ import Prelude hiding (takeWhile,dropWhile)
 -- | parsed yaml 
 data PYaml = PYObject [ (T.Text, PYaml) ]
            | PYText T.Text
+           | PYNumber Double
            | PYList [PYaml]
            deriving (Show, Eq)
 
@@ -76,6 +77,13 @@ p_literalblock = do
   where spaces x = replicateM x (char ' ')
         p_sep n = char '\n' >> spaces n
 
+-- | number 
+p_number :: Parser PYaml
+p_number = do 
+    -- xs <- many1 (satisfy (`elem` "0123456789e+-."))
+    -- return (T.pack xs)
+    PYNumber <$> double
+
 -- | indentation-aware key value pair parser
 p_keyvalue :: (Int -> Parser b) 
            -> Parser (T.Text,b)
@@ -125,6 +133,7 @@ p_object n = do
     <|> try (do kvlst <- p_sepBy1CommentAndIndent n content 
                 return (PYObject kvlst))
     <|> try (PYText <$> p_literalblock)
+    <|> try p_number
     <|> PYText <$> (p_ptext [':','#','\n',',','[',']'])
   where 
     content = p_keyvalue p_object
