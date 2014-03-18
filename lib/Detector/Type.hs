@@ -5,11 +5,15 @@ module Detector.Type where
 
 import Data.Monoid ((<>))
 import Data.Scientific
-import Data.Text.Lazy (Text)
+import Data.Text (Text)
+import qualified Data.Text.Lazy as L
 -- 
 import YAML.Builder
 -- 
 import Prelude hiding (lines)
+
+class Nameable a where
+  name :: a -> Text
 
 data DetectorDescription = 
   DetectorDescription { detectorName :: Text
@@ -19,11 +23,13 @@ data DetectorDescription =
                       , detectorValidationInfo :: Text 
                       , detectorObject :: ObjectDescription
                       }
+  deriving (Show)
 
 instance Nameable DetectorDescription where
   name = detectorName  
 
 data Import = Import { fileName :: Text }
+            deriving (Show)
 
 data ObjectDescription = 
   ObjectDescription { electron :: Either Import ElectronEffData 
@@ -35,15 +41,19 @@ data ObjectDescription =
                     , track :: Maybe (Either Import TrackEffData)
                     , ptThresholds :: Either Import PTThresholds }
 
+  deriving (Show)
 
 data MetaInfo = MetaInfo { tag :: Text
                          , description :: Text
                          , comment :: Text 
                          , reference :: Text } 
 
+  deriving (Show)
+
 data Grid = GridFull { gridData :: [ [ Scientific ] ] 
                                   }
           | GridConst { gridConst :: Scientific } 
+          deriving (Show)
 
 data PTEtaData = PTEtaGrid 
                    { ptBins :: [Scientific]
@@ -53,12 +63,14 @@ data PTEtaData = PTEtaGrid
                | PTEtaInterpolation
                    { interpolationFunction :: Text
                    }
+               deriving (Show)
 			  
 data ElectronEffData = ElectronEffData
                             { eleName :: Text
                             , eleMetaInfo :: MetaInfo 
                             , eleEfficiency :: PTEtaData
                             }
+                     deriving (Show)
 
 instance Nameable ElectronEffData where
   name = eleName
@@ -67,6 +79,7 @@ data PhotonEffData = PhotonEffData
                           { phoName :: Text
                           , phoMetaInfo :: MetaInfo
                           , phoEfficiency :: PTEtaData }
+                   deriving (Show)
 
 instance Nameable PhotonEffData where
   name = phoName
@@ -77,6 +90,7 @@ data BJetEffData = BJetEffData
                      , bJetEfficiency :: PTEtaData
                      , bJetRejection :: PTEtaData
                      } 
+                 deriving (Show)
 
 instance Nameable BJetEffData where
   name = bJetName
@@ -85,6 +99,7 @@ data MuonEffData = MuonEffData
                      { muonName :: Text
                      , muonMetaInfo :: MetaInfo
                      , muonEfficiency :: PTEtaData }
+                 deriving (Show)
 
 instance Nameable MuonEffData where
   name = muonName
@@ -93,6 +108,7 @@ data JetEffData = JetEffData
                        { jetName :: Text 
                        , jetMetaInfo :: MetaInfo 
                        , jetEfficiency :: PTEtaData }
+                deriving (Show)
 
 instance Nameable JetEffData where
   name = jetName
@@ -103,6 +119,7 @@ data TauEffData = TauEffData
                     , tauTagMethod :: Text
                     , tauEfficiency :: TauEffDetail
                     } 
+                deriving (Show)
 
 data TauEffDetail = Tau1or3Prong
                       { tau1ProngEff :: PTEtaData
@@ -114,8 +131,7 @@ data TauEffDetail = Tau1or3Prong
                       { tauCombEff :: PTEtaData
                       , tauCombRej :: PTEtaData
                       } 
-
-
+                  deriving (Show)
 
 instance Nameable TauEffData where
   name = tauName
@@ -130,15 +146,16 @@ data PTThresholds = PTThresholds
                       , trkPTMin :: Scientific
                       , tauPTMin :: Scientific
                       }
+                  deriving (Show)
 
 instance Nameable PTThresholds where
   name = pTThreName 
-
 
 data TrackEffData = TrackEffData 
                        { trackName :: Text 
                        , trackMetaInfo :: MetaInfo 
                        , trackEfficiency :: PTEtaData }
+                  deriving (Show)
 
 instance Nameable TrackEffData where
   name = trackName 
@@ -154,9 +171,7 @@ mkImport :: Int -> Import -> YamlValue
 mkImport n Import {..} = 
   YObject $ [ ("Import", mkString (n+defIndent) fileName) ] 
 
- 
-
-mkMetaInfoPairs :: Int -> MetaInfo -> [ (Text, YamlValue) ]
+mkMetaInfoPairs :: Int -> MetaInfo -> [ (L.Text, YamlValue) ]
 mkMetaInfoPairs n MetaInfo {..} = 
   [ ("Tag" , mkString n tag)
   , ("Description", mkString n description) 

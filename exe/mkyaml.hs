@@ -1,14 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ExistentialQuantification #-}
 
-
-import qualified Data.Text.Lazy as T
+import qualified Data.Text as ST
+-- import qualified Data.Text.Lazy as T
 import           Data.Text.Lazy.Builder 
 import qualified Data.Text.Lazy.IO as TIO
 import           System.FilePath
 --
 import ATLAS
 import CMS
+import Detector.Type
 import YAML.Builder
 
 data YamlBox = forall a. (MakeYaml a, Nameable a) => MkYamlBox a 
@@ -16,7 +17,7 @@ data YamlBox = forall a. (MakeYaml a, Nameable a) => MkYamlBox a
 main :: IO ()
 main = do 
   let f (MkYamlBox x) = 
-       TIO.writeFile (T.unpack (name x) <.> "yaml") $ toLazyText (buildYaml 0 (makeYaml 0 x))
+       TIO.writeFile (ST.unpack (name x) <.> "yaml") $ toLazyText (buildYaml 0 (makeYaml 0 x))
   
   mapM_ f [ MkYamlBox atlas2011
           , MkYamlBox atlasEleDataTight

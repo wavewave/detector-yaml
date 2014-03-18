@@ -6,7 +6,7 @@ module YAML.Parser where
 import Control.Applicative 
 import Control.Monad (replicateM)
 import Data.Attoparsec.Combinator
-import Data.Attoparsec.Text 
+import Data.Attoparsec.Text
 import Data.Monoid
 import qualified Data.Text as T
 --
@@ -90,7 +90,7 @@ p_keyvalue :: (Int -> Parser b)
 p_keyvalue pv = do 
     (n1,k) <- p_key 
     char ':' 
-    spcs <- Data.Attoparsec.Text.takeWhile (== ' ')
+    spcs <- takeWhile (== ' ')
     v <- (try (char '\n' *> (p_indent >>= pv)))
           <|> (let n2 = T.length spcs + 1
                in pv (n1 + n2))

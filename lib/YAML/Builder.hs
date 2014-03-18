@@ -8,10 +8,8 @@ import           Data.Monoid ((<>), mconcat, mempty)
 import           Data.Scientific
 import qualified Data.String as S (IsString(..), fromString)
 import qualified Data.Text.Lazy as T
+import qualified Data.Text as ST
 import           Data.Text.Lazy.Builder 
-
-class Nameable a where
-  name :: a -> T.Text
 
 data ListStyle = Inline | Wrapped 
 
@@ -111,10 +109,12 @@ mkWrap = YLArray Wrapped
 makeLiteralBlock :: Int -> T.Text -> YamlPrimValue
 makeLiteralBlock n txt = YLiteralBlock n (T.lines txt)
 
-mkString :: Int -> T.Text -> YamlValue
-mkString n txt = 
-  if length (T.lines txt) <= 1 
-    then if T.any (`elem` [':',',']) txt
-           then (YPrim . YString DoubleQuote) txt
-           else (YPrim . YString Plain) txt
-    else (YPrim . makeLiteralBlock n) txt
+mkString :: Int -> ST.Text -> YamlValue
+mkString n stxt = 
+  let txt = T.fromChunks [stxt]
+      len = (length . ST.lines) stxt 
+  in if len <= 1 
+       then if T.any (`elem` [':',',']) txt
+              then (YPrim . YString DoubleQuote) txt
+              else (YPrim . YString Plain) txt
+       else (YPrim . makeLiteralBlock n) txt

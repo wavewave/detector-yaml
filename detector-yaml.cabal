@@ -48,6 +48,7 @@ Library
   Exposed-Modules: 
                    ATLAS
                    CMS
+                   Detector.Parser
                    Detector.Type
                    YAML.Builder
                    YAML.Parser
