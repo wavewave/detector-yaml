@@ -9,7 +9,6 @@ import Data.Attoparsec.Combinator
 import Data.Attoparsec.Text 
 import Data.Monoid
 import qualified Data.Text as T
-import qualified Data.Text.IO as TIO
 --
 import Prelude hiding (takeWhile,dropWhile)
 -- import Debug.Trace
@@ -142,8 +141,3 @@ p_yaml :: Parser PYaml
 p_yaml = do
   many p_emptyline >> p_indent >>= p_object
 
--- | testing with a given file
-test :: FilePath -> IO ()
-test fp = do    
-    txt <- TIO.readFile fp 
-    print (parseOnly p_yaml txt)

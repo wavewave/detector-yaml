@@ -6,6 +6,7 @@ module Detector.Type where
 import Data.Monoid ((<>))
 import Data.Scientific
 import Data.Text.Lazy (Text, lines)
+-- 
 import YAML.Builder
 -- 
 import Prelude hiding (lines)

@@ -29,6 +29,7 @@ Executable parseyaml
   Build-Depends: 
                    base>4, 
                    text, 
+                   attoparsec,
                    detector-yaml
 
 
