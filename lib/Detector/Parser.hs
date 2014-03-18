@@ -15,7 +15,7 @@ import           Detector.Type
 -- 
 import           YAML.Parser
 -- 
-import           Debug.Trace
+-- import           Debug.Trace
 
 
 find :: T.Text -> [(T.Text,PYaml)] -> Maybe PYaml
@@ -74,12 +74,13 @@ getObjectDescription kvlst = do
             f = const undefined  
             -- (e,p,b,m,j,_pt) = 
         e <- importOrDeal getElectronEffData eleObj
-        p <-  importOrDeal f phoObj
-        b <-  importOrDeal f bjetObj
-        m <- importOrDeal f muObj
-        j <- importOrDeal f jetObj
-        -- _pt <- importOrDeal f ptThre 
+        p <-  importOrDeal getPhotonEffData phoObj
+        b <-  importOrDeal getBJetEffData bjetObj
+        m <- importOrDeal getMuonEffData muObj
+        j <- importOrDeal getJetEffData jetObj
         ta <- importOrDeal getTauEffData tauObj
+        let tk = (importOrDeal getTrackEffData <=< maybeObject <=< find "Track") kvlst -- <- -- importOrDeal f trkObj
+        pt <- importOrDeal getPTThresholds ptThre 
         return ObjectDescription
                { electron = e -- Left (Import "xx")
                , photon =  p --  Left (Import "xx")
@@ -87,8 +88,8 @@ getObjectDescription kvlst = do
                , muon = m -- Left (Import "xx") 
                , jet =  j -- Left (Import "xx")
                , tau = ta --Left (Import "xx")
-               , track = Nothing
-               , ptThresholds = Left (Import "xx") 
+               , track = tk
+               , ptThresholds = pt -- Left (Import "xx") 
                }
       _ -> Nothing
     
@@ -149,6 +150,44 @@ getElectronEffData kvlst = do
     eff <- getPTEtaData effkvlst
     return (ElectronEffData nm meta eff)
       
+-- | 
+getPhotonEffData :: [ (T.Text,PYaml) ] -> Maybe PhotonEffData
+getPhotonEffData kvlst = do 
+    nm <- (maybeText <=< find "Name") kvlst
+    meta <- getMetaInfo kvlst
+    effkvlst <- (maybeObject <=< find "Efficiency") kvlst
+    eff <- getPTEtaData effkvlst
+    return (PhotonEffData nm meta eff)
+
+-- | 
+getBJetEffData :: [ (T.Text,PYaml) ] -> Maybe BJetEffData
+getBJetEffData kvlst = do
+    nm <- (maybeText <=< find "Name") kvlst
+    meta <- getMetaInfo kvlst
+    effkvlst <- (maybeObject <=< find "Efficiency") kvlst
+    eff <- getPTEtaData effkvlst
+    rejkvlst <- (maybeObject <=< find "Rejection") kvlst
+    rej <- getPTEtaData rejkvlst
+    return (BJetEffData nm meta eff rej)
+
+-- | 
+getMuonEffData :: [ (T.Text,PYaml) ] -> Maybe MuonEffData
+getMuonEffData kvlst = do
+    nm <- (maybeText <=< find "Name") kvlst
+    meta <- getMetaInfo kvlst
+    effkvlst <- (maybeObject <=< find "Efficiency") kvlst
+    eff <- getPTEtaData effkvlst
+    return (MuonEffData nm meta eff)
+  
+-- | 
+getJetEffData :: [ (T.Text,PYaml) ] -> Maybe JetEffData
+getJetEffData kvlst = do
+    nm <- (maybeText <=< find "Name") kvlst
+    meta <- getMetaInfo kvlst
+    effkvlst <- (maybeObject <=< find "Efficiency") kvlst
+    eff <- getPTEtaData effkvlst
+    return (JetEffData nm meta eff)
+
 -- |
 getTauEffData :: [(T.Text,PYaml)] -> Maybe TauEffData
 getTauEffData kvlst = do 
@@ -162,5 +201,29 @@ getTauEffData kvlst = do
            , tauEfficiency = undefined
            }
 
-    
+-- | 
+getTrackEffData :: [ (T.Text,PYaml) ] -> Maybe TrackEffData
+getTrackEffData kvlst = do
+    nm <- (maybeText <=< find "Name") kvlst
+    meta <- getMetaInfo kvlst
+    effkvlst <- (maybeObject <=< find "Efficiency") kvlst
+    eff <- getPTEtaData effkvlst
+    return (TrackEffData nm meta eff)
+
+
+-- |
+getPTThresholds :: [(T.Text,PYaml)] -> Maybe PTThresholds
+getPTThresholds kvlst = do
+    nm <- (maybeText <=< find "Name") kvlst
+    xs <- mapM (maybeNum <=< flip find kvlst) 
+            [ "MuPTMIN", "ElePTMIN", "PhoPTMIN", "JetPTMIN"
+            , "BJetPTMIN", "TrkPTMIN", "TauPTMIN" ] 
+    case xs of 
+      [ m, e, p, j, b, tr, ta ] ->
+        return PTThresholds 
+               { pTThreName = nm, muPTMin = m, elePTMin = e, phoPTMin = p
+               , jetPTMin = j, bJetPTMin = b, trkPTMin = tr, tauPTMin = ta } 
+      _ -> Nothing
+
+
 -- efficiency

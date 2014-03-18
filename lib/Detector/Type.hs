@@ -270,8 +270,9 @@ instance MakeYaml TauEffDetail where
               ]
      
 instance MakeYaml PTThresholds where
-  makeYaml _n PTThresholds {..} = 
-    YObject $ [ ( "MuPTMIN", (YPrim . YNumber) muPTMin )  
+  makeYaml n PTThresholds {..} = 
+    YObject $ [ ( "Name", mkString (n+defIndent) pTThreName)
+              , ( "MuPTMIN", (YPrim . YNumber) muPTMin )  
               , ( "ElePTMIN", (YPrim . YNumber) elePTMin )
               , ( "PhoPTMIN", (YPrim . YNumber) phoPTMin )
               , ( "JetPTMIN", (YPrim . YNumber) jetPTMin )

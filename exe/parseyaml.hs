@@ -24,8 +24,7 @@ main = do
   case r of 
     Left err -> print err
     Right (PYObject kvlst) -> do  
-      print kvlst
+      -- print kvlst
       print (getDetectorDescription kvlst)
- 
     Right _ -> putStrLn "not an object"
 
