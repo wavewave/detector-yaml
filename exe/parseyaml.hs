@@ -3,12 +3,13 @@
 module Main where
 
 -- import Control.Monad ((<=<))
-import Data.Attoparsec.Text
+import           Data.Attoparsec.Text
 import qualified Data.Text.IO as TIO
+import           System.Environment 
 -- 
-import Detector.Parser
-import YAML.Parser
-import System.Environment 
+import           Detector.Parser
+import           Test
+import           YAML.Parser
 
 -- | testing with a given file
 parseFile :: FilePath -> IO (Either String PYaml)
@@ -28,3 +29,4 @@ main = do
       print (getDetectorDescription kvlst)
     Right _ -> putStrLn "not an object"
 
+  c_testffi

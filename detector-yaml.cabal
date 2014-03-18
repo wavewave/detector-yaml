@@ -9,6 +9,11 @@ Maintainer: 	Ian-Woo Kim <ianwookim@gmail.com>
 Build-Type: 	Simple
 Cabal-Version:  >= 1.8
 data-files:     
+Extra-source-files: csrc/testffi.h
+                    csrc/testffi.cpp
+
+--                     csrc/testffi.c
+                    
 
 Executable mkyaml
   Main-is: mkyaml.hs
@@ -52,4 +57,14 @@ Library
                    Detector.Type
                    YAML.Builder
                    YAML.Parser
+                   Test
 
+  include-dirs:      csrc
+  C-sources:         csrc/testffi.cpp
+
+  install-includes:  testffi.h
+
+  extra-libraries:   stdc++
+  extra-lib-dirs:    /afs/cern.ch/work/i/ikim/public/nix/store/9bs7d2bpi5vrhpr6cdv3w0sn9v4lqrh9-gcc-4.8.2/lib64
+  -- yaml-cpp
+  -- pkgconfig-depends: yaml-cpp
