@@ -5,8 +5,8 @@
 
 module Detector.Parser where
 
-import           Control.Applicative ((<$>),(<*>))
-import           Control.Monad ((<=<), liftM)
+import           Control.Applicative ((<$>))
+import           Control.Monad ((<=<))
 import qualified Data.List as L
 import           Data.Scientific
 import qualified Data.Text as T
@@ -71,26 +71,17 @@ getObjectDescription kvlst = do
       [ eleObj, phoObj, bjetObj, muObj, jetObj, tauObj, ptThre ] -> do
         let importOrDeal :: ([(T.Text, PYaml)] -> Maybe a) -> [(T.Text, PYaml)] -> Maybe (Either Import a) 
             importOrDeal func = (either (Just . Left) (fmap Right . func) . getEitherImportOrObj) 
-            f = const undefined  
-            -- (e,p,b,m,j,_pt) = 
         e <- importOrDeal getElectronEffData eleObj
         p <-  importOrDeal getPhotonEffData phoObj
         b <-  importOrDeal getBJetEffData bjetObj
         m <- importOrDeal getMuonEffData muObj
         j <- importOrDeal getJetEffData jetObj
         ta <- importOrDeal getTauEffData tauObj
-        let tk = (importOrDeal getTrackEffData <=< maybeObject <=< find "Track") kvlst -- <- -- importOrDeal f trkObj
+        let tk = (importOrDeal getTrackEffData <=< maybeObject <=< find "Track") kvlst
         pt <- importOrDeal getPTThresholds ptThre 
         return ObjectDescription
-               { electron = e -- Left (Import "xx")
-               , photon =  p --  Left (Import "xx")
-               , bJet = b -- Left (Import "xx")
-               , muon = m -- Left (Import "xx") 
-               , jet =  j -- Left (Import "xx")
-               , tau = ta --Left (Import "xx")
-               , track = tk
-               , ptThresholds = pt -- Left (Import "xx") 
-               }
+               { electron = e, photon = p, bJet = b, muon = m
+               , jet = j, tau = ta, track = tk, ptThresholds = pt }
       _ -> Nothing
     
 -- |
@@ -225,5 +216,3 @@ getPTThresholds kvlst = do
                , jetPTMin = j, bJetPTMin = b, trkPTMin = tr, tauPTMin = ta } 
       _ -> Nothing
 
-
--- efficiency

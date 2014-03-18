@@ -22,7 +22,7 @@ cms2011Object = ObjectDescription
   , muon         = Left (Import "Muon_S_CMS")
   , jet          = Left (Import "Jet_PF_CMS")
   , tau          = Left (Import "Tau_TaNCL_CMS")
-  , track        = Just (Right cmsTrack)  -- Just (Left (Import "Track_CMS"))
+  , track        = Just (Right cmsTrack)
   , ptThresholds = Right cmsPTThresholds 
   }
 

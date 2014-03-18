@@ -35,7 +35,7 @@ Executable parseyaml
 
 Library
   hs-source-dirs: lib
-  ghc-options: 	-Wall -funbox-strict-fields -fno-warn-unused-do-bind -fno-warn-orphans
+  ghc-options: 	-Wall -Werror -funbox-strict-fields -fno-warn-unused-do-bind -fno-warn-orphans
   ghc-prof-options: -caf-all -auto-all
   Build-Depends: 
                    base>4, 
