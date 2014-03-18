@@ -5,7 +5,7 @@ module Detector.Type where
 
 import Data.Monoid ((<>))
 import Data.Scientific
-import Data.Text.Lazy (Text, lines)
+import Data.Text.Lazy (Text)
 -- 
 import YAML.Builder
 -- 
@@ -154,11 +154,6 @@ mkImport :: Int -> Import -> YamlValue
 mkImport n Import {..} = 
   YObject $ [ ("Import", mkString (n+defIndent) fileName) ] 
 
-mkString :: Int -> Text -> YamlValue
-mkString n txt = 
-  if length (lines txt) <= 1 
-    then (YPrim . YString) txt
-    else (YPrim . makeLiteralBlock n) txt
  
 
 mkMetaInfoPairs :: Int -> MetaInfo -> [ (Text, YamlValue) ]

@@ -25,6 +25,10 @@ p_text :: [Char] -> Parser T.Text
 p_text delim = 
     T.strip <$> takeTill (\x -> x `elem` delim) 
 
+-- | double-quoted text parser (not correctly implemented)
+p_doubleQuoteText :: Parser T.Text
+p_doubleQuoteText = char '"' *> takeTill (== '"') <* char '"'
+   
 -- | detect indentation
 p_indent :: Parser Int 
 p_indent = T.length <$> takeWhile (== ' ') 
@@ -77,11 +81,8 @@ p_literalblock = do
         p_sep n = char '\n' >> spaces n
 
 -- | number 
-p_number :: Parser PYaml
-p_number = do 
-    -- xs <- many1 (satisfy (`elem` "0123456789e+-."))
-    -- return (T.pack xs)
-    PYNumber <$> double
+-- p_number :: Parser PYaml
+-- p_number = PYNumber <$> double
 
 -- | indentation-aware key value pair parser
 p_keyvalue :: (Int -> Parser b) 
@@ -129,10 +130,11 @@ p_object :: Int -> Parser PYaml
 p_object n = do 
     try (PYList <$> p_list (p_object n))
     <|> try (PYList <$> p_itemlist n (p_object n))
+    <|> try (PYText <$> p_literalblock)
+    <|> try (PYNumber <$> double)
+    <|> try (PYText <$> p_doubleQuoteText)
     <|> try (do kvlst <- p_sepBy1CommentAndIndent n content 
                 return (PYObject kvlst))
-    <|> try (PYText <$> p_literalblock)
-    <|> try p_number
     <|> PYText <$> (p_ptext [':','#','\n',',','[',']'])
   where 
     content = p_keyvalue p_object

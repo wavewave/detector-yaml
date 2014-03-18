@@ -15,6 +15,8 @@ class Nameable a where
 
 data ListStyle = Inline | Wrapped 
 
+data StringStyle = Plain | DoubleQuote
+
 data YamlValue = YObject [(T.Text, YamlValue)]
                | YLArray ListStyle [YamlValue]
                | YIArray [YamlValue]
@@ -22,7 +24,7 @@ data YamlValue = YObject [(T.Text, YamlValue)]
 
 data YamlPrimValue = YNumber Scientific
                    | YInteger Int 
-                   | YString T.Text
+                   | YString StringStyle T.Text
                    | YLiteralBlock Int [T.Text]
                    | YBool Bool 
                    | YNull 
@@ -39,7 +41,8 @@ newLine :: Builder
 newLine = fromLazyText "\n"
 
 instance S.IsString YamlPrimValue where
-  fromString str = YString (T.pack str) 
+  fromString str = let b = any (`elem` [ ',', ':' ]) str
+                   in if b then YString DoubleQuote (T.pack str) else YString Plain (T.pack str) 
 
 instance S.IsString YamlValue where
   fromString = YPrim . S.fromString
@@ -75,12 +78,12 @@ buildList Wrapped n xs = newLine <> makeIndent n
                             . intersperse (newLine <> makeIndent n <> fromLazyText ", ")
                             . map (buildYaml n)) xs 
                          <> fromLazyText " ]"
-                         -- <> makeIndent n <> fromLazyText "] "
 
 buildPrim :: YamlPrimValue -> Builder
 buildPrim (YNumber s) = scientificBuilder s 
 buildPrim (YInteger s) = (fromLazyText . T.pack . show) s
-buildPrim (YString txt) = fromLazyText txt
+buildPrim (YString Plain txt) = fromLazyText txt
+buildPrim (YString DoubleQuote txt) = fromLazyText "\"" <> fromLazyText txt <> fromLazyText "\""
 buildPrim (YLiteralBlock n txts) = 
     (fromLazyText "|\n") 
     <> ( F.fold 
@@ -108,3 +111,10 @@ mkWrap = YLArray Wrapped
 makeLiteralBlock :: Int -> T.Text -> YamlPrimValue
 makeLiteralBlock n txt = YLiteralBlock n (T.lines txt)
 
+mkString :: Int -> T.Text -> YamlValue
+mkString n txt = 
+  if length (T.lines txt) <= 1 
+    then if T.any (`elem` [':',',']) txt
+           then (YPrim . YString DoubleQuote) txt
+           else (YPrim . YString Plain) txt
+    else (YPrim . makeLiteralBlock n) txt
