@@ -3,7 +3,7 @@
 
 module ATLAS where
 
-import Detector
+import Detector.Type
 
 atlas2011 :: DetectorDescription
 atlas2011 = DetectorDescription 

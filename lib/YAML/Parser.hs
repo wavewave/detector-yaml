@@ -147,15 +147,3 @@ test :: FilePath -> IO ()
 test fp = do    
     txt <- TIO.readFile fp 
     print (parseOnly p_yaml txt)
-{-
-    let tester = char '[' 
-                 *> skipSpace
-                 *> ( char '[' 
-                      *> skipSpace
-                      *> p_object 0 `sepBy1` char ',' 
-                      <* char ']'
-                    ) `sepBy1` (char ',' >> skipSpace)
-        tester2 = p_list (p_object 0)
-    print (parseOnly  tester txt)
-    print (parseOnly  tester2 txt)
--}

@@ -3,7 +3,7 @@
 
 module CMS where
 
-import Detector
+import Detector.Type
 
 cms2011 :: DetectorDescription
 cms2011 = DetectorDescription 

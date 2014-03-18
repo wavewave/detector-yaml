@@ -9,7 +9,6 @@ import           System.FilePath
 --
 import ATLAS
 import CMS
--- import Detector
 import YAML.Builder
 
 data YamlBox = forall a. (MakeYaml a, Nameable a) => MkYamlBox a 

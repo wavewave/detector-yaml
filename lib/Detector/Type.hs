@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Detector where
+module Detector.Type where
 
 import Data.Monoid ((<>))
 import Data.Scientific
