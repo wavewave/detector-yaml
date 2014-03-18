@@ -31,6 +31,7 @@ instance Nameable DetectorDescription where
 data Import = Import { fileName :: Text }
             deriving (Show)
 
+
 data ObjectDescription = 
   ObjectDescription { electron :: Either Import ElectronEffData 
                     , photon :: Either Import PhotonEffData 
@@ -48,29 +49,34 @@ data MetaInfo = MetaInfo { tag :: Text
                          , comment :: Text 
                          , reference :: Text } 
 
-  deriving (Show)
+              deriving (Show)
+
 
 data Grid = GridFull { gridData :: [ [ Scientific ] ] 
                                   }
           | GridConst { gridConst :: Scientific } 
           deriving (Show)
 
+-- instance Show Grid where show _ = "Grid"
+
 data PTEtaData = PTEtaGrid 
                    { ptBins :: [Scientific]
                    , etaBins :: [Scientific]
                    , grid :: Grid
                    } 
-               | PTEtaInterpolation
+                | PTEtaInterpolation
                    { interpolationFunction :: Text
                    }
                deriving (Show)
-			  
+
 data ElectronEffData = ElectronEffData
                             { eleName :: Text
                             , eleMetaInfo :: MetaInfo 
                             , eleEfficiency :: PTEtaData
                             }
-                     deriving (Show)
+                      deriving (Show)
+-- instance Show ElectronEffData where show _ = "ElectronEffData"
+
 
 instance Nameable ElectronEffData where
   name = eleName
@@ -131,7 +137,8 @@ data TauEffDetail = Tau1or3Prong
                       { tauCombEff :: PTEtaData
                       , tauCombRej :: PTEtaData
                       } 
-                  deriving (Show)
+--                  deriving (Show)
+instance Show TauEffDetail where show _ = "TauEffDetail"
 
 instance Nameable TauEffData where
   name = tauName

@@ -24,16 +24,8 @@ main = do
   case r of 
     Left err -> print err
     Right (PYObject kvlst) -> do  
+      print kvlst
       print (getDetectorDescription kvlst)
-  
-
-
-
- -- "Name") kvlst
- --            desc <- (maybeText <=< find "Description") kvlst
- --            ref <- (maybeText <=< find "Reference") kvlst
- --            return (name,desc,ref)
  
-
     Right _ -> putStrLn "not an object"
 

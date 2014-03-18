@@ -16,7 +16,7 @@ atlas2011 = DetectorDescription
 
 atlas2011Object :: ObjectDescription
 atlas2011Object = ObjectDescription 
-  { electron = Left (Import "Electron_Loose_ATLAS")
+  { electron = Right atlasEleDataTight -- Left (Import "Electron_Loose_ATLAS")
   , photon = Left (Import "Photon_Tight_ATLAS")
   , bJet = Left (Import "BJet_JP50_ATLAS")
   , muon = Left (Import "Muon_CB1_ATLAS")

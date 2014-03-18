@@ -65,7 +65,7 @@ p_list p = char '['
 -- | list with flow with indentation and - 
 p_itemlist :: Int -> Parser a -> Parser [a]
 p_itemlist n p = p_sepBy1CommentAndIndent n line
-  where line = char '-' *> skipSpace *> p  
+  where line = string "- " *> skipSpace *> p  
 
 
 -- | literal block
