@@ -64,7 +64,6 @@ Library
 
   install-includes:  testffi.h
 
-  extra-libraries:   stdc++
-  extra-lib-dirs:    /afs/cern.ch/work/i/ikim/public/nix/store/9bs7d2bpi5vrhpr6cdv3w0sn9v4lqrh9-gcc-4.8.2/lib64
+  extra-libraries:   stdc++, yaml-cpp
   -- yaml-cpp
-  -- pkgconfig-depends: yaml-cpp
+  pkgconfig-depends: yaml-cpp
