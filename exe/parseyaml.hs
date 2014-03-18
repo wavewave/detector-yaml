@@ -8,7 +8,6 @@ import qualified Data.Text.IO as TIO
 import           System.Environment 
 -- 
 import           Detector.Parser
-import           Test
 import           YAML.Parser
 
 -- | testing with a given file
@@ -28,5 +27,3 @@ main = do
       -- print kvlst
       print (getDetectorDescription kvlst)
     Right _ -> putStrLn "not an object"
-
-  c_testffi

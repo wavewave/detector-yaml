@@ -37,6 +37,16 @@ Executable parseyaml
                    attoparsec,
                    detector-yaml
 
+Executable parsecpp
+  Main-is: parsecpp.hs
+  hs-source-dirs: exe
+  ghc-options: 	-Wall -Werror -O2 -threaded -funbox-strict-fields -fno-warn-unused-do-bind -rtsopts
+  ghc-prof-options: -caf-all -auto-all
+  Build-Depends: 
+                   base>4, 
+                   text, 
+                   attoparsec,
+                   detector-yaml
 
 Library
   hs-source-dirs: lib
