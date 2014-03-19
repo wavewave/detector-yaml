@@ -1,6 +1,9 @@
 #include <iostream>
 #include <fstream>
+#include <boost/optional/optional.hpp>
 #include "yaml-cpp/yaml.h"
+
+using namespace std;
 
 void yamlemittest( void ) {
     YAML::Emitter out;
@@ -9,10 +12,33 @@ void yamlemittest( void ) {
     std::cout << "Here's the output YAML:\n" << out.c_str(); // prints "Hello, World!"
 }
 
+boost::optional<string> maybeTextFind( string key, YAML::Node doc ) {
+  if( doc[key] ) {
+    try { 
+      string r = doc[key].as<string>(); 
+      return boost::optional<string>(r);
+    } catch(const YAML::Exception& e) {
+      return boost::optional<string>();
+    };
+  } 
+  else return boost::optional<string>();
+}
+
 void yamlparsetest( void ) {
-  std::ifstream input("test.yaml");  
+  std::ifstream input("temp/ATLAS2011.yaml");  
   YAML::Node doc = YAML::Load(input);
-  std::cout << doc << "\n";
+
+  boost::optional<string> s = maybeTextFind("Name", doc) ; 
+
+  if( s.is_initialized() ) {
+    string const* r = s.get_ptr(); 
+    cout << "Name is : " << (*r) << endl; 
+  }
+
+
+  // std::cout << doc << "\n";
+
+    
 
 
   /*  YAML::Parser parser(fin);
@@ -25,9 +51,6 @@ void yamlparsetest( void ) {
   */
   
 }
-
-
-using namespace std;
 
 
 #ifdef __cplusplus
