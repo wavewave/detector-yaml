@@ -61,35 +61,29 @@ boost::optional<object_description> getObjectDescription( YAML::Node node)
 boost::optional<detector_description> getDetectorDescription( YAML::Node doc ) 
 {
   detector_description dd; 
-  
-  //if ( !s1.is_initialized() ) return boost::optional<detector_description>();
 
-  if( boost::optional<string> s1 = maybeFind<string>("Name", doc) ) {  
-    if( boost::optional<string> s2 = maybeFind<string>("Description", doc) ) { 
-      if( boost::optional<string> s3 = maybeFind<string>("Reference", doc) ) {
-        if( boost::optional<string> s4 = maybeFind<string>("Comment", doc) ) {
-          if( boost::optional<string> s5 = maybeFind<string>("ValidationInfo", doc) ) {
-            if( boost::optional<YAML::Node> s6 = maybeFind<YAML::Node>("Object", doc) ) {
-              dd.name = s1.get();
-              dd.description =s2.get();
-	      dd.reference = s3.get(); 
-	      dd.comment = s4.get();
-	      dd.validation_info = *(s5.get_ptr());
+  boost::optional<string> s1,s2,s3,s4,s5; 
+  boost::optional<YAML::Node> s6;
+  boost::optional<object_description> mo1;
 
-	      YAML::Node n1 = *(s6.get_ptr());
-	      boost::optional<object_description> mo1 = getObjectDescription(n1); 
-	      if( !mo1.is_initialized() ) return boost::optional<detector_description>();
+  if( (s1 = maybeFind<string>("Name", doc))
+      && (s2 = maybeFind<string>("Description", doc)) 
+      && (s3 = maybeFind<string>("Reference", doc))
+      && (s4 = maybeFind<string>("Comment", doc))
+      && (s5 = maybeFind<string>("ValidationInfo", doc))
+      && (s6 = maybeFind<YAML::Node>("Object", doc)) 
+      && (mo1 = getObjectDescription(s6.get()))
 
-	      dd.object = *(mo1.get_ptr());
-
-	      return boost::optional<detector_description>(dd);
-	    }
-          }
-        }
-      }
-    }
+    ) 
+  {
+    dd.name = s1.get();
+    dd.description =s2.get();
+    dd.reference = s3.get(); 
+    dd.comment = s4.get();
+    dd.validation_info = s5.get();
+    dd.object = mo1.get();
+    return boost::optional<detector_description>(dd);
   }
-  
   return NULL;
 }
 
