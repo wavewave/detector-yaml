@@ -2,6 +2,7 @@
 #include <fstream>
 #include <boost/optional/optional.hpp>
 #include <boost/variant.hpp>
+#include <type_traits>
 #include <yaml-cpp/yaml.h>
 // 
 #include <detector/type.h>
@@ -241,6 +242,18 @@ boost::optional<detector_description_t> getDetectorDescription( YAML::Node doc )
   return NULL;
 }
 
+template <typename T> 
+void showname( T t ) 
+{ 
+  static_assert(std::is_base_of<INameable,T>::value, "T must be a descendent of INameable");
+  static_assert(std::is_base_of<IMetaInfoable,T>::value, "T must be a descendent of IMetaInfoable"); 
+  cout << "name is " << t.name() << endl;
+  cout << "description is " << t.meta_info().description << endl;
+
+}
+
+
+
 void yamlparsetest( void ) {
   std::ifstream input("temp/ATLAS2011.yaml");  
   YAML::Node doc = YAML::Load(input);
@@ -254,19 +267,28 @@ void yamlparsetest( void ) {
   cout << "Name is " << pdd.name << endl; 
   cout << "Description is "<< pdd.description << endl;
   cout << "Reference is " << pdd.reference << endl;
+
   either<import,electron_eff_data_t> e = pdd.object.electron; 
   if( boost::optional<import> t1 = e.getLeft() )
   { 
     cout << "Object.Electron.Import is " << t1.get().name << endl;
   }
+  else if( boost::optional<electron_eff_data_t> t2 = e.getRight() ) {
+    electron_eff_data_t t2v = t2.get();
+    electron_eff_data_wrapper t2w (t2v); 
+    showname<electron_eff_data_wrapper>( t2w );
+  } 
   else cout << "Object.Electron parse failed" << endl;
-    
 
   either<import,muon_eff_data_t> mu = pdd.object.muon; 
+  if( boost::optional<import> t1 = mu.getLeft() )
+  { 
+    cout << "Object.Muon.Import is " << t1.get().name << endl;
+  }
   if( boost::optional<muon_eff_data_t> t2 = mu.getRight() )
   { 
-    cout << "Object.Muon.Eff_data is " << t2.get().name << endl;
-    cout << "Object.Muon.EffData.Description " << t2.get().meta_info.description << endl;
+    muon_eff_data_wrapper t2w(t2.get()); 
+    showname<muon_eff_data_wrapper>( t2w ); 
   }
   else cout << "Object.Muon parse failed" << endl;
 

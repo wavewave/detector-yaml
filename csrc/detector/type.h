@@ -37,7 +37,6 @@ public:
   }
 };
 
-
 struct import
 {
   string name;
@@ -114,6 +113,39 @@ struct detector_description_t
   string validation_info;
   object_description_t object;
 }; 
+
+class INameable 
+{ 
+public:
+  virtual string name( void ) = 0;  
+};
+
+class IMetaInfoable 
+{  
+public:
+  virtual meta_info_t meta_info( void ) = 0;  
+};
+
+class electron_eff_data_wrapper : public INameable, IMetaInfoable 
+{
+private:
+  electron_eff_data_t dat; 
+public:  
+  electron_eff_data_wrapper( electron_eff_data_t e ) : dat(e) { } 
+  string name( void ) { return dat.name; }
+  meta_info_t meta_info( void ) { return dat.meta_info; }
+};
+
+class muon_eff_data_wrapper : public INameable, IMetaInfoable 
+{
+private:
+  muon_eff_data_t dat; 
+public:  
+ muon_eff_data_wrapper( muon_eff_data_t e ) : dat(e) { } 
+  string name( void ) { return dat.name; }
+  meta_info_t meta_info( void ) { return dat.meta_info; }
+};
+
 
 #endif // __DETECTOR_TYPE__
 
