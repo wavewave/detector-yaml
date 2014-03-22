@@ -11,6 +11,7 @@ Cabal-Version:  >= 1.8
 data-files:     
 Extra-source-files: csrc/testffi.h
                     csrc/testffi.cpp
+                    csrc/detector/type.h
 
 Executable mkyaml
   Main-is: mkyaml.hs
@@ -71,7 +72,8 @@ Library
   C-sources:         csrc/testffi.cpp
 
   install-includes:  testffi.h
+                     detector/type.h
 
   extra-libraries:   stdc++, yaml-cpp
-  -- yaml-cpp
+
   pkgconfig-depends: yaml-cpp
