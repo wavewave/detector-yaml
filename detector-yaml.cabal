@@ -12,9 +12,6 @@ data-files:
 Extra-source-files: csrc/testffi.h
                     csrc/testffi.cpp
 
---                     csrc/testffi.c
-                    
-
 Executable mkyaml
   Main-is: mkyaml.hs
   hs-source-dirs: exe
@@ -52,6 +49,7 @@ Library
   hs-source-dirs: lib
   ghc-options: 	-Wall -Werror -funbox-strict-fields -fno-warn-unused-do-bind -fno-warn-orphans
   ghc-prof-options: -caf-all -auto-all
+  cc-options: -std=c++11
   Build-Depends: 
                    base>4, 
                    text, 
