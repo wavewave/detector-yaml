@@ -121,55 +121,56 @@ getMetaInfo( YAML::Node node )
   return NULL; 
 }
 
-boost::optional< either<import,electron_eff_data> >
-getElectronEffData( YAML::Node node ) 
+template<typename T> 
+boost::optional< either<import,T> >
+importOrDeal( boost::optional<T> getT (YAML::Node node), YAML::Node node ) 
 {
-  either<import, electron_eff_data> r; 
-  
+  either<import, T> r;   
   boost::optional<string> e1; 
-  boost::optional<string> s1; 
-  boost::optional<meta_info_t> minfo; 
+  boost::optional<T> t; 
   if( e1 = maybeFind<string>("Import", node) )
   {
     import imp; 
     imp.name = e1.get();
     r.put(imp);
-    return r;
+    return boost::optional< either<import,T> >(r);
   }
-  else if( (s1 = maybeFind<string>("Name", node) )
-           && ( minfo = getMetaInfo(node) ) )
+  else if( boost::optional<T> t = getT( node))
+  {
+    r.put(t.get());
+    return boost::optional< either<import,T> >(r); 
+  } 
+  return NULL;
+}
+
+boost::optional<electron_eff_data> getElectronEffData( YAML::Node node ) 
+{ 
+  boost::optional<string> s1; 
+  boost::optional<meta_info_t> minfo; 
+
+  if( (s1 = maybeFind<string>("Name", node) )
+      && ( minfo = getMetaInfo(node) ) )
   { 
     electron_eff_data eeff; 
     eeff.name = s1.get(); 
     eeff.meta_info = minfo.get();
-    r.put(eeff);
-    return r; 
+    return boost::optional<electron_eff_data>(eeff); 
   }
   return NULL;
 }
 
-boost::optional< either<import,muon_eff_data> >
-getMuonEffData( YAML::Node node ) 
+boost::optional<muon_eff_data> getMuonEffData( YAML::Node node ) 
 {
-  either<import, muon_eff_data> r; 
-  boost::optional<string> e1; 
   boost::optional<string> s1; 
   boost::optional<meta_info_t> minfo ;  
-  if( e1 = maybeFind<string>("Import", node) )
-  {
-    import imp; 
-    imp.name = e1.get();
-    r.put(imp);
-    return r;
-  }
-  else if( (s1 = maybeFind<string>("Name", node) )
-           && ( minfo = getMetaInfo( node ) ) )
+
+  if( (s1 = maybeFind<string>("Name", node) )
+      && ( minfo = getMetaInfo( node ) ) )
   { 
     muon_eff_data mueff; 
     mueff.name = s1.get(); 
     mueff.meta_info = minfo.get();
-    r.put(mueff);
-    return r; 
+    return boost::optional<muon_eff_data>(mueff); 
   }
   return NULL;
 }
@@ -187,8 +188,8 @@ boost::optional<object_description> getObjectDescription( YAML::Node node)
     
   if ( (n1 = maybeFind<YAML::Node>("Electron", node) )
        && (n2 = maybeFind<YAML::Node>("Muon", node) )
-       && (r1 = getElectronEffData(n1.get())) 
-       && (r2 = getMuonEffData(n2.get()))
+       && (r1 = importOrDeal( getElectronEffData, n1.get()) )
+       && (r2 = importOrDeal( getMuonEffData, n2.get()) )
      )
   {
     od.electron = r1.get();
