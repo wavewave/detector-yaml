@@ -66,14 +66,24 @@ struct import
   string name;
 };
 
+struct meta_info_t
+{
+  string tag;
+  string description;
+  string comment; 
+  string reference; 
+};
+
 struct electron_eff_data 
 { 
   string name;
+  meta_info_t meta_info; 
 }; 
 
 struct muon_eff_data
 {
   string name;
+  meta_info_t meta_info;
 };
 
 struct object_description
@@ -92,6 +102,25 @@ struct detector_description
   object_description object;
 }; 
 
+boost::optional<meta_info_t> 
+getMetaInfo( YAML::Node node ) 
+{
+  boost::optional<string> s1,s2,s3,s4; 
+  if( ( s1 = maybeFind<string>("Tag", node) )
+      && ( s2 = maybeFind<string>("Description", node) )
+      && ( s3 = maybeFind<string>("Comment", node) )
+      && ( s4 = maybeFind<string>("Reference", node) ) )
+  {
+    meta_info_t meta_info; 
+    meta_info.tag = s1.get();
+    meta_info.description = s2.get();
+    meta_info.comment = s3.get();
+    meta_info.reference = s4.get();
+    return boost::optional<meta_info_t>(meta_info); 
+  }
+  return NULL; 
+}
+
 boost::optional< either<import,electron_eff_data> >
 getElectronEffData( YAML::Node node ) 
 {
@@ -99,6 +128,7 @@ getElectronEffData( YAML::Node node )
   
   boost::optional<string> e1; 
   boost::optional<string> s1; 
+  boost::optional<meta_info_t> minfo; 
   if( e1 = maybeFind<string>("Import", node) )
   {
     import imp; 
@@ -106,10 +136,12 @@ getElectronEffData( YAML::Node node )
     r.put(imp);
     return r;
   }
-  else if( s1 = maybeFind<string>("Name", node) )
+  else if( (s1 = maybeFind<string>("Name", node) )
+           && ( minfo = getMetaInfo(node) ) )
   { 
     electron_eff_data eeff; 
     eeff.name = s1.get(); 
+    eeff.meta_info = minfo.get();
     r.put(eeff);
     return r; 
   }
@@ -120,9 +152,9 @@ boost::optional< either<import,muon_eff_data> >
 getMuonEffData( YAML::Node node ) 
 {
   either<import, muon_eff_data> r; 
-  
   boost::optional<string> e1; 
   boost::optional<string> s1; 
+  boost::optional<meta_info_t> minfo ;  
   if( e1 = maybeFind<string>("Import", node) )
   {
     import imp; 
@@ -130,10 +162,12 @@ getMuonEffData( YAML::Node node )
     r.put(imp);
     return r;
   }
-  else if( s1 = maybeFind<string>("Name", node) )
+  else if( (s1 = maybeFind<string>("Name", node) )
+           && ( minfo = getMetaInfo( node ) ) )
   { 
     muon_eff_data mueff; 
     mueff.name = s1.get(); 
+    mueff.meta_info = minfo.get();
     r.put(mueff);
     return r; 
   }
@@ -222,6 +256,7 @@ void yamlparsetest( void ) {
   if( boost::optional<muon_eff_data> t2 = mu.getRight() )
   { 
     cout << "Object.Muon.Eff_data is " << t2.get().name << endl;
+    cout << "Object.Muon.EffData.Description " << t2.get().meta_info.description << endl;
   }
   else cout << "Object.Muon parse failed" << endl;
 
