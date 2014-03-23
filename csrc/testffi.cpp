@@ -10,6 +10,22 @@
 
 using namespace std;
 
+/********************************/
+electron_eff_data_wrapper 
+create_electron_eff_data_wrapper( electron_eff_data_t e ) 
+{
+  electron_eff_data_wrapper ewrap(e);
+  return ewrap ;
+}
+
+muon_eff_data_wrapper 
+create_muon_eff_data_wrapper( muon_eff_data_t e ) 
+{
+  muon_eff_data_wrapper mwrap(e);
+  return mwrap ;
+}
+
+
 
 /********************************/
 
@@ -243,15 +259,35 @@ boost::optional<detector_description_t> getDetectorDescription( YAML::Node doc )
 }
 
 template <typename T> 
-void showname( T t ) 
+void show_name_and_meta_info( T t ) 
 { 
   static_assert(std::is_base_of<INameable,T>::value, "T must be a descendent of INameable");
   static_assert(std::is_base_of<IMetaInfoable,T>::value, "T must be a descendent of IMetaInfoable"); 
+  cout << "-----------------------------" << endl;
   cout << "name is " << t.name() << endl;
+  cout << "tag is " << t.meta_info().tag << endl;
   cout << "description is " << t.meta_info().description << endl;
-
+  cout << "comment is " << t.meta_info().comment << endl; 
+  cout << "reference is " << t.meta_info().reference << endl; 
+  cout << "-----------------------------" << endl;
 }
 
+template <typename T, typename TWrapper> 
+void show_import_or_do( void f(TWrapper), TWrapper wrap( T )
+                      , either<import,T> et )
+{
+  if( boost::optional<import> t = et.getLeft() ) {
+    cout << "----------------------------------" << endl; 
+    cout << "import is " << t.get().name << endl;
+    cout << "----------------------------------" << endl;
+  }
+  else if( boost::optional<T> t = et.getRight() ) {
+    TWrapper twrapped = wrap(t.get());
+    f(twrapped);
+  }
+  else 
+    cout << "parse failed" << endl;
+}
 
 
 void yamlparsetest( void ) {
@@ -268,38 +304,12 @@ void yamlparsetest( void ) {
   cout << "Description is "<< pdd.description << endl;
   cout << "Reference is " << pdd.reference << endl;
 
-  either<import,electron_eff_data_t> e = pdd.object.electron; 
-  if( boost::optional<import> t1 = e.getLeft() )
-  { 
-    cout << "Object.Electron.Import is " << t1.get().name << endl;
-  }
-  else if( boost::optional<electron_eff_data_t> t2 = e.getRight() ) {
-    electron_eff_data_t t2v = t2.get();
-    electron_eff_data_wrapper t2w (t2v); 
-    showname<electron_eff_data_wrapper>( t2w );
-  } 
-  else cout << "Object.Electron parse failed" << endl;
-
-  either<import,muon_eff_data_t> mu = pdd.object.muon; 
-  if( boost::optional<import> t1 = mu.getLeft() )
-  { 
-    cout << "Object.Muon.Import is " << t1.get().name << endl;
-  }
-  if( boost::optional<muon_eff_data_t> t2 = mu.getRight() )
-  { 
-    muon_eff_data_wrapper t2w(t2.get()); 
-    showname<muon_eff_data_wrapper>( t2w ); 
-  }
-  else cout << "Object.Muon parse failed" << endl;
-
-}
-
-
-void yamlemittest( void ) {
-    YAML::Emitter out;
-    out << "Hello, World!";
-   
-    std::cout << "Here's the output YAML:\n" << out.c_str(); // prints "Hello, World!"
+  show_import_or_do( show_name_and_meta_info, create_electron_eff_data_wrapper
+		     , pdd.object.electron ); 
+ 
+  show_import_or_do( show_name_and_meta_info, create_muon_eff_data_wrapper
+                   , pdd.object.muon );
+  
 }
 
 /*****************************************/
