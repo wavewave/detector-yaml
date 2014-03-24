@@ -3,9 +3,9 @@
 
 #include <boost/optional/optional.hpp>
 #include <boost/variant.hpp>
+#include <vector>
 
 using namespace std; 
-
 
 template<typename A, typename B>
 class either 
@@ -50,34 +50,76 @@ struct meta_info_t
   string reference; 
 };
 
+struct grid_t 
+{ 
+  vector<double> pt_bins;
+  vector<double> eta_bins;
+};
+
+struct interpolation_t
+{
+  string function = "function is not implemented";
+};
+
+class pt_eta_data_t 
+{
+private:
+  enum which_t { grid, interpolation } which;
+  boost::variant<grid_t, interpolation_t> content; 
+public:
+  void put(grid_t g) { which = grid; content = g; }
+  void put(interpolation_t g ) {which = interpolation; content = g; }
+  
+  bool isGrid( void ) { return (which == grid); }
+  bool isInterpolation(void ) { return (which == interpolation); }
+  boost::optional<grid_t> getGrid( void ) {
+    if( which == grid ) 
+      return boost::optional<grid_t>(boost::get<grid_t>(content)); 
+    else
+      return boost::optional<grid_t>();
+  }
+  boost::optional<interpolation_t> getInterpolation( void ) {
+    if( which == interpolation )
+      return boost::optional<interpolation_t>(boost::get<interpolation_t>(content));
+    else
+      return boost::optional<interpolation_t>();
+  }
+};
+
 struct electron_eff_data_t
 { 
   string name;
   meta_info_t meta_info; 
+  pt_eta_data_t efficiency; 
 }; 
 
 struct photon_eff_data_t
 { 
   string name;
   meta_info_t meta_info; 
+  pt_eta_data_t efficiency;
 }; 
 
 struct bjet_eff_data_t
 { 
   string name;
   meta_info_t meta_info; 
+  pt_eta_data_t efficiency;
+  pt_eta_data_t rejection;
 }; 
 
 struct muon_eff_data_t
 {
   string name;
   meta_info_t meta_info;
+  pt_eta_data_t efficiency;
 };
 
 struct jet_eff_data_t
 {
   string name;
   meta_info_t meta_info;
+  pt_eta_data_t efficiency;
 };
 
 struct tau_eff_data_t
@@ -126,13 +168,12 @@ public:
   virtual meta_info_t meta_info( void ) = 0;  
 };
 
+class IEfficiency
+{
+public:
+  virtual pt_eta_data_t efficiency( void ) = 0;
+};
 
-/* template <typename T> 
-class name_meta_info_wrapped; 
-
-template <typename T> 
-name_meta_info_wrapped<T> 
-create_name_meta_info_wrapped( T e ); */
 
 template <typename T> 
 class name_meta_info_wrapped : public INameable, IMetaInfoable 
@@ -142,50 +183,30 @@ private:
   name_meta_info_wrapped( T e ) : dat(e) { } 
 
 public:  
-  string name( void ) { return dat.name; }
-  meta_info_t meta_info( void ) { return dat.meta_info; }
-  static name_meta_info_wrapped<T> create_name_meta_info_wrapped( T e ) { 
+  virtual string name( void ) { return dat.name; }
+  virtual meta_info_t meta_info( void ) { return dat.meta_info; }
+  static name_meta_info_wrapped<T> create_wrapped( T e ) { 
     name_meta_info_wrapped<T> t(e); 
     return t;
   }
 };
 
-/*
-template<typename T> 
-name_meta_info_wrapped<T> 
-create_name_meta_info_wrapped( T e ) { 
-} 
-*/
-
-/* 
-class electron_eff_data_wrapper : public INameable, IMetaInfoable 
+template <typename T> 
+class name_meta_info_efficiency_wrapped : public INameable, IMetaInfoable, IEfficiency
 {
 private:
-  electron_eff_data_t dat; 
-  electron_eff_data_wrapper( electron_eff_data_t e ) : dat(e) { } 
+  T dat; 
+  name_meta_info_efficiency_wrapped( T e ) : dat(e) { } 
 
 public:  
-  string name( void ) { return dat.name; }
-  meta_info_t meta_info( void ) { return dat.meta_info; }
-  friend electron_eff_data_wrapper 
-    create_electron_eff_data_wrapper( electron_eff_data_t e ) ; 
-
+  virtual string name( void ) { return dat.name; }
+  virtual meta_info_t meta_info( void ) { return dat.meta_info; }
+  virtual pt_eta_data_t efficiency( void ) { return dat.efficiency; } 
+  static name_meta_info_efficiency_wrapped<T> create_wrapped( T e ) { 
+    name_meta_info_efficiency_wrapped<T> t(e); 
+    return t;
+  }
 };
-
-
-class muon_eff_data_wrapper : public INameable, IMetaInfoable 
-{
-private:
-  muon_eff_data_t dat; 
-  muon_eff_data_wrapper( muon_eff_data_t e ) : dat(e) { } 
-public:  
-  string name( void ) { return dat.name; }
-  meta_info_t meta_info( void ) { return dat.meta_info; }
-  friend muon_eff_data_wrapper 
-    create_muon_eff_data_wrapper( muon_eff_data_t e ) ; 
-
-};
-*/
 
 #endif // __DETECTOR_TYPE__
 

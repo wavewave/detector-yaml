@@ -10,25 +10,6 @@
 
 using namespace std;
 
-/********************************/
-/* electron_eff_data_wrapper 
-create_electron_eff_data_wrapper( electron_eff_data_t e ) 
-{
-  electron_eff_data_wrapper ewrap(e);
-  return ewrap ;
-}
-
-muon_eff_data_wrapper 
-create_muon_eff_data_wrapper( muon_eff_data_t e ) 
-{
-  muon_eff_data_wrapper mwrap(e);
-  return mwrap ;
-}
-
-*/
-
-/********************************/
-
 template<typename T>
 boost::optional<T> maybeFind( string key, YAML::Node doc ) {
   if( doc[key] ) {
@@ -50,9 +31,6 @@ boost::optional<YAML::Node> maybeFind( string key, YAML::Node doc ) {
   else return boost::optional<YAML::Node>();
 }
 
-
-
-
 boost::optional<meta_info_t> 
 getMetaInfo( YAML::Node node ) 
 {
@@ -69,6 +47,32 @@ getMetaInfo( YAML::Node node )
     meta_info.reference = s4.get();
     return boost::optional<meta_info_t>(meta_info); 
   }
+  return NULL; 
+}
+
+boost::optional<pt_eta_data_t>
+get_pt_eta_data( YAML::Node node )
+{
+  boost::optional<string> s1; 
+  if( s1 = maybeFind<string>("Type",node) ) {
+    if( s1.get() == "Grid" ) {
+      boost::optional< vector<double> > ptbin; 
+      boost::optional< vector<double> > etabin;
+      if( (ptbin = maybeFind< vector<double> >("PtBins" ,node))
+	  && ( etabin = maybeFind< vector<double> >("EtaBins", node)) ) { 
+        grid_t g ;
+        g.pt_bins = ptbin.get();
+        g.eta_bins = etabin.get(); 
+        pt_eta_data_t dat; 
+        dat.put(g);
+        return boost::optional<pt_eta_data_t>(dat);
+      }
+    }
+    else if ( s1.get() == "Interpolation" ) {
+    }
+  
+  }
+  
   return NULL; 
 }
 
@@ -98,14 +102,18 @@ boost::optional<electron_eff_data_t> getElectronEffData( YAML::Node node )
 { 
   boost::optional<string> s1; 
   boost::optional<meta_info_t> minfo; 
+  boost::optional<YAML::Node> node2;
+  boost::optional<pt_eta_data_t> eff;
 
   if( (s1 = maybeFind<string>("Name", node) )
-      && ( minfo = getMetaInfo(node) ) )
-  { 
-    electron_eff_data_t eeff; 
-    eeff.name = s1.get(); 
-    eeff.meta_info = minfo.get();
-    return boost::optional<electron_eff_data_t>(eeff); 
+      && ( minfo = getMetaInfo(node) )
+      && ( node2 = maybeFind<YAML::Node>("Efficiency",node) )
+      && ( eff = get_pt_eta_data( node2.get() ) ) ) { 
+    electron_eff_data_t e; 
+    e.name = s1.get(); 
+    e.meta_info = minfo.get();
+    e.efficiency = eff.get();
+    return boost::optional<electron_eff_data_t>(e); 
   }
   return NULL;
 }
@@ -114,14 +122,18 @@ boost::optional<photon_eff_data_t> getPhotonEffData( YAML::Node node )
 {
   boost::optional<string> s1; 
   boost::optional<meta_info_t> minfo ;  
+  boost::optional<YAML::Node> node2;
+  boost::optional<pt_eta_data_t> eff;
 
   if( (s1 = maybeFind<string>("Name", node) )
-      && ( minfo = getMetaInfo( node ) ) )
-  { 
-    photon_eff_data_t mueff; 
-    mueff.name = s1.get(); 
-    mueff.meta_info = minfo.get();
-    return boost::optional<photon_eff_data_t>(mueff); 
+      && ( minfo = getMetaInfo( node ) ) 
+      && ( node2 = maybeFind<YAML::Node>("Efficiency",node) )
+      && ( eff = get_pt_eta_data( node2.get() ) ) ) { 
+    photon_eff_data_t p; 
+    p.name = s1.get(); 
+    p.meta_info = minfo.get();
+    p.efficiency = eff.get();
+    return boost::optional<photon_eff_data_t>(p); 
   }
   return NULL;
 }
@@ -130,14 +142,23 @@ boost::optional<bjet_eff_data_t> getBJetEffData( YAML::Node node )
 {
   boost::optional<string> s1; 
   boost::optional<meta_info_t> minfo ;  
+  boost::optional<YAML::Node> node2;
+  boost::optional<pt_eta_data_t> eff;
+  boost::optional<YAML::Node> node3;
+  boost::optional<pt_eta_data_t> rej;
 
   if( (s1 = maybeFind<string>("Name", node) )
-      && ( minfo = getMetaInfo( node ) ) )
-  { 
-    bjet_eff_data_t mueff; 
-    mueff.name = s1.get(); 
-    mueff.meta_info = minfo.get();
-    return boost::optional<bjet_eff_data_t>(mueff); 
+      && ( minfo = getMetaInfo( node ) ) 
+      && ( node2 = maybeFind<YAML::Node>("Efficiency",node) )
+      && ( eff = get_pt_eta_data( node2.get() ) ) 
+      && ( node3 = maybeFind<YAML::Node>("Rejection",node) )
+      && ( rej = get_pt_eta_data( node3.get() ) ) ) { 
+    bjet_eff_data_t b; 
+    b.name = s1.get(); 
+    b.meta_info = minfo.get();
+    b.efficiency = eff.get();
+    b.rejection = rej.get();
+    return boost::optional<bjet_eff_data_t>(b); 
   }
   return NULL;
 }
@@ -146,14 +167,19 @@ boost::optional<muon_eff_data_t> getMuonEffData( YAML::Node node )
 {
   boost::optional<string> s1; 
   boost::optional<meta_info_t> minfo ;  
+  boost::optional<YAML::Node> node2;
+  boost::optional<pt_eta_data_t> eff;
 
   if( (s1 = maybeFind<string>("Name", node) )
-      && ( minfo = getMetaInfo( node ) ) )
+      && ( minfo = getMetaInfo( node ) ) 
+      && ( node2 = maybeFind<YAML::Node>("Efficiency",node) )
+      && ( eff = get_pt_eta_data( node2.get() ) ) )
   { 
-    muon_eff_data_t mueff; 
-    mueff.name = s1.get(); 
-    mueff.meta_info = minfo.get();
-    return boost::optional<muon_eff_data_t>(mueff); 
+    muon_eff_data_t m; 
+    m.name = s1.get(); 
+    m.meta_info = minfo.get();
+    m.efficiency = eff.get();
+    return boost::optional<muon_eff_data_t>(m); 
   }
   return NULL;
 }
@@ -162,14 +188,18 @@ boost::optional<jet_eff_data_t> getJetEffData( YAML::Node node )
 {
   boost::optional<string> s1; 
   boost::optional<meta_info_t> minfo ;  
+  boost::optional<YAML::Node> node2;
+  boost::optional<pt_eta_data_t> eff;
 
   if( (s1 = maybeFind<string>("Name", node) )
-      && ( minfo = getMetaInfo( node ) ) )
-  { 
-    jet_eff_data_t mueff; 
-    mueff.name = s1.get(); 
-    mueff.meta_info = minfo.get();
-    return boost::optional<jet_eff_data_t>(mueff); 
+      && ( minfo = getMetaInfo( node ) ) 
+      && ( node2 = maybeFind<YAML::Node>("Efficiency",node) )
+      && ( eff = get_pt_eta_data( node2.get() ) ) ) { 
+    jet_eff_data_t j; 
+    j.name = s1.get(); 
+    j.meta_info = minfo.get();
+    j.efficiency = eff.get();
+    return boost::optional<jet_eff_data_t>(j); 
   }
   return NULL;
 }
@@ -273,7 +303,30 @@ void show_name_and_meta_info( T t )
 }
 
 template <typename T> 
-void show_import_or_do( void f(name_meta_info_wrapped<T>), either<import,T> et )
+void show_name_and_meta_info_efficiency( T t ) 
+{ 
+  static_assert(std::is_base_of<IEfficiency,T>::value, "T must be a descendent of IEfficiency");
+  cout << "-----------------------------" << endl;
+  show_name_and_meta_info( t );
+  if( boost::optional<grid_t> mg = t.efficiency().getGrid() ) { 
+    grid_t g = mg.get();
+    cout << "efficiency : pt_bins = [" ;
+    for( auto it = g.pt_bins.begin() ; it != g.pt_bins.end() ; ++it ) {
+      cout << *it << "," ;
+    }
+    cout << "] " << endl;
+    cout << "efficiency : eta_bins = [";
+    for( auto it = g.eta_bins.begin() ; it != g.eta_bins.end() ; ++it ) {
+      cout << *it << "," ;
+    }
+    cout << "] " << endl;
+  }
+  cout << "-----------------------------" << endl;
+}
+
+
+template <typename T, typename TWrapper> 
+void show_import_or_do( void f(TWrapper), either<import,T> et )
 {
   if( boost::optional<import> t = et.getLeft() ) {
     cout << "----------------------------------" << endl; 
@@ -281,7 +334,7 @@ void show_import_or_do( void f(name_meta_info_wrapped<T>), either<import,T> et )
     cout << "----------------------------------" << endl;
   }
   else if( boost::optional<T> t = et.getRight() ) {
-    name_meta_info_wrapped<T> w = name_meta_info_wrapped<T>::create_name_meta_info_wrapped(t.get());
+    TWrapper w = TWrapper::create_wrapped(t.get());
     f(w);
   }
   else 
@@ -303,12 +356,17 @@ void yamlparsetest( void ) {
   cout << "Description is "<< pdd.description << endl;
   cout << "Reference is " << pdd.reference << endl;
 
-  show_import_or_do( show_name_and_meta_info, pdd.object.electron ); 
-  show_import_or_do( show_name_and_meta_info, pdd.object.photon );
-  show_import_or_do( show_name_and_meta_info, pdd.object.bjet );  
-  show_import_or_do( show_name_and_meta_info, pdd.object.muon );
-  show_import_or_do( show_name_and_meta_info, pdd.object.jet );
-  show_import_or_do( show_name_and_meta_info, pdd.object.tau );
+  show_import_or_do( show_name_and_meta_info_efficiency<name_meta_info_efficiency_wrapped<electron_eff_data_t> > 
+                   , pdd.object.electron ); 
+  show_import_or_do( show_name_and_meta_info_efficiency<name_meta_info_efficiency_wrapped<photon_eff_data_t> >
+                   , pdd.object.photon );
+  show_import_or_do( show_name_and_meta_info_efficiency<name_meta_info_efficiency_wrapped<bjet_eff_data_t> >
+                   , pdd.object.bjet );  
+  show_import_or_do( show_name_and_meta_info_efficiency<name_meta_info_efficiency_wrapped<muon_eff_data_t> >
+                   , pdd.object.muon );
+  show_import_or_do( show_name_and_meta_info_efficiency<name_meta_info_efficiency_wrapped<jet_eff_data_t> >
+                   , pdd.object.jet );
+  show_import_or_do( show_name_and_meta_info<name_meta_info_wrapped<tau_eff_data_t> >, pdd.object.tau ); 
     
 
 }
