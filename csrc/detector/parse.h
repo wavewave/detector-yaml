@@ -92,23 +92,49 @@ void show_name_and_meta_info_efficiency( T t )
   show_name_and_meta_info( t );
   boost::optional<grid_t> mg ; 
   boost::optional<grid_const_t> mgc; 
-  if( (mg = t.efficiency().getGrid()) 
-      && (mgc = mg.get().getGridConst() )) {
-    grid_const_t gc = mgc.get();
-    
-    cout << "efficiency : pt_bins = [" ;
-    for( auto it = gc.pt_eta_bins.pt.begin() ; it != gc.pt_eta_bins.pt.end() ; ++it ) {
-      cout << *it << "," ;
-    }
-    cout << "] " << endl;
-    cout << "efficiency : eta_bins = [";
-    for( auto it = gc.pt_eta_bins.eta.begin() ; it != gc.pt_eta_bins.eta.end() ; ++it ) {
-      cout << *it << "," ;
-    }
-    cout << "] " << endl;
-    cout << "efficiency : value = " << gc.value << endl; 
+  boost::optional<grid_full_t> mgf;
 
-  }
+  if( mg = t.efficiency().getGrid() ) { 
+    if( mgc = mg.get().getGridConst() ) {
+      grid_const_t gc = mgc.get();
+    
+      cout << "efficiency : pt_bins = [" ;
+      for( auto it = gc.pt_eta_bins.pt.begin() ; it != gc.pt_eta_bins.pt.end() ; ++it ) {
+        cout << *it << "," ;
+      }
+      cout << "] " << endl;
+      cout << "efficiency : eta_bins = [";
+      for( auto it = gc.pt_eta_bins.eta.begin() ; it != gc.pt_eta_bins.eta.end() ; ++it ) {
+        cout << *it << "," ;
+      }
+      cout << "] " << endl;
+      cout << "efficiency : value = " << gc.value << endl; 
+    } 
+    else if( mgf = mg.get().getGridFull() ) {
+      grid_full_t gf = mgf.get();
+    
+      cout << "efficiency : pt_bins = [" ;
+      for( auto it = gf.pt_eta_bins.pt.begin() ; it != gf.pt_eta_bins.pt.end() ; ++it ) {
+        cout << *it << "," ;
+      }
+      cout << "] " << endl;
+      cout << "efficiency : eta_bins = [";
+      for( auto it = gf.pt_eta_bins.eta.begin() ; it != gf.pt_eta_bins.eta.end() ; ++it ) {
+        cout << *it << "," ;
+      }
+      cout << "] " << endl;
+      cout << "efficiency : grid_data = [ " ;
+      for( auto it1 = gf.grid_data.begin() ; it1 != gf.grid_data.end() ; ++it1 ) {
+        cout << "[" ; 
+        for( auto it2 = it1->begin() ; it2 != it1->end() ; ++it2 ) {
+          cout << *it2 << "," ; 
+        }
+        cout << "],  " << endl << "                           " ;
+      } 
+      cout << "] " << endl;
+
+    }
+  } 
   cout << "-----------------------------" << endl;
 }
 

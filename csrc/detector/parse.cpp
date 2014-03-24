@@ -54,17 +54,27 @@ get_grid( vector<double> ptbins, vector<double> etabins, YAML::Node node )
         return boost::optional<grid_t>(g);
       }
     } else if( s1.get() == "Full" ) {
-      // wrong 
-        grid_t g ; 
-        grid_const_t gc; 
-        gc.pt_eta_bins.pt = ptbins; 
-        gc.pt_eta_bins.eta = etabins;
-        gc.value = 0;
-        g.put( gc ); 
-        return boost::optional<grid_t>(g);
-       
-    } 
+      boost::optional<YAML::Node> mvv; 
+      if( mvv = maybeFind< YAML::Node > ("Data", node) ) {
+	YAML::Node node2 = mvv.get(); // wrong
+        if( node2.IsSequence() ) { 
+          grid_t g ; 
+          grid_full_t gf; 
+          gf.pt_eta_bins.pt = ptbins; 
+          gf.pt_eta_bins.eta = etabins;
+          vector< vector<double> > vv; 
+          for(YAML::const_iterator it=node2.begin(); it != node2.end(); ++it ) {
+	    vector<double> v; 
+            v = it->as< vector<double> >(); 
+            vv.push_back(v); 
+          }
+          gf.grid_data = vv;
+          g.put( gf ); 
+          return boost::optional<grid_t>(g);
+        }
+      } 
          
+    }
   }
   return NULL;
 } 
