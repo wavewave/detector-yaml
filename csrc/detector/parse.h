@@ -66,6 +66,8 @@ boost::optional<jet_eff_data_t> getJetEffData( YAML::Node node ) ;
 
 boost::optional<tau_eff_data_t> getTauEffData( YAML::Node node ) ;
 
+boost::optional<pt_threshold_eff_data_t> getPTThresholdEffDat( YAML::Node node );
+
 boost::optional<object_description_t> getObjectDescription( YAML::Node node) ;
 
 boost::optional<detector_description_t> getDetectorDescription( YAML::Node doc ) ;

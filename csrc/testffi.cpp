@@ -10,6 +10,27 @@
 
 using namespace std;
 
+class PTThresholdWrapper {
+private:
+public:
+  pt_threshold_eff_data_t dat ; 
+  PTThresholdWrapper( pt_threshold_eff_data_t p ) : dat(p) { }
+  static PTThresholdWrapper create_wrapped( pt_threshold_eff_data_t p ) { 
+    return PTThresholdWrapper(p);
+  }
+};
+
+void ptshow( PTThresholdWrapper p ) {
+  cout << "name : "            <<  p.dat.name << endl; 
+  cout << "mu_pt_min : "       << p.dat.mu_pt_min << endl;
+  cout << "electron_pt_min : " << p.dat.electron_pt_min << endl; 
+  cout << "photon_pt_min : "   << p.dat.photon_pt_min << endl; 
+  cout << "jet_pt_min : "      << p.dat.jet_pt_min << endl;
+  cout << "bjet_pt_min : "     << p.dat.bjet_pt_min << endl;
+  cout << "track_pt_min : "    << p.dat.track_pt_min << endl; 
+  cout << "tau_pt_min : "      << p.dat.tau_pt_min << endl;
+}
+
 void yamlparsetest( void ) {
   std::ifstream input("temp/ATLAS2011.yaml");  
   YAML::Node doc = YAML::Load(input);
@@ -36,7 +57,7 @@ void yamlparsetest( void ) {
                    , pdd.object.jet );
   show_import_or_do( show_name_and_meta_info<name_meta_info_wrapped<tau_eff_data_t> >, pdd.object.tau ); 
     
-
+  show_import_or_do( ptshow, pdd.object.ptthresholds );
 }
 
 /*****************************************/

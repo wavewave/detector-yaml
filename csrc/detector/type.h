@@ -164,13 +164,19 @@ struct tau_eff_data_t
   meta_info_t meta_info;
 };
 
-/*
+
 struct pt_threshold_eff_data_t
 {
   string name;
-  meta_info_t meta_info;
+  double mu_pt_min;
+  double electron_pt_min; 
+  double photon_pt_min; 
+  double jet_pt_min; 
+  double bjet_pt_min;
+  double track_pt_min;
+  double tau_pt_min;
 };
-*/
+
 
 struct object_description_t
 { 
@@ -180,6 +186,7 @@ struct object_description_t
   either <import,muon_eff_data_t> muon;
   either <import,jet_eff_data_t> jet;
   either <import,tau_eff_data_t> tau;
+  either <import,pt_threshold_eff_data_t> ptthresholds;
 };
 
 struct detector_description_t

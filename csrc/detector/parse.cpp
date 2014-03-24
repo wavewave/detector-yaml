@@ -232,6 +232,33 @@ boost::optional<tau_eff_data_t> getTauEffData( YAML::Node node )
   return NULL;
 }
 
+boost::optional<pt_threshold_eff_data_t> getPTThresholdEffData( YAML::Node node ) 
+{
+  boost::optional<string> s1; 
+  boost::optional<double> d1, d2, d3, d4, d5, d6, d7 ;  
+
+  if( (s1 = maybeFind<string>("Name", node) )
+      && (d1 = maybeFind<double>("MuPTMIN", node) )
+      && (d2 = maybeFind<double>("ElePTMIN", node) )
+      && (d3 = maybeFind<double>("PhoPTMIN", node) )
+      && (d4 = maybeFind<double>("JetPTMIN", node) )
+      && (d5 = maybeFind<double>("BJetPTMIN", node) )
+      && (d6 = maybeFind<double>("TrkPTMIN", node) )
+      && (d7 = maybeFind<double>("TauPTMIN", node) )  ) { 
+    pt_threshold_eff_data_t p; 
+    p.name = s1.get(); 
+    p.mu_pt_min       = d1.get();
+    p.electron_pt_min = d2.get();
+    p.photon_pt_min   = d3.get();
+    p.jet_pt_min      = d4.get();
+    p.bjet_pt_min     = d5.get();
+    p.track_pt_min    = d6.get();
+    p.tau_pt_min      = d7.get(); 
+    return boost::optional<pt_threshold_eff_data_t>(p); 
+  }
+  return NULL;
+}
+
 boost::optional<object_description_t> getObjectDescription( YAML::Node node)
 {
   object_description_t od; 
@@ -243,7 +270,7 @@ boost::optional<object_description_t> getObjectDescription( YAML::Node node)
   boost::optional<either <import, muon_eff_data_t > > r4; 
   boost::optional<either <import, jet_eff_data_t > > r5; 
   boost::optional<either <import, tau_eff_data_t > > r6; 
-  // boost::optional<either <import, pt_threshold_eff_data_t > > r7; 
+  boost::optional<either <import, pt_threshold_eff_data_t > > r7; 
     
   if ( (n1 = maybeFind<YAML::Node>("Electron", node) )
        && (r1 = importOrDeal( getElectronEffData, n1.get() ))
@@ -257,6 +284,8 @@ boost::optional<object_description_t> getObjectDescription( YAML::Node node)
        && (r5 = importOrDeal( getJetEffData, n5.get()) )
        && (n6 = maybeFind<YAML::Node>("Tau", node) )
        && (r6 = importOrDeal( getTauEffData, n6.get()) )
+       && (n7 = maybeFind<YAML::Node>("PTThresholds", node) )
+       && (r7 = importOrDeal( getPTThresholdEffData, n7.get()) )
      )
   {
     od.electron = r1.get();
@@ -265,6 +294,7 @@ boost::optional<object_description_t> getObjectDescription( YAML::Node node)
     od.muon = r4.get();
     od.jet = r5.get();
     od.tau = r6.get();
+    od.ptthresholds = r7.get();
     return boost::optional<object_description_t>(od);
   }
   
