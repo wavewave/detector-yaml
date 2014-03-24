@@ -37,6 +37,38 @@ getMetaInfo( YAML::Node node )
   return NULL; 
 }
 
+boost::optional<grid_t> 
+get_grid( vector<double> ptbins, vector<double> etabins, YAML::Node node )
+{
+  boost::optional<string> s1; 
+  if( s1 = maybeFind<string>("Type",node) ) {
+    if( s1.get() == "Const" ) {
+      boost::optional<double> mv;
+      if( mv = maybeFind<double>("Data",node) ) {
+        grid_t g ; 
+        grid_const_t gc; 
+        gc.pt_eta_bins.pt = ptbins; 
+        gc.pt_eta_bins.eta = etabins;
+        gc.value = mv.get();
+        g.put( gc ); 
+        return boost::optional<grid_t>(g);
+      }
+    } else if( s1.get() == "Full" ) {
+      // wrong 
+        grid_t g ; 
+        grid_const_t gc; 
+        gc.pt_eta_bins.pt = ptbins; 
+        gc.pt_eta_bins.eta = etabins;
+        gc.value = 0;
+        g.put( gc ); 
+        return boost::optional<grid_t>(g);
+       
+    } 
+         
+  }
+  return NULL;
+} 
+
 boost::optional<pt_eta_data_t>
 get_pt_eta_data( YAML::Node node )
 {
@@ -45,11 +77,15 @@ get_pt_eta_data( YAML::Node node )
     if( s1.get() == "Grid" ) {
       boost::optional< vector<double> > ptbin; 
       boost::optional< vector<double> > etabin;
+      boost::optional<YAML::Node> mnode2; 
+      boost::optional< grid_t > mg; 
       if( (ptbin = maybeFind< vector<double> >("PtBins" ,node))
-	  && ( etabin = maybeFind< vector<double> >("EtaBins", node)) ) { 
-        grid_t g ;
-        g.pt_bins = ptbin.get();
-        g.eta_bins = etabin.get(); 
+	  && ( etabin = maybeFind< vector<double> >("EtaBins", node)) 
+          && ( mnode2 = maybeFind<YAML::Node>("Grid", node) )
+          && ( mg = get_grid( ptbin.get(), etabin.get(), mnode2.get() ) ) ) { 
+        grid_t g = mg.get() ;
+        //g.pt_bins = ptbin.get();
+        //g.eta_bins = etabin.get(); 
         pt_eta_data_t dat; 
         dat.put(g);
         return boost::optional<pt_eta_data_t>(dat);

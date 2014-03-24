@@ -50,11 +50,47 @@ struct meta_info_t
   string reference; 
 };
 
-struct grid_t 
-{ 
-  vector<double> pt_bins;
-  vector<double> eta_bins;
+struct pt_eta_bins_t 
+{
+  vector<double> pt;
+  vector<double> eta;
 };
+
+struct grid_full_t
+{
+  pt_eta_bins_t pt_eta_bins;
+  vector< vector<double> > grid_data; 
+};
+
+struct grid_const_t
+{
+  pt_eta_bins_t pt_eta_bins;
+  double value;
+};
+
+
+class grid_t 
+{ 
+private:
+  enum which_t { full, constant } which;
+  boost::variant<grid_full_t, grid_const_t> content;
+public:  
+  void put( grid_full_t g ) { which = full; content = g; }
+  void put( grid_const_t g ) { which = constant; content = g; }
+  boost::optional<grid_full_t> getGridFull( void ) {
+    if( which == full ) 
+      return boost::optional<grid_full_t>(boost::get<grid_full_t>(content)); 
+    else
+      return boost::optional<grid_full_t>();
+  }
+  boost::optional<grid_const_t> getGridConst( void ) {
+    if( which == constant )
+      return boost::optional<grid_const_t>(boost::get<grid_const_t>(content));
+    else
+      return boost::optional<grid_const_t>();
+  }
+};
+
 
 struct interpolation_t
 {

@@ -26,6 +26,8 @@ boost::optional<T> maybeFind( string key, YAML::Node doc ) {
 
 boost::optional<meta_info_t> getMetaInfo( YAML::Node node ) ;
 
+boost::optional<grid_t> get_grid( vector<double> ptbins, vector<double> etbins, YAML::Node node );
+
 boost::optional<pt_eta_data_t> get_pt_eta_data( YAML::Node node );
 
 template<typename T> 
@@ -88,18 +90,24 @@ void show_name_and_meta_info_efficiency( T t )
   static_assert(std::is_base_of<IEfficiency,T>::value, "T must be a descendent of IEfficiency");
   cout << "-----------------------------" << endl;
   show_name_and_meta_info( t );
-  if( boost::optional<grid_t> mg = t.efficiency().getGrid() ) { 
-    grid_t g = mg.get();
+  boost::optional<grid_t> mg ; 
+  boost::optional<grid_const_t> mgc; 
+  if( (mg = t.efficiency().getGrid()) 
+      && (mgc = mg.get().getGridConst() )) {
+    grid_const_t gc = mgc.get();
+    
     cout << "efficiency : pt_bins = [" ;
-    for( auto it = g.pt_bins.begin() ; it != g.pt_bins.end() ; ++it ) {
+    for( auto it = gc.pt_eta_bins.pt.begin() ; it != gc.pt_eta_bins.pt.end() ; ++it ) {
       cout << *it << "," ;
     }
     cout << "] " << endl;
     cout << "efficiency : eta_bins = [";
-    for( auto it = g.eta_bins.begin() ; it != g.eta_bins.end() ; ++it ) {
+    for( auto it = gc.pt_eta_bins.eta.begin() ; it != gc.pt_eta_bins.eta.end() ; ++it ) {
       cout << *it << "," ;
     }
     cout << "] " << endl;
+    cout << "efficiency : value = " << gc.value << endl; 
+
   }
   cout << "-----------------------------" << endl;
 }
