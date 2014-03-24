@@ -12,6 +12,8 @@ data-files:
 Extra-source-files: csrc/testffi.h
                     csrc/testffi.cpp
                     csrc/detector/type.h
+                    csrc/detector/parse.h
+                    csrc/detector/parse.cpp
 
 Executable mkyaml
   Main-is: mkyaml.hs
@@ -70,9 +72,11 @@ Library
 
   include-dirs:      csrc
   C-sources:         csrc/testffi.cpp
+                     csrc/detector/parse.cpp
 
   install-includes:  testffi.h
                      detector/type.h
+                     detector/parse.h
 
   extra-libraries:   stdc++, yaml-cpp
 
