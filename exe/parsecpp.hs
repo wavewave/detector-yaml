@@ -2,8 +2,13 @@
 
 module Main where
 
+import Foreign.C.String
+import System.Environment 
+--
 import           Test
 
 main :: IO ()
 main = do 
-  c_testffi
+  args <- getArgs
+  cstr <- newCString (args !! 0)
+  c_testffi cstr

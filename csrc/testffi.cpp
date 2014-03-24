@@ -48,14 +48,17 @@ void taushow( TauWrapper p ) {
   cout << "tag_method : " << p.dat.tag_method << endl;
   tau_eff_detail_t eff = p.dat.efficiency; 
   boost::optional<tau_1or3prong_t> mt ;
+  boost::optional<tau_combined_t> mtc;
   if( mt = eff.get1or3Prong() ) {
     tau_1or3prong_t t = mt.get();
     show_pt_eta_data( t.efficiency_1prong ); 
     show_pt_eta_data( t.rejection_1prong ); 
     show_pt_eta_data( t.efficiency_3prong ); 
     show_pt_eta_data( t.rejection_3prong ); 
-
-
+  } else if ( mtc = eff.getCombined() ) {
+    tau_combined_t t = mtc.get();
+    show_pt_eta_data( t.efficiency );
+    show_pt_eta_data( t.rejection );
   }
   cout << "----------------------------------" << endl;
    
@@ -69,8 +72,8 @@ void taushow( TauWrapper p ) {
   cout << "tau_pt_min : "      << p.dat.tau_pt_min << endl; */
 }
 
-void yamlparsetest( void ) {
-  std::ifstream input("temp/ATLAS2011.yaml");  
+void yamlparsetest( char* filename) {
+  std::ifstream input( filename ) ;// input("temp/ATLAS2011.yaml");  
   YAML::Node doc = YAML::Load(input);
 
 
@@ -104,9 +107,9 @@ void yamlparsetest( void ) {
 extern "C" {
 #endif 
 
-void testffi( void )
+void testffi( char* filename )
 {
-  yamlparsetest();
+  yamlparsetest( filename );
 }
 
 #ifdef __cplusplus

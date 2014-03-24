@@ -132,13 +132,25 @@ get_tau_eff_detail( YAML::Node node )
         t.put( t13 ); 
         return boost::optional<tau_eff_detail_t>(t);
       }
-   
      
+    } else if( s1.get() == "TauCombined" ) {
+      boost::optional<YAML::Node> mn1,mn2;
+      boost::optional<pt_eta_data_t> eff, rej;
+      if( ( mn1 = maybeFind<YAML::Node>("Efficiency", node) )
+          && (eff = get_pt_eta_data( mn1.get() ) )
+          && (mn2 = maybeFind<YAML::Node>("Rejection", node) )
+          && (rej = get_pt_eta_data( mn2.get() ) ) ) {
+        tau_combined_t tc ;
+        tau_eff_detail_t t; 
+        tc.efficiency = eff.get();
+        tc.rejection  = rej.get();
+        t.put( tc ); 
+        return boost::optional<tau_eff_detail_t>(t);  
+      }
     }
   }
   return NULL;  
 }
-
 
 boost::optional<electron_eff_data_t> getElectronEffData( YAML::Node node ) 
 { 

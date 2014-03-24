@@ -21,7 +21,7 @@ cms2011Object = ObjectDescription
   , bJet         = Left (Import "BJet_TCHEL_CMS")
   , muon         = Left (Import "Muon_S_CMS")
   , jet          = Left (Import "Jet_PF_CMS")
-  , tau          = Left (Import "Tau_TaNCL_CMS")
+  , tau          = Right cmsTauTaNCL -- Left (Import "Tau_TaNCL_CMS")
   , track        = Just (Right cmsTrack)
   , ptThresholds = Right cmsPTThresholds 
   }
