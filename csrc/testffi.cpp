@@ -61,19 +61,10 @@ void taushow( TauWrapper p ) {
     show_pt_eta_data( t.rejection );
   }
   cout << "----------------------------------" << endl;
-   
-  /* cout << "name : "            <<  p.dat.name << endl; 
-  cout << "mu_pt_min : "       << p.dat.mu_pt_min << endl;
-  cout << "electron_pt_min : " << p.dat.electron_pt_min << endl; 
-  cout << "photon_pt_min : "   << p.dat.photon_pt_min << endl; 
-  cout << "jet_pt_min : "      << p.dat.jet_pt_min << endl;
-  cout << "bjet_pt_min : "     << p.dat.bjet_pt_min << endl;
-  cout << "track_pt_min : "    << p.dat.track_pt_min << endl; 
-  cout << "tau_pt_min : "      << p.dat.tau_pt_min << endl; */
 }
 
 void yamlparsetest( char* filename) {
-  std::ifstream input( filename ) ;// input("temp/ATLAS2011.yaml");  
+  std::ifstream input( filename ) ; 
   YAML::Node doc = YAML::Load(input);
 
   boost::optional<detector_description_t> mdd = getDetectorDescription(doc) ; 

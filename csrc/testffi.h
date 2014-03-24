@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 
-  void testffi( void ) ; 
+  void testffi( char* ) ; 
 
 
 #ifdef __cplusplus
