@@ -121,6 +121,10 @@ void show_import_or_do( void f(TWrapper), either<import,T> et )
     cout << "parse failed" << endl;
 }
 
+void ptshow( PTThresholdWrapper p );
+
+void taushow( TauWrapper p );
+
 #endif // __DETECTOR_TYPE__
 
 

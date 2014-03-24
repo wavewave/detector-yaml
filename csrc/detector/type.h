@@ -299,5 +299,27 @@ public:
   }
 };
 
+class PTThresholdWrapper {
+private:
+public:
+  pt_threshold_eff_data_t dat ; 
+  PTThresholdWrapper( pt_threshold_eff_data_t p ) : dat(p) { }
+  static PTThresholdWrapper create_wrapped( pt_threshold_eff_data_t p ) { 
+    return PTThresholdWrapper(p);
+  }
+};
+
+class TauWrapper : public INameable, public IMetaInfoable {
+private:
+public:
+  tau_eff_data_t dat; 
+  TauWrapper( tau_eff_data_t p ) : dat(p) { }
+  virtual string name( void ) { return dat.name; }
+  virtual meta_info_t meta_info( void ) { return dat.meta_info; } 
+  static TauWrapper create_wrapped( tau_eff_data_t p ) {
+    return TauWrapper(p);
+  }
+};
+
 #endif // __DETECTOR_TYPE__
 
