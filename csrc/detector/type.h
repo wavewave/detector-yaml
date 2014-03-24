@@ -158,12 +158,52 @@ struct jet_eff_data_t
   pt_eta_data_t efficiency;
 };
 
+struct tau_1or3prong_t
+{
+  pt_eta_data_t efficiency_1prong;
+  pt_eta_data_t rejection_1prong;
+  pt_eta_data_t efficiency_3prong;
+  pt_eta_data_t rejection_3prong;
+};
+
+struct tau_combined_t
+{
+  pt_eta_data_t efficiency; 
+  pt_eta_data_t rejection;
+};
+
+class tau_eff_detail_t 
+{
+private:
+  enum which_t { tau1or3prong, combined } which;
+  boost::variant<tau_1or3prong_t, tau_combined_t> content; 
+ public:
+  void put(tau_1or3prong_t g) { which = tau1or3prong; content = g; }
+  void put(tau_combined_t g ) {which = combined; content = g; }
+  
+  bool is1or3Prong( void ) { return (which == tau1or3prong); }
+  bool isCombined( void ) { return (which == combined); }
+  boost::optional<tau_1or3prong_t> get1or3Prong( void ) {
+    if( which == tau1or3prong ) 
+      return boost::optional<tau_1or3prong_t>(boost::get<tau_1or3prong_t>(content)); 
+    else
+      return boost::optional<tau_1or3prong_t>();
+  }
+  boost::optional<tau_combined_t> getCombined( void ) {
+    if( which == combined )
+      return boost::optional<tau_combined_t>(boost::get<tau_combined_t>(content));
+    else
+      return boost::optional<tau_combined_t>();
+  }
+};
+
 struct tau_eff_data_t
 {
   string name;
   meta_info_t meta_info;
+  string tag_method; 
+  tau_eff_detail_t efficiency; 
 };
-
 
 struct pt_threshold_eff_data_t
 {

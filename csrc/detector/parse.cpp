@@ -94,8 +94,6 @@ get_pt_eta_data( YAML::Node node )
           && ( mnode2 = maybeFind<YAML::Node>("Grid", node) )
           && ( mg = get_grid( ptbin.get(), etabin.get(), mnode2.get() ) ) ) { 
         grid_t g = mg.get() ;
-        //g.pt_bins = ptbin.get();
-        //g.eta_bins = etabin.get(); 
         pt_eta_data_t dat; 
         dat.put(g);
         return boost::optional<pt_eta_data_t>(dat);
@@ -107,6 +105,38 @@ get_pt_eta_data( YAML::Node node )
   }
   
   return NULL; 
+}
+
+boost::optional<tau_eff_detail_t> 
+get_tau_eff_detail( YAML::Node node ) 
+{
+  boost::optional<string> s1; 
+  if( s1 = maybeFind<string>("Type",node) ) {
+    if( s1.get() == "Tau1or3Prong" ) {
+      boost::optional<YAML::Node> mn1,mn2,mn3,mn4;
+      boost::optional<pt_eta_data_t> eff1, rej1, eff3, rej3;
+      if( ( mn1 = maybeFind<YAML::Node>("Efficiency1Prong", node) )
+          && (eff1 = get_pt_eta_data( mn1.get() ) )
+          && (mn2 = maybeFind<YAML::Node>("Rejection1Prong", node) )
+          && (rej1 = get_pt_eta_data( mn2.get() ) )
+          && (mn3 = maybeFind<YAML::Node>("Efficiency3Prong", node) )
+          && (eff3 = get_pt_eta_data( mn1.get() ) )
+          && (mn4 = maybeFind<YAML::Node>("Rejection3Prong", node) ) 
+          && (rej3 = get_pt_eta_data( mn1.get() ) ) ) {
+        tau_1or3prong_t t13 ;
+        tau_eff_detail_t t; 
+        t13.efficiency_1prong = eff1.get();
+        t13.rejection_1prong  = rej1.get();
+        t13.efficiency_3prong = eff3.get();
+        t13.rejection_3prong  = rej3.get();
+        t.put( t13 ); 
+        return boost::optional<tau_eff_detail_t>(t);
+      }
+   
+     
+    }
+  }
+  return NULL;  
 }
 
 
@@ -219,15 +249,23 @@ boost::optional<jet_eff_data_t> getJetEffData( YAML::Node node )
 boost::optional<tau_eff_data_t> getTauEffData( YAML::Node node ) 
 {
   boost::optional<string> s1; 
+  boost::optional<string> s2;
   boost::optional<meta_info_t> minfo ;  
+  boost::optional<YAML::Node> n1;
+  boost::optional<tau_eff_detail_t> eff; 
 
   if( (s1 = maybeFind<string>("Name", node) )
-      && ( minfo = getMetaInfo( node ) ) )
+      && (s2 = maybeFind<string>("TaggingMethod", node) )
+      && ( minfo = getMetaInfo( node ) ) 
+      && ( n1 = maybeFind<YAML::Node>("Efficiency", node) )
+      && ( eff = get_tau_eff_detail( n1.get() ) ) )
   { 
-    tau_eff_data_t mueff; 
-    mueff.name = s1.get(); 
-    mueff.meta_info = minfo.get();
-    return boost::optional<tau_eff_data_t>(mueff); 
+    tau_eff_data_t t; 
+    t.name = s1.get(); 
+    t.meta_info = minfo.get();
+    t.tag_method = s2.get();
+    t.efficiency = eff.get() ;
+    return boost::optional<tau_eff_data_t>(t); 
   }
   return NULL;
 }
@@ -328,4 +366,54 @@ boost::optional<detector_description_t> getDetectorDescription( YAML::Node doc )
     return boost::optional<detector_description_t>(dd);
   }
   return NULL;
+}
+
+
+void show_pt_eta_data( pt_eta_data_t dat ) 
+{
+  boost::optional<grid_t> mg ; 
+  boost::optional<grid_const_t> mgc; 
+  boost::optional<grid_full_t> mgf;
+
+  if( mg = dat.getGrid() ) { 
+    if( mgc = mg.get().getGridConst() ) {
+      grid_const_t gc = mgc.get();
+    
+      cout << "efficiency : pt_bins = [" ;
+      for( auto it = gc.pt_eta_bins.pt.begin() ; it != gc.pt_eta_bins.pt.end() ; ++it ) {
+        cout << *it << "," ;
+      }
+      cout << "] " << endl;
+      cout << "efficiency : eta_bins = [";
+      for( auto it = gc.pt_eta_bins.eta.begin() ; it != gc.pt_eta_bins.eta.end() ; ++it ) {
+        cout << *it << "," ;
+      }
+      cout << "] " << endl;
+      cout << "efficiency : value = " << gc.value << endl; 
+    } 
+    else if( mgf = mg.get().getGridFull() ) {
+      grid_full_t gf = mgf.get();
+    
+      cout << "efficiency : pt_bins = [" ;
+      for( auto it = gf.pt_eta_bins.pt.begin() ; it != gf.pt_eta_bins.pt.end() ; ++it ) {
+        cout << *it << "," ;
+      }
+      cout << "] " << endl;
+      cout << "efficiency : eta_bins = [";
+      for( auto it = gf.pt_eta_bins.eta.begin() ; it != gf.pt_eta_bins.eta.end() ; ++it ) {
+        cout << *it << "," ;
+      }
+      cout << "] " << endl;
+      cout << "efficiency : grid_data = [ " ;
+      for( auto it1 = gf.grid_data.begin() ; it1 != gf.grid_data.end() ; ++it1 ) {
+        cout << "[" ; 
+        for( auto it2 = it1->begin() ; it2 != it1->end() ; ++it2 ) {
+          cout << *it2 << "," ; 
+        }
+        cout << "],  " << endl << "                           " ;
+      } 
+      cout << "] " << endl;
+
+    }
+  } 
 }

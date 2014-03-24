@@ -52,6 +52,10 @@ importOrDeal( boost::optional<T> getT (YAML::Node node), YAML::Node node )
   return NULL;
 }
 
+boost::optional<pt_eta_data_t> get_pt_eta_data( YAML::Node node ) ;
+
+boost::optional<tau_eff_detail_t> get_tau_eff_detail( YAML::Node node ) ;
+
 boost::optional<electron_eff_data_t> getElectronEffData( YAML::Node node ) ;
 
 boost::optional<photon_eff_data_t> getPhotonEffData( YAML::Node node ) ;
@@ -71,6 +75,9 @@ boost::optional<pt_threshold_eff_data_t> getPTThresholdEffDat( YAML::Node node )
 boost::optional<object_description_t> getObjectDescription( YAML::Node node) ;
 
 boost::optional<detector_description_t> getDetectorDescription( YAML::Node doc ) ;
+
+void show_pt_eta_data( pt_eta_data_t dat );
+
 
 template <typename T> 
 void show_name_and_meta_info( T t ) 
@@ -92,6 +99,9 @@ void show_name_and_meta_info_efficiency( T t )
   static_assert(std::is_base_of<IEfficiency,T>::value, "T must be a descendent of IEfficiency");
   cout << "-----------------------------" << endl;
   show_name_and_meta_info( t );
+  show_pt_eta_data( t.efficiency() );
+
+  /* 
   boost::optional<grid_t> mg ; 
   boost::optional<grid_const_t> mgc; 
   boost::optional<grid_full_t> mgf;
@@ -136,7 +146,7 @@ void show_name_and_meta_info_efficiency( T t )
       cout << "] " << endl;
 
     }
-  } 
+    }  */
   cout << "-----------------------------" << endl;
 }
 

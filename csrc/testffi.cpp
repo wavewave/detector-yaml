@@ -31,6 +31,44 @@ void ptshow( PTThresholdWrapper p ) {
   cout << "tau_pt_min : "      << p.dat.tau_pt_min << endl;
 }
 
+class TauWrapper : public INameable, public IMetaInfoable {
+private:
+public:
+  tau_eff_data_t dat; 
+  TauWrapper( tau_eff_data_t p ) : dat(p) { }
+  virtual string name( void ) { return dat.name; }
+  virtual meta_info_t meta_info( void ) { return dat.meta_info; } 
+  static TauWrapper create_wrapped( tau_eff_data_t p ) {
+    return TauWrapper(p);
+  }
+};
+
+void taushow( TauWrapper p ) {
+  show_name_and_meta_info( p );
+  cout << "tag_method : " << p.dat.tag_method << endl;
+  tau_eff_detail_t eff = p.dat.efficiency; 
+  boost::optional<tau_1or3prong_t> mt ;
+  if( mt = eff.get1or3Prong() ) {
+    tau_1or3prong_t t = mt.get();
+    show_pt_eta_data( t.efficiency_1prong ); 
+    show_pt_eta_data( t.rejection_1prong ); 
+    show_pt_eta_data( t.efficiency_3prong ); 
+    show_pt_eta_data( t.rejection_3prong ); 
+
+
+  }
+  cout << "----------------------------------" << endl;
+   
+  /* cout << "name : "            <<  p.dat.name << endl; 
+  cout << "mu_pt_min : "       << p.dat.mu_pt_min << endl;
+  cout << "electron_pt_min : " << p.dat.electron_pt_min << endl; 
+  cout << "photon_pt_min : "   << p.dat.photon_pt_min << endl; 
+  cout << "jet_pt_min : "      << p.dat.jet_pt_min << endl;
+  cout << "bjet_pt_min : "     << p.dat.bjet_pt_min << endl;
+  cout << "track_pt_min : "    << p.dat.track_pt_min << endl; 
+  cout << "tau_pt_min : "      << p.dat.tau_pt_min << endl; */
+}
+
 void yamlparsetest( void ) {
   std::ifstream input("temp/ATLAS2011.yaml");  
   YAML::Node doc = YAML::Load(input);
@@ -55,7 +93,7 @@ void yamlparsetest( void ) {
                    , pdd.object.muon );
   show_import_or_do( show_name_and_meta_info_efficiency<name_meta_info_efficiency_wrapped<jet_eff_data_t> >
                    , pdd.object.jet );
-  show_import_or_do( show_name_and_meta_info<name_meta_info_wrapped<tau_eff_data_t> >, pdd.object.tau ); 
+  show_import_or_do( taushow, pdd.object.tau ); 
     
   show_import_or_do( ptshow, pdd.object.ptthresholds );
 }
