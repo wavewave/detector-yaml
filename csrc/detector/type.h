@@ -205,6 +205,13 @@ struct tau_eff_data_t
   tau_eff_detail_t efficiency; 
 };
 
+struct track_eff_data_t
+{  
+  string name;
+  meta_info_t meta_info;
+  pt_eta_data_t efficiency;
+};
+
 struct pt_threshold_eff_data_t
 {
   string name;
@@ -226,6 +233,7 @@ struct object_description_t
   either <import,muon_eff_data_t> muon;
   either <import,jet_eff_data_t> jet;
   either <import,tau_eff_data_t> tau;
+  boost::optional< either<import, track_eff_data_t> > track;
   either <import,pt_threshold_eff_data_t> ptthresholds;
 };
 

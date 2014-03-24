@@ -76,7 +76,6 @@ void yamlparsetest( char* filename) {
   std::ifstream input( filename ) ;// input("temp/ATLAS2011.yaml");  
   YAML::Node doc = YAML::Load(input);
 
-
   boost::optional<detector_description_t> mdd = getDetectorDescription(doc) ; 
 
   if( !mdd.is_initialized() ) return; 
@@ -99,6 +98,12 @@ void yamlparsetest( char* filename) {
   show_import_or_do( taushow, pdd.object.tau ); 
     
   show_import_or_do( ptshow, pdd.object.ptthresholds );
+
+  if( pdd.object.track ) {
+    show_import_or_do( show_name_and_meta_info_efficiency<name_meta_info_efficiency_wrapped<track_eff_data_t> >
+		       , pdd.object.track.get() );
+  }
+ 
 }
 
 /*****************************************/

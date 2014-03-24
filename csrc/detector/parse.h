@@ -70,6 +70,8 @@ boost::optional<jet_eff_data_t> getJetEffData( YAML::Node node ) ;
 
 boost::optional<tau_eff_data_t> getTauEffData( YAML::Node node ) ;
 
+boost::optional<track_eff_data_t> getTrackEffData( YAML::Node node ) ;
+
 boost::optional<pt_threshold_eff_data_t> getPTThresholdEffDat( YAML::Node node );
 
 boost::optional<object_description_t> getObjectDescription( YAML::Node node) ;
@@ -100,56 +102,8 @@ void show_name_and_meta_info_efficiency( T t )
   cout << "-----------------------------" << endl;
   show_name_and_meta_info( t );
   show_pt_eta_data( t.efficiency() );
-
-  /* 
-  boost::optional<grid_t> mg ; 
-  boost::optional<grid_const_t> mgc; 
-  boost::optional<grid_full_t> mgf;
-
-  if( mg = t.efficiency().getGrid() ) { 
-    if( mgc = mg.get().getGridConst() ) {
-      grid_const_t gc = mgc.get();
-    
-      cout << "efficiency : pt_bins = [" ;
-      for( auto it = gc.pt_eta_bins.pt.begin() ; it != gc.pt_eta_bins.pt.end() ; ++it ) {
-        cout << *it << "," ;
-      }
-      cout << "] " << endl;
-      cout << "efficiency : eta_bins = [";
-      for( auto it = gc.pt_eta_bins.eta.begin() ; it != gc.pt_eta_bins.eta.end() ; ++it ) {
-        cout << *it << "," ;
-      }
-      cout << "] " << endl;
-      cout << "efficiency : value = " << gc.value << endl; 
-    } 
-    else if( mgf = mg.get().getGridFull() ) {
-      grid_full_t gf = mgf.get();
-    
-      cout << "efficiency : pt_bins = [" ;
-      for( auto it = gf.pt_eta_bins.pt.begin() ; it != gf.pt_eta_bins.pt.end() ; ++it ) {
-        cout << *it << "," ;
-      }
-      cout << "] " << endl;
-      cout << "efficiency : eta_bins = [";
-      for( auto it = gf.pt_eta_bins.eta.begin() ; it != gf.pt_eta_bins.eta.end() ; ++it ) {
-        cout << *it << "," ;
-      }
-      cout << "] " << endl;
-      cout << "efficiency : grid_data = [ " ;
-      for( auto it1 = gf.grid_data.begin() ; it1 != gf.grid_data.end() ; ++it1 ) {
-        cout << "[" ; 
-        for( auto it2 = it1->begin() ; it2 != it1->end() ; ++it2 ) {
-          cout << *it2 << "," ; 
-        }
-        cout << "],  " << endl << "                           " ;
-      } 
-      cout << "] " << endl;
-
-    }
-    }  */
   cout << "-----------------------------" << endl;
 }
-
 
 template <typename T, typename TWrapper> 
 void show_import_or_do( void f(TWrapper), either<import,T> et )

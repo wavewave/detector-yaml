@@ -258,6 +258,26 @@ boost::optional<jet_eff_data_t> getJetEffData( YAML::Node node )
   return NULL;
 }
 
+boost::optional<track_eff_data_t> getTrackEffData( YAML::Node node ) 
+{
+  boost::optional<string> s1; 
+  boost::optional<meta_info_t> minfo ;  
+  boost::optional<YAML::Node> node2;
+  boost::optional<pt_eta_data_t> eff;
+
+  if( (s1 = maybeFind<string>("Name", node) )
+      && ( minfo = getMetaInfo( node ) ) 
+      && ( node2 = maybeFind<YAML::Node>("Efficiency",node) )
+      && ( eff = get_pt_eta_data( node2.get() ) ) ) { 
+    track_eff_data_t tr; 
+    tr.name = s1.get(); 
+    tr.meta_info = minfo.get();
+    tr.efficiency = eff.get();
+    return boost::optional<track_eff_data_t>(tr); 
+  }
+  return NULL;
+}
+
 boost::optional<tau_eff_data_t> getTauEffData( YAML::Node node ) 
 {
   boost::optional<string> s1; 
@@ -345,6 +365,16 @@ boost::optional<object_description_t> getObjectDescription( YAML::Node node)
     od.jet = r5.get();
     od.tau = r6.get();
     od.ptthresholds = r7.get();
+    boost::optional<YAML::Node> mn8;
+    if( mn8 = maybeFind<YAML::Node>("Track",node) ) {
+      boost::optional< either<import, track_eff_data_t> > eimptrk;  
+      eimptrk = importOrDeal( getTrackEffData, mn8.get() ); 
+      od.track = eimptrk;
+    } else { 
+      boost::optional< either<import, track_eff_data_t> > nullimptrk; 
+      od.track = nullimptrk; 
+    } 
+
     return boost::optional<object_description_t>(od);
   }
   
