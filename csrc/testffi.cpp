@@ -11,7 +11,7 @@
 using namespace std;
 
 /********************************/
-electron_eff_data_wrapper 
+/* electron_eff_data_wrapper 
 create_electron_eff_data_wrapper( electron_eff_data_t e ) 
 {
   electron_eff_data_wrapper ewrap(e);
@@ -25,7 +25,7 @@ create_muon_eff_data_wrapper( muon_eff_data_t e )
   return mwrap ;
 }
 
-
+*/
 
 /********************************/
 
@@ -272,9 +272,8 @@ void show_name_and_meta_info( T t )
   cout << "-----------------------------" << endl;
 }
 
-template <typename T, typename TWrapper> 
-void show_import_or_do( void f(TWrapper), TWrapper wrap( T )
-                      , either<import,T> et )
+template <typename T> 
+void show_import_or_do( void f(name_meta_info_wrapped<T>), either<import,T> et )
 {
   if( boost::optional<import> t = et.getLeft() ) {
     cout << "----------------------------------" << endl; 
@@ -282,8 +281,8 @@ void show_import_or_do( void f(TWrapper), TWrapper wrap( T )
     cout << "----------------------------------" << endl;
   }
   else if( boost::optional<T> t = et.getRight() ) {
-    TWrapper twrapped = wrap(t.get());
-    f(twrapped);
+    name_meta_info_wrapped<T> w = name_meta_info_wrapped<T>::create_name_meta_info_wrapped(t.get());
+    f(w);
   }
   else 
     cout << "parse failed" << endl;
@@ -304,12 +303,14 @@ void yamlparsetest( void ) {
   cout << "Description is "<< pdd.description << endl;
   cout << "Reference is " << pdd.reference << endl;
 
-  show_import_or_do( show_name_and_meta_info, create_electron_eff_data_wrapper
-		     , pdd.object.electron ); 
- 
-  show_import_or_do( show_name_and_meta_info, create_muon_eff_data_wrapper
-                   , pdd.object.muon );
-  
+  show_import_or_do( show_name_and_meta_info, pdd.object.electron ); 
+  show_import_or_do( show_name_and_meta_info, pdd.object.photon );
+  show_import_or_do( show_name_and_meta_info, pdd.object.bjet );  
+  show_import_or_do( show_name_and_meta_info, pdd.object.muon );
+  show_import_or_do( show_name_and_meta_info, pdd.object.jet );
+  show_import_or_do( show_name_and_meta_info, pdd.object.tau );
+    
+
 }
 
 /*****************************************/

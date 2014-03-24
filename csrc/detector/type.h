@@ -126,6 +126,38 @@ public:
   virtual meta_info_t meta_info( void ) = 0;  
 };
 
+
+/* template <typename T> 
+class name_meta_info_wrapped; 
+
+template <typename T> 
+name_meta_info_wrapped<T> 
+create_name_meta_info_wrapped( T e ); */
+
+template <typename T> 
+class name_meta_info_wrapped : public INameable, IMetaInfoable 
+{
+private:
+  T dat; 
+  name_meta_info_wrapped( T e ) : dat(e) { } 
+
+public:  
+  string name( void ) { return dat.name; }
+  meta_info_t meta_info( void ) { return dat.meta_info; }
+  static name_meta_info_wrapped<T> create_name_meta_info_wrapped( T e ) { 
+    name_meta_info_wrapped<T> t(e); 
+    return t;
+  }
+};
+
+/*
+template<typename T> 
+name_meta_info_wrapped<T> 
+create_name_meta_info_wrapped( T e ) { 
+} 
+*/
+
+/* 
 class electron_eff_data_wrapper : public INameable, IMetaInfoable 
 {
 private:
@@ -153,7 +185,7 @@ public:
     create_muon_eff_data_wrapper( muon_eff_data_t e ) ; 
 
 };
-
+*/
 
 #endif // __DETECTOR_TYPE__
 
