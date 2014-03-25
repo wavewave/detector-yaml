@@ -5,7 +5,7 @@ module ATLAS where
 
 import Detector.Type
 
-atlas2011 :: DetectorDescription
+atlas2011 :: DetectorDescription (Either Import)
 atlas2011 = DetectorDescription 
             { detectorName = "ATLAS2011"
             , detectorDescription = "ATLAS 2011 detector description"
@@ -14,7 +14,7 @@ atlas2011 = DetectorDescription
             , detectorValidationInfo = "Validated on 2014/02" 
             , detectorObject = atlas2011Object }
 
-atlas2011Object :: ObjectDescription
+atlas2011Object :: ObjectDescription (Either Import)
 atlas2011Object = ObjectDescription 
   { electron = Right atlasEleDataTight -- Left (Import "Electron_Loose_ATLAS") 
   , photon = Right atlasPhoDataTight --  Left (Import "Photon_Tight_ATLAS")

@@ -22,8 +22,9 @@ Executable mkyaml
   ghc-prof-options: -caf-all -auto-all
   Build-Depends: 
                    base>4, 
-                   text,  
+                   directory,
                    filepath,
+                   text,  
                    detector-yaml
 
 Executable parseyaml
@@ -32,9 +33,11 @@ Executable parseyaml
   ghc-options: 	-Wall -Werror -O2 -threaded -funbox-strict-fields -fno-warn-unused-do-bind -rtsopts
   ghc-prof-options: -caf-all -auto-all
   Build-Depends: 
-                   base>4, 
-                   text, 
                    attoparsec,
+                   base>4, 
+                   directory,
+                   filepath,
+                   text, 
                    detector-yaml
 
 Executable parsecpp
@@ -54,12 +57,13 @@ Library
   ghc-prof-options: -caf-all -auto-all
   cc-options: -std=c++11
   Build-Depends: 
-                   base>4, 
-                   text, 
-                   scientific, 
-                   bytestring, 
                    attoparsec,
-                   filepath
+                   base>4, 
+                   bytestring, 
+                   filepath,
+                   scientific, 
+                   text, 
+                   transformers
 
   Exposed-Modules: 
                    ATLAS

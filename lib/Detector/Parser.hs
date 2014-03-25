@@ -5,11 +5,13 @@
 
 module Detector.Parser where
 
-import           Control.Applicative ((<$>))
+import           Control.Applicative ((<$>), (<*>), liftA)
 import           Control.Monad ((<=<))
+import           Data.Functor.Identity
 import qualified Data.List as L
 import           Data.Scientific
 import qualified Data.Text as T
+import           System.FilePath
 --
 import           Detector.Type
 -- 
@@ -44,7 +46,7 @@ maybeNum _ = Nothing
 
 
 -- | get a detector description from parsed YAML object
-getDetectorDescription :: [(T.Text, PYaml)] -> Maybe DetectorDescription
+getDetectorDescription :: [(T.Text, PYaml)] -> Maybe (DetectorDescription (Either Import))
 getDetectorDescription kvlst = do
     xs <- mapM (maybeText <=< flip find kvlst) 
             ["Name", "Description", "Reference"
@@ -62,7 +64,7 @@ getDetectorDescription kvlst = do
       _ -> Nothing
 
 -- | get an object description from parsed YAML object
-getObjectDescription :: [(T.Text,PYaml)] -> Maybe ObjectDescription 
+getObjectDescription :: [(T.Text,PYaml)] -> Maybe (ObjectDescription (Either Import)) 
 getObjectDescription kvlst = do
     xs <- mapM (maybeObject <=< flip find kvlst) 
             [ "Electron", "Photon", "BJet", "Muon", "Jet"
@@ -201,7 +203,6 @@ getTrackEffData kvlst = do
     eff <- getPTEtaData effkvlst
     return (TrackEffData nm meta eff)
 
-
 -- |
 getPTThresholds :: [(T.Text,PYaml)] -> Maybe PTThresholds
 getPTThresholds kvlst = do
@@ -216,3 +217,44 @@ getPTThresholds kvlst = do
                , jetPTMin = j, bJetPTMin = b, trkPTMin = tr, tauPTMin = ta } 
       _ -> Nothing
 
+
+--------------
+-- import   --
+--------------
+
+importData :: ([(T.Text, PYaml)] -> Maybe a)  
+           -> FilePath
+           -> Either Import a 
+           -> IO (Identity a) 
+importData _ _ (Right x) = (return . Identity) x 
+importData f rdir (Left (Import n)) = do
+    let fname = rdir </> T.unpack n <.> "yaml"
+    r <- parseFile fname 
+    case r of
+      Left err -> error err
+      Right (PYObject kvlst) -> do 
+        maybe (error ("parse " ++ fname ++ " failed")) 
+              (return . Identity)
+              (f kvlst)
+      Right _ -> error "not an object"
+
+importObjectDescription :: FilePath 
+                        -> ObjectDescription (Either Import)
+                        -> IO (ObjectDescription Identity)
+importObjectDescription rdir ObjectDescription {..} = do
+    ObjectDescription 
+    <$> importData getElectronEffData rdir electron 
+    <*> importData getPhotonEffData rdir photon
+    <*> importData getBJetEffData rdir bJet
+    <*> importData getMuonEffData rdir muon
+    <*> importData getJetEffData rdir jet
+    <*> importData getTauEffData rdir tau
+    <*> maybe (return Nothing) (liftA Just . importData getTrackEffData rdir) track
+    <*> importData getPTThresholds rdir ptThresholds
+
+importDetectorDescription :: FilePath 
+                          -> DetectorDescription (Either Import)
+                          -> IO (DetectorDescription Identity)
+importDetectorDescription rdir dd@DetectorDescription {..} = do 
+    od <- importObjectDescription rdir detectorObject
+    return dd { detectorObject = od }

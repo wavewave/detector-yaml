@@ -1,8 +1,12 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 module Detector.Type where
 
+import Data.Functor.Identity
 import Data.Monoid ((<>))
 import Data.Scientific
 import Data.Text (Text)
@@ -15,34 +19,43 @@ import Prelude hiding (lines)
 class Nameable a where
   name :: a -> Text
 
-data DetectorDescription = 
+data DetectorDescription m = 
   DetectorDescription { detectorName :: Text
                       , detectorDescription :: Text
                       , detectorReference :: Text
                       , detectorComment :: Text
                       , detectorValidationInfo :: Text 
-                      , detectorObject :: ObjectDescription
+                      , detectorObject :: ObjectDescription m
                       }
-  deriving (Show)
 
-instance Nameable DetectorDescription where
+deriving instance Show (DetectorDescription (Either Import))
+deriving instance Show (DetectorDescription Identity)
+-- deriving instance (Show (ObjectDescription m)) => Show (DetectorDescription m)
+
+instance (Show a) => Show (Identity a) where
+  show x = show (runIdentity x)
+
+instance Nameable (DetectorDescription m) where
   name = detectorName  
+
+data ObjectDescription m = 
+  ObjectDescription 
+  { electron :: m ElectronEffData -- Either Import ElectronEffData 
+  , photon :: m PhotonEffData -- Either Import PhotonEffData 
+  , bJet :: m BJetEffData -- Either Import BJetEffData 
+  , muon :: m MuonEffData -- Either Import MuonEffData 
+  , jet :: m JetEffData -- Either Import JetEffData 
+  , tau :: m TauEffData -- Either Import TauEffData
+  , track :: Maybe (m TrackEffData) -- Maybe (Either Import TrackEffData)
+  , ptThresholds :: m PTThresholds -- Either Import PTThresholds
+  }
+
+deriving instance Show (ObjectDescription (Either Import))
+deriving instance Show (ObjectDescription Identity)
+-- deriving instance (Show (m PTThresholds)) => Show (ObjectDescription m)
 
 data Import = Import { fileName :: Text }
             deriving (Show)
-
-
-data ObjectDescription = 
-  ObjectDescription { electron :: Either Import ElectronEffData 
-                    , photon :: Either Import PhotonEffData 
-                    , bJet :: Either Import BJetEffData 
-                    , muon :: Either Import MuonEffData 
-                    , jet :: Either Import JetEffData 
-                    , tau :: Either Import TauEffData
-                    , track :: Maybe (Either Import TrackEffData)
-                    , ptThresholds :: Either Import PTThresholds }
-
-  deriving (Show)
 
 data MetaInfo = MetaInfo { tag :: Text
                          , description :: Text
@@ -281,7 +294,7 @@ instance MakeYaml PTThresholds where
               , ( "TauPTMIN", (YPrim . YNumber) tauPTMin ) 
               ]
 
-instance MakeYaml DetectorDescription where
+instance MakeYaml (DetectorDescription (Either Import)) where
   makeYaml n DetectorDescription {..} = 
     YObject $ [ ( "Name", mkString (n+defIndent) detectorName )
               , ( "Class", mkString (n+defIndent) "TopLevel" )
@@ -292,7 +305,7 @@ instance MakeYaml DetectorDescription where
               , ( "Object", makeYaml (n+defIndent) detectorObject ) 
               ]
 
-instance MakeYaml ObjectDescription where
+instance MakeYaml (ObjectDescription (Either Import)) where
   makeYaml n ObjectDescription {..} = 
     YObject $ [ ( "Electron", importOrEmbed (n+defIndent) electron)  
               , ( "Photon", importOrEmbed (n+defIndent) photon) 

@@ -5,6 +5,7 @@ import qualified Data.Text as ST
 -- import qualified Data.Text.Lazy as T
 import           Data.Text.Lazy.Builder 
 import qualified Data.Text.Lazy.IO as TIO
+import           System.Directory
 import           System.FilePath
 --
 import ATLAS
@@ -19,8 +20,15 @@ main = do
   let f (MkYamlBox x) = 
        TIO.writeFile (ST.unpack (name x) <.> "yaml") $ toLazyText (buildYaml 0 (makeYaml 0 x))
   
-  mapM_ f [ MkYamlBox atlas2011
-          , MkYamlBox atlasEleDataTight
+  cdir <- getCurrentDirectory
+  createDirectoryIfMissing True (cdir </> "top-level" ) 
+  createDirectoryIfMissing True (cdir </> "object" )
+
+  setCurrentDirectory (cdir </> "top-level")
+  mapM_ f [ MkYamlBox atlas2011, MkYamlBox cms2011 ] 
+
+  setCurrentDirectory (cdir </> "object")
+  mapM_ f [ MkYamlBox atlasEleDataTight
           , MkYamlBox atlasEleDataMedium
           , MkYamlBox atlasEleDataLoose
           , MkYamlBox atlasPhoDataTight
@@ -45,8 +53,7 @@ main = do
           ]
 
 
-  mapM_ f [ MkYamlBox cms2011
-          , MkYamlBox cmsBTagTCHEL
+  mapM_ f [ MkYamlBox cmsBTagTCHEL
           , MkYamlBox cmsBTagSSVHPT
           , MkYamlBox cmsBTagSSVHEM
           , MkYamlBox cmsMuonS

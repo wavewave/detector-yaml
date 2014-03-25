@@ -5,7 +5,7 @@ module CMS where
 
 import Detector.Type
 
-cms2011 :: DetectorDescription
+cms2011 :: DetectorDescription (Either Import)
 cms2011 = DetectorDescription 
             { detectorName = "CMS2011"
             , detectorDescription = "CMS 2011 detector description"
@@ -14,7 +14,7 @@ cms2011 = DetectorDescription
             , detectorValidationInfo = "Validated on 2014/02" 
             , detectorObject = cms2011Object }
 
-cms2011Object :: ObjectDescription 
+cms2011Object :: ObjectDescription (Either Import)
 cms2011Object = ObjectDescription 
   { electron     = Left (Import "Electron_PF_CMS")
   , photon       = Left (Import "Photon_PF_CMS")

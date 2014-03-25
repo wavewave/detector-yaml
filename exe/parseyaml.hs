@@ -3,27 +3,32 @@
 module Main where
 
 -- import Control.Monad ((<=<))
-import           Data.Attoparsec.Text
-import qualified Data.Text.IO as TIO
+import           System.Directory
 import           System.Environment 
+import           System.FilePath
 -- 
 import           Detector.Parser
 import           YAML.Parser
 
--- | testing with a given file
-parseFile :: FilePath -> IO (Either String PYaml)
-parseFile fp = do    
-    txt <- TIO.readFile fp 
-    return (parseOnly p_yaml txt)
 
+-- | main function 
 main :: IO ()
 main = do 
+  bdir <- getCurrentDirectory
   args <- getArgs
   let fp = args !! 0  
-  r <- parseFile fp
+  r <- parseFile (bdir </> "top-level" </> fp <.> "yaml")
   case r of 
     Left err -> print err
-    Right (PYObject kvlst) -> do  
-      -- print kvlst
-      print (getDetectorDescription kvlst)
+    Right (PYObject kvlst) -> do 
+      let mdd = getDetectorDescription kvlst
+      case mdd of
+        Nothing -> putStrLn "parsing failed"
+        Just dd -> do
+	  print dd
+	  putStrLn "======================"
+	  putStrLn "======================"
+	  putStrLn "======================"
+	  dd' <- importDetectorDescription (bdir </> "object") dd
+	  print dd'     
     Right _ -> putStrLn "not an object"
