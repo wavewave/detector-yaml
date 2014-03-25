@@ -24,11 +24,11 @@ main = do
       let mdd = getDetectorDescription kvlst
       case mdd of
         Nothing -> putStrLn "parsing failed"
-        Just dd -> do
-	  print dd
-	  putStrLn "======================"
-	  putStrLn "======================"
-	  putStrLn "======================"
-	  dd' <- importDetectorDescription (bdir </> "object") dd
-	  print dd'     
+        Just dd -> do 
+          print dd
+          putStrLn "======================"
+          putStrLn "======================"
+          putStrLn "======================"
+          dd' <- importDetectorDescription (bdir </> "object") dd
+          print dd'     
     Right _ -> putStrLn "not an object"

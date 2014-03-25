@@ -2,6 +2,7 @@
 #define __DETECTOR_PARSE__
 
 #include <iostream>
+#include <fstream>
 #include <boost/optional/optional.hpp>
 #include <boost/variant.hpp>
 #include <type_traits>
@@ -72,7 +73,7 @@ boost::optional<tau_eff_data_t> getTauEffData( YAML::Node node ) ;
 
 boost::optional<track_eff_data_t> getTrackEffData( YAML::Node node ) ;
 
-boost::optional<pt_threshold_eff_data_t> getPTThresholdEffDat( YAML::Node node );
+boost::optional<pt_threshold_eff_data_t> getPTThresholdEffData( YAML::Node node );
 
 boost::optional<object_description_t> getObjectDescription( YAML::Node node) ;
 
@@ -124,6 +125,31 @@ void show_import_or_do( void f(TWrapper), either<import,T> et )
 void ptshow( PTThresholdWrapper p );
 
 void taushow( TauWrapper p );
+
+boost::optional<object_description_dump_t> 
+importObjectDescription( string, object_description_t ) ;
+
+boost::optional<detector_description_dump_t>
+importDetectorDescription( string, detector_description_t );
+
+template<typename T>
+boost::optional<T> import_data ( boost::optional<T> f(YAML::Node)
+                              , string rdir
+                              , either< import, T> e ) 
+{
+  if( e.isRight() ) {
+    boost::optional<T> mt = e.getRight();
+    return mt;
+  }
+  else {
+    boost::optional<import> mi = e.getLeft(); 
+    string filepath = rdir + "/" + mi.get().name + ".yaml"; 
+    std::ifstream input( filepath );
+    YAML::Node doc = YAML::Load(input); 
+    boost::optional<T> mt = f(doc); 
+    return mt;
+  }
+}
 
 #endif // __DETECTOR_TYPE__
 

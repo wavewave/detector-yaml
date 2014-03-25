@@ -237,6 +237,18 @@ struct object_description_t
   either <import,pt_threshold_eff_data_t> ptthresholds;
 };
 
+struct object_description_dump_t
+{
+  electron_eff_data_t electron; 
+  photon_eff_data_t photon;
+  bjet_eff_data_t bjet;
+  muon_eff_data_t muon;
+  jet_eff_data_t jet;
+  tau_eff_data_t tau;
+  boost::optional<track_eff_data_t> track;
+  pt_threshold_eff_data_t ptthresholds;
+};
+
 struct detector_description_t
 { 
   string name; 
@@ -246,6 +258,16 @@ struct detector_description_t
   string validation_info;
   object_description_t object;
 }; 
+
+struct detector_description_dump_t
+{
+  string name;
+  string description; 
+  string reference; 
+  string comment;
+  string validation_info;
+  object_description_dump_t object;
+};
 
 class INameable 
 { 

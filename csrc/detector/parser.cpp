@@ -5,7 +5,7 @@
 #include <yaml-cpp/yaml.h>
 // 
 #include <detector/type.h>
-#include <detector/parse.h>
+#include <detector/parser.h>
 
 using namespace std;
 
@@ -491,4 +491,57 @@ void taushow( TauWrapper p ) {
     show_pt_eta_data( t.rejection );
   }
   cout << "----------------------------------" << endl;
+}
+
+boost::optional<object_description_dump_t> 
+importObjectDescription( string rdir, object_description_t od ) 
+{
+  object_description_dump_t oddump ;
+  boost::optional<electron_eff_data_t> melectron; 
+  boost::optional<photon_eff_data_t> mphoton;
+  boost::optional<bjet_eff_data_t> mbjet; 
+  boost::optional<muon_eff_data_t> mmuon;
+  boost::optional<jet_eff_data_t> mjet; 
+  boost::optional<tau_eff_data_t> mtau;
+  boost::optional<track_eff_data_t> mtrack; 
+  boost::optional<pt_threshold_eff_data_t> mpt; 
+  if( (melectron  = import_data( getElectronEffData, rdir, od.electron ) )
+      && (mphoton = import_data( getPhotonEffData  , rdir, od.photon) )
+      && (mbjet   = import_data( getBJetEffData    , rdir, od.bjet) )
+      && (mmuon   = import_data( getMuonEffData    , rdir, od.muon) )
+      && (mjet    = import_data( getJetEffData     , rdir, od.jet) ) 
+      && (mtau    = import_data( getTauEffData     , rdir, od.tau) )
+      && (mpt     = import_data( getPTThresholdEffData, rdir, od.ptthresholds ) )
+      ) {
+    oddump.electron = melectron.get();
+    oddump.photon = mphoton.get();
+    oddump.bjet = mbjet.get();
+    oddump.muon = mmuon.get();
+    oddump.jet = mjet.get();
+    oddump.tau = mtau.get();
+    oddump.ptthresholds = mpt.get();
+    if( od.track ) {
+      mtrack = import_data( getTrackEffData, rdir, od.track.get() );
+      oddump.track = mtrack;
+    }  
+    return boost::optional<object_description_dump_t>(oddump);
+  }
+  return NULL;
+}
+
+boost::optional<detector_description_dump_t> 
+importDetectorDescription( string rdir, detector_description_t dd )
+{
+  detector_description_dump_t dddump ; 
+  boost::optional<object_description_dump_t> moddump;
+  if( moddump = importObjectDescription(rdir,dd.object) ) {
+    dddump.name = dd.name; 
+    dddump.description = dd.description;
+    dddump.reference = dd.reference;
+    dddump.comment = dd.comment;
+    dddump.validation_info = dd.validation_info;
+    dddump.object = moddump.get(); 
+    return boost::optional<detector_description_dump_t>(dddump); 
+  }
+  return NULL; 
 }

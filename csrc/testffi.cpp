@@ -4,16 +4,21 @@
 #include <boost/variant.hpp>
 #include <type_traits>
 #include <yaml-cpp/yaml.h>
+#include <unistd.h>
 // 
 #include <detector/type.h>
-#include <detector/parse.h>
+#include <detector/parser.h>
 
 using namespace std;
 
 
-
 void yamlparsetest( char* filename) {
-  std::ifstream input( filename ) ; 
+  string fname (filename); 
+  char filePath[256] ; 
+  getcwd( filePath, sizeof(filePath) ) ;
+  string fpath(filePath);
+  string rdir = fpath + "/object";
+  std::ifstream input( fpath + "/top-level/" + fname + ".yaml") ; 
   YAML::Node doc = YAML::Load(input);
 
   boost::optional<detector_description_t> mdd = getDetectorDescription(doc) ; 
@@ -42,6 +47,17 @@ void yamlparsetest( char* filename) {
   if( pdd.object.track ) {
     show_import_or_do( show_name_and_meta_info_efficiency<name_meta_info_efficiency_wrapped<track_eff_data_t> >
 		       , pdd.object.track.get() );
+  }
+
+
+  cout << "===========================================" << endl;
+  cout << "======      now importing        ==========" << endl;
+  cout << "===========================================" << endl;
+  boost::optional<detector_description_dump_t> mdddump 
+    = importDetectorDescription(rdir,pdd);
+  if( mdddump ) {
+    cout << mdddump.get().name <<endl ;  
+    cout << mdddump.get().object.electron.name << endl;
   }
  
 }
