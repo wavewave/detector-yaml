@@ -7,6 +7,8 @@ module Detector.Parser where
 
 import           Control.Applicative ((<$>), (<*>), liftA)
 import           Control.Monad ((<=<))
+import           Control.Monad.Trans.Class
+import           Control.Monad.Trans.Maybe
 import           Data.Functor.Identity
 import qualified Data.List as L
 import           Data.Scientific
@@ -225,25 +227,25 @@ getPTThresholds kvlst = do
 importData :: ([(T.Text, PYaml)] -> Maybe a)  
            -> FilePath
            -> Either Import a 
-           -> IO (Identity a) 
+           -> MaybeT IO (Identity a)
 importData _ _ (Right x) = (return . Identity) x 
 importData f rdir (Left (Import n)) = do
     let fname = rdir </> T.unpack n <.> "yaml"
-    r <- parseFile fname 
+    r <- lift (parseFile fname)
     case r of
-      Left err -> error err
+      Left err -> fail err
       Right (PYObject kvlst) -> do 
-        maybe (error ("parse " ++ fname ++ " failed")) 
+        maybe (fail ("parse " ++ fname ++ " failed")) 
               (return . Identity)
               (f kvlst)
-      Right _ -> error "not an object"
+      Right _ -> fail "not an object"
 
 importObjectDescription :: FilePath 
                         -> ObjectDescription (Either Import)
-                        -> IO (ObjectDescription Identity)
+                        -> MaybeT IO (ObjectDescription Identity)
 importObjectDescription rdir ObjectDescription {..} = do
     ObjectDescription 
-    <$> importData getElectronEffData rdir electron 
+    <$> importData getElectronEffData rdir electron
     <*> importData getPhotonEffData rdir photon
     <*> importData getBJetEffData rdir bJet
     <*> importData getMuonEffData rdir muon
@@ -254,7 +256,7 @@ importObjectDescription rdir ObjectDescription {..} = do
 
 importDetectorDescription :: FilePath 
                           -> DetectorDescription (Either Import)
-                          -> IO (DetectorDescription Identity)
+                          -> MaybeT IO (DetectorDescription Identity)
 importDetectorDescription rdir dd@DetectorDescription {..} = do 
     od <- importObjectDescription rdir detectorObject
     return dd { detectorObject = od }

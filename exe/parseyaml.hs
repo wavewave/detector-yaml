@@ -3,6 +3,7 @@
 module Main where
 
 -- import Control.Monad ((<=<))
+import           Control.Monad.Trans.Maybe
 import           System.Directory
 import           System.Environment 
 import           System.FilePath
@@ -29,6 +30,6 @@ main = do
           putStrLn "======================"
           putStrLn "======================"
           putStrLn "======================"
-          dd' <- importDetectorDescription (bdir </> "object") dd
-          print dd'     
+          mdd' <- runMaybeT (importDetectorDescription (bdir </> "object") dd)
+          print mdd'     
     Right _ -> putStrLn "not an object"

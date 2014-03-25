@@ -38,6 +38,7 @@ Executable parseyaml
                    directory,
                    filepath,
                    text, 
+                   transformers,
                    detector-yaml
 
 Executable parsecpp
