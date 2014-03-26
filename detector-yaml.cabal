@@ -1,7 +1,7 @@
 Name:		detector-yaml
 Version:	0.0
-Synopsis:	
-Description: 	
+Synopsis:	YAML description handler for collider detectors
+Description: 	YAML description handler for collider detectors
 License: 	GPL-3
 License-file:	LICENSE
 Author:		Ian-Woo Kim
@@ -25,6 +25,7 @@ Executable mkyaml
                    directory,
                    filepath,
                    text,  
+                   yayaml,
                    detector-yaml
 
 Executable parseyaml
@@ -39,6 +40,7 @@ Executable parseyaml
                    filepath,
                    text, 
                    transformers,
+                   yayaml,
                    detector-yaml
 
 Executable parsecpp
@@ -64,16 +66,17 @@ Library
                    filepath,
                    scientific, 
                    text, 
-                   transformers
+                   transformers,
+                   yayaml
 
   Exposed-Modules: 
                    ATLAS
                    CMS
                    Detector.Parser
                    Detector.Type
-                   YAML.Builder
-                   YAML.Parser
                    Test
+                   -- YAML.Builder
+                   -- YAML.Parser
 
   include-dirs:      csrc
   C-sources:         csrc/testffi.cpp
