@@ -50,6 +50,7 @@ main = do
           , MkYamlBox atlasTauDataBDTLoose
           , MkYamlBox atlasTauDataBDTMedium
           , MkYamlBox atlasTauDataBDTTight
+          , MkYamlBox atlasPTThresholds
           ]
 
 
