@@ -1,3 +1,6 @@
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveFoldable #-}
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -6,15 +9,23 @@
 
 module Detector.Type where
 
+import Control.Applicative
+import Data.Foldable
+-- import Data.Functor
 import Data.Functor.Identity
 import Data.Monoid ((<>))
 import Data.Scientific
 import Data.Text (Text)
+import Data.Traversable
 import qualified Data.Text.Lazy as L
 -- 
 import YAML.Builder
 -- 
 import Prelude hiding (lines)
+
+deriving instance Foldable (Either e)
+
+deriving instance Traversable (Either e)
 
 class Nameable a where
   name :: a -> Text
@@ -30,7 +41,6 @@ data DetectorDescription m =
 
 deriving instance Show (DetectorDescription (Either Import))
 deriving instance Show (DetectorDescription Identity)
--- deriving instance (Show (ObjectDescription m)) => Show (DetectorDescription m)
 
 instance (Show a) => Show (Identity a) where
   show x = show (runIdentity x)
@@ -40,19 +50,18 @@ instance Nameable (DetectorDescription m) where
 
 data ObjectDescription m = 
   ObjectDescription 
-  { electron :: m ElectronEffData -- Either Import ElectronEffData 
-  , photon :: m PhotonEffData -- Either Import PhotonEffData 
-  , bJet :: m BJetEffData -- Either Import BJetEffData 
-  , muon :: m MuonEffData -- Either Import MuonEffData 
-  , jet :: m JetEffData -- Either Import JetEffData 
-  , tau :: m TauEffData -- Either Import TauEffData
-  , track :: Maybe (m TrackEffData) -- Maybe (Either Import TrackEffData)
-  , ptThresholds :: m PTThresholds -- Either Import PTThresholds
+  { electron :: m ElectronEffData 
+  , photon :: m PhotonEffData 
+  , bJet :: m BJetEffData 
+  , muon :: m MuonEffData
+  , jet :: m JetEffData 
+  , tau :: m TauEffData 
+  , track :: Maybe (m TrackEffData) 
+  , ptThresholds :: m PTThresholds
   }
 
 deriving instance Show (ObjectDescription (Either Import))
 deriving instance Show (ObjectDescription Identity)
--- deriving instance (Show (m PTThresholds)) => Show (ObjectDescription m)
 
 data Import = Import { fileName :: Text }
             deriving (Show)
@@ -70,8 +79,6 @@ data Grid = GridFull { gridData :: [ [ Scientific ] ]
           | GridConst { gridConst :: Scientific } 
           deriving (Show)
 
--- instance Show Grid where show _ = "Grid"
-
 data PTEtaData = PTEtaGrid 
                    { ptBins :: [Scientific]
                    , etaBins :: [Scientific]
@@ -88,8 +95,6 @@ data ElectronEffData = ElectronEffData
                             , eleEfficiency :: PTEtaData
                             }
                       deriving (Show)
--- instance Show ElectronEffData where show _ = "ElectronEffData"
-
 
 instance Nameable ElectronEffData where
   name = eleName
@@ -150,8 +155,9 @@ data TauEffDetail = Tau1or3Prong
                       { tauCombEff :: PTEtaData
                       , tauCombRej :: PTEtaData
                       } 
---                  deriving (Show)
-instance Show TauEffDetail where show _ = "TauEffDetail"
+                  deriving Show
+
+-- instance Show TauEffDetail where show _ = "TauEffDetail"
 
 instance Nameable TauEffData where
   name = tauName
@@ -198,11 +204,20 @@ mkMetaInfoPairs n MetaInfo {..} =
   , ("Comment", mkString n comment )
   , ("Reference", mkString n reference ) ]
 
+
+
 importOrEmbed :: (MakeYaml a) => 
                  Int 
               -> Either Import a 
               -> YamlValue
 importOrEmbed n = either (mkImport n) (makeYaml n)
+
+importOrEmbedF :: (MakeYaml a, Applicative f) => 
+                 Int 
+              -> Either Import (f a) 
+              -> f YamlValue
+importOrEmbedF n = fmap (importOrEmbed n) . sequenceA
+
 
 
 instance MakeYaml Grid where
@@ -294,7 +309,7 @@ instance MakeYaml PTThresholds where
               , ( "TauPTMIN", (YPrim . YNumber) tauPTMin ) 
               ]
 
-instance MakeYaml (DetectorDescription (Either Import)) where
+instance MakeYaml (DetectorDescription ImportList) where
   makeYaml n DetectorDescription {..} = 
     YObject $ [ ( "Name", mkString (n+defIndent) detectorName )
               , ( "Class", mkString (n+defIndent) "TopLevel" )
@@ -315,4 +330,19 @@ instance MakeYaml (ObjectDescription (Either Import)) where
               , ( "Tau", importOrEmbed (n+defIndent) tau) ] 
               <> maybe [] (\trk -> [("Track", importOrEmbed (n+defIndent) trk)]) track
               <> [ ( "PTThresholds", importOrEmbed (n+defIndent) ptThresholds) ]
-              
+
+newtype ImportList a = ImportList { unImportList :: [Either Import a] }
+
+deriving instance Functor ImportList
+ 
+instance MakeYaml (ObjectDescription ImportList) where
+  makeYaml n ObjectDescription {..} = 
+      YObject $ [ ( "Electron", importOrEmbed' (n+defIndent) electron)  
+                , ( "Photon", importOrEmbed' (n+defIndent) photon) 
+                , ( "BJet", importOrEmbed' (n+defIndent) bJet)
+                , ( "Muon", importOrEmbed' (n+defIndent) muon) 
+                , ( "Jet", importOrEmbed' (n+defIndent) jet)
+                , ( "Tau", importOrEmbed' (n+defIndent) tau) ] 
+                <> maybe [] (\trk -> [("Track", importOrEmbed' (n+defIndent) trk)]) track
+                <> [ ( "PTThresholds", importOrEmbed' (n+defIndent) ptThresholds) ]
+    where importOrEmbed' m = YIArray . fmap (importOrEmbed m) . unImportList

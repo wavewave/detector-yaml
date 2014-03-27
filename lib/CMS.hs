@@ -5,7 +5,7 @@ module CMS where
 
 import Detector.Type
 
-cms2011 :: DetectorDescription (Either Import)
+cms2011 :: DetectorDescription ImportList
 cms2011 = DetectorDescription 
             { detectorName = "CMS2011"
             , detectorDescription = "CMS 2011 detector description"
@@ -14,16 +14,18 @@ cms2011 = DetectorDescription
             , detectorValidationInfo = "Validated on 2014/02" 
             , detectorObject = cms2011Object }
 
-cms2011Object :: ObjectDescription (Either Import)
+cms2011Object :: ObjectDescription ImportList
 cms2011Object = ObjectDescription 
-  { electron     = Left (Import "Electron_PF_CMS")
-  , photon       = Left (Import "Photon_PF_CMS")
-  , bJet         = Left (Import "BJet_TCHEL_CMS")
-  , muon         = Left (Import "Muon_S_CMS")
-  , jet          = Left (Import "Jet_PF_CMS")
-  , tau          = Left (Import "Tau_TaNCL_CMS")
-  , track        = Just (Left (Import "Track_CMS")) -- Right cmsTrack
-  , ptThresholds = Left (Import "CMS_PTThreshold") -- Right cmsPTThresholds 
+  { electron     = ImportList [Left (Import "Electron_PF_CMS")]
+  , photon       = ImportList [Left (Import "Photon_PF_CMS")]
+  , bJet         = ImportList [Left (Import "BJet_TCHEL_CMS")]
+  , muon         = ImportList [Left (Import "Muon_S_CMS")]
+  , jet          = ImportList [Left (Import "Jet_PF_CMS")]
+  , tau          = ImportList [ Left (Import "Tau_TaNCL_CMS")
+                              , Left (Import "Tau_TaNCM_CMS")
+                              , Left (Import "Tau_TaNCT_CMS")]
+  , track        = Just (ImportList [Left (Import "Track_CMS")])
+  , ptThresholds = ImportList [Left (Import "CMS_PTThreshold")]
   }
 
 cmsBTagTCHEL :: BJetEffData

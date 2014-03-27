@@ -5,7 +5,7 @@ module ATLAS where
 
 import Detector.Type
 
-atlas2011 :: DetectorDescription (Either Import)
+atlas2011 :: DetectorDescription ImportList -- (Either Import)
 atlas2011 = DetectorDescription 
             { detectorName = "ATLAS2011"
             , detectorDescription = "ATLAS 2011 detector description"
@@ -14,17 +14,19 @@ atlas2011 = DetectorDescription
             , detectorValidationInfo = "Validated on 2014/02" 
             , detectorObject = atlas2011Object }
 
-atlas2011Object :: ObjectDescription (Either Import)
+atlas2011Object :: ObjectDescription ImportList -- (Either Import)
 atlas2011Object = ObjectDescription 
-  { electron = Left (Import "Electron_Tight_ATLAS") -- Right atlasEleDataTight -- Left (Import "Electron_Loose_ATLAS") 
-  , photon = Left (Import "Photon_Tight_ATLAS") -- Right atlasPhoDataTight --  Left (Import "Photon_Tight_ATLAS")
-  , bJet = Left (Import "BJet_SV50_ATLAS") --  Right atlasBJetDataSV50 -- Left (Import "BJet_JP50_ATLAS")
-  , muon = Left (Import "Muon_CB1_ATLAS") -- Right atlasMuonDataCB1 -- Left (Import "Muon_CB1_ATLAS")
-  , jet = Left (Import "Jet_ATLAS") -- Right atlasJetData -- Left (Import "Jet_ATLAS")
-  , tau = Left (Import "Tau_Cut_Loose_ATLAS") -- Right atlasTauDataCutLoose 
-           -- Left (Import "Tau_BDT_Tight_ATLAS")
-  , track = Nothing
-  , ptThresholds = Left (Import "ATLAS_PTThreshold") -- Right atlasPTThresholds 
+  { electron = ImportList -- [Left (Import "Electron_Tight_ATLAS")]
+                          [ Right atlasEleDataTight
+                          , Right atlasEleDataMedium
+                          , Right atlasEleDataLoose ]
+  , photon   = ImportList [Left (Import "Photon_Tight_ATLAS")]
+  , bJet     = ImportList [Left (Import "BJet_SV50_ATLAS")]
+  , muon     = ImportList [Left (Import "Muon_CB1_ATLAS")]
+  , jet      = ImportList [Left (Import "Jet_ATLAS")]
+  , tau      = ImportList [Left (Import "Tau_Cut_Loose_ATLAS")]
+  , track    = Nothing
+  , ptThresholds = ImportList [Left (Import "ATLAS_PTThreshold")]
   }
 
 
