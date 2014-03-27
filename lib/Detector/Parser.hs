@@ -5,20 +5,22 @@
 
 module Detector.Parser where
 
-import           Control.Applicative ((<$>), (<*>), liftA)
+import           Control.Applicative
 import           Control.Monad ((<=<))
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Maybe
-import           Data.Functor.Identity
+-- import           Data.Functor.Identity
 import qualified Data.List as L
 import           Data.Scientific
 import qualified Data.Text as T
+import           Data.Traversable
 import           System.FilePath
 --
 import           Detector.Type
 -- 
 import           YAML.Parser
 -- 
+import Prelude hiding (mapM)
 -- import           Debug.Trace
 
 
@@ -48,7 +50,7 @@ maybeNum _ = Nothing
 
 
 -- | get a detector description from parsed YAML object
-getDetectorDescription :: [(T.Text, PYaml)] -> Maybe (DetectorDescription (Either Import))
+getDetectorDescription :: [(T.Text, PYaml)] -> Maybe (DetectorDescription ImportList) -- (Either Import)
 getDetectorDescription kvlst = do
     xs <- mapM (maybeText <=< flip find kvlst) 
             ["Name", "Description", "Reference"
@@ -66,26 +68,29 @@ getDetectorDescription kvlst = do
       _ -> Nothing
 
 -- | get an object description from parsed YAML object
-getObjectDescription :: [(T.Text,PYaml)] -> Maybe (ObjectDescription (Either Import)) 
+getObjectDescription :: [(T.Text,PYaml)] -> Maybe (ObjectDescription ImportList) 
 getObjectDescription kvlst = do
-    xs <- mapM (maybeObject <=< flip find kvlst) 
-            [ "Electron", "Photon", "BJet", "Muon", "Jet"
-            , "Tau", "PTThresholds" ]
+    xs <- mapM (maybeList <=< flip find kvlst) 
+                 [ "Electron", "Photon", "BJet", "Muon", "Jet"
+                 , "Tau", "PTThresholds" ]
     case xs of 
-      [ eleObj, phoObj, bjetObj, muObj, jetObj, tauObj, ptThre ] -> do
-        let importOrDeal :: ([(T.Text, PYaml)] -> Maybe a) -> [(T.Text, PYaml)] -> Maybe (Either Import a) 
-            importOrDeal func = (either (Just . Left) (fmap Right . func) . getEitherImportOrObj) 
-        e <- importOrDeal getElectronEffData eleObj
-        p <-  importOrDeal getPhotonEffData phoObj
-        b <-  importOrDeal getBJetEffData bjetObj
-        m <- importOrDeal getMuonEffData muObj
-        j <- importOrDeal getJetEffData jetObj
-        ta <- importOrDeal getTauEffData tauObj
-        let tk = (importOrDeal getTrackEffData <=< maybeObject <=< find "Track") kvlst
-        pt <- importOrDeal getPTThresholds ptThre 
-        return ObjectDescription
-               { electron = e, photon = p, bJet = b, muon = m
-               , jet = j, tau = ta, track = tk, ptThresholds = pt }
+      [ eleObjs, phoObjs, bjetObjs, muObjs, jetObjs, tauObjs, ptThres ] -> do
+        let importOrDeal :: forall a. ([(T.Text, PYaml)] -> Maybe a) -> [(T.Text, PYaml)] 
+                         -> Maybe (Either Import a) 
+            importOrDeal func x = let y = fmap func (getEitherImportOrObj x) :: Either Import (Maybe a)
+                                  in sequenceA y
+        e <- ImportList <$> (traverse (importOrDeal getElectronEffData) =<< mapM maybeObject eleObjs)
+        p <- ImportList <$> (traverse (importOrDeal getPhotonEffData) =<< mapM maybeObject phoObjs)
+        b <- ImportList <$> (traverse (importOrDeal getBJetEffData) =<< mapM maybeObject bjetObjs)
+        m <- ImportList <$> (traverse (importOrDeal getMuonEffData) =<< mapM maybeObject muObjs)
+        j <- ImportList <$> (traverse (importOrDeal getJetEffData) =<< mapM maybeObject jetObjs)
+        ta <- ImportList <$> (traverse (importOrDeal getTauEffData) =<< mapM maybeObject tauObjs)
+        let mtk = do 
+              trkObjs <- maybeList =<< find "Track" kvlst
+              ImportList <$> (traverse (importOrDeal getTrackEffData) =<< mapM maybeObject trkObjs)
+        pt <- ImportList <$> (traverse (importOrDeal getPTThresholds) =<< mapM maybeObject ptThres) 
+        return ObjectDescription { electron = e, photon = p, bJet = b, muon = m
+                                 , jet = j, tau = ta, track = mtk, ptThresholds = pt } 
       _ -> Nothing
     
 -- |
@@ -227,8 +232,8 @@ getPTThresholds kvlst = do
 importData :: ([(T.Text, PYaml)] -> Maybe a)  
            -> FilePath
            -> Either Import a 
-           -> MaybeT IO (Identity a)
-importData _ _ (Right x) = (return . Identity) x 
+           -> MaybeT IO a
+importData _ _ (Right x) = return x 
 importData f rdir (Left (Import n)) = do
     let fname = rdir </> T.unpack n <.> "yaml"
     r <- lift (parseFile fname)
@@ -236,27 +241,27 @@ importData f rdir (Left (Import n)) = do
       Left err -> fail err
       Right (PYObject kvlst) -> do 
         maybe (fail ("parse " ++ fname ++ " failed")) 
-              (return . Identity)
+              return
               (f kvlst)
       Right _ -> fail "not an object"
 
 importObjectDescription :: FilePath 
-                        -> ObjectDescription (Either Import)
-                        -> MaybeT IO (ObjectDescription Identity)
+                        -> ObjectDescription ImportList
+                        -> MaybeT IO (ObjectDescription [])
 importObjectDescription rdir ObjectDescription {..} = do
     ObjectDescription 
-    <$> importData getElectronEffData rdir electron
-    <*> importData getPhotonEffData rdir photon
-    <*> importData getBJetEffData rdir bJet
-    <*> importData getMuonEffData rdir muon
-    <*> importData getJetEffData rdir jet
-    <*> importData getTauEffData rdir tau
-    <*> maybe (return Nothing) (liftA Just . importData getTrackEffData rdir) track
-    <*> importData getPTThresholds rdir ptThresholds
+    <$> (traverse (importData getElectronEffData rdir) . unImportList) electron
+    <*> (traverse (importData getPhotonEffData rdir) . unImportList) photon
+    <*> (traverse (importData getBJetEffData rdir) . unImportList) bJet
+    <*> (traverse (importData getMuonEffData rdir) . unImportList) muon
+    <*> (traverse (importData getJetEffData rdir) . unImportList) jet
+    <*> (traverse (importData getTauEffData rdir) . unImportList) tau
+    <*> maybe (return Nothing) (liftA Just . (traverse (importData getTrackEffData rdir) . unImportList)) track
+    <*> (traverse (importData getPTThresholds rdir) . unImportList) ptThresholds
 
 importDetectorDescription :: FilePath 
-                          -> DetectorDescription (Either Import)
-                          -> MaybeT IO (DetectorDescription Identity)
+                          -> DetectorDescription ImportList
+                          -> MaybeT IO (DetectorDescription [])
 importDetectorDescription rdir dd@DetectorDescription {..} = do 
     od <- importObjectDescription rdir detectorObject
     return dd { detectorObject = od }

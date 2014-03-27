@@ -320,6 +320,18 @@ instance MakeYaml (DetectorDescription ImportList) where
               , ( "Object", makeYaml (n+defIndent) detectorObject ) 
               ]
 
+instance MakeYaml (DetectorDescription []) where
+  makeYaml n DetectorDescription {..} = 
+    YObject $ [ ( "Name", mkString (n+defIndent) detectorName )
+              , ( "Class", mkString (n+defIndent) "TopLevel" )
+              , ( "Description", mkString (n+defIndent) detectorDescription)
+              , ( "Reference", mkString (n+defIndent) detectorReference)
+              , ( "Comment", mkString (n+defIndent) detectorComment )
+              , ( "ValidationInfo", mkString (n+defIndent) detectorValidationInfo )
+              , ( "Object", makeYaml (n+defIndent) detectorObject ) 
+              ]
+
+
 instance MakeYaml (ObjectDescription (Either Import)) where
   makeYaml n ObjectDescription {..} = 
     YObject $ [ ( "Electron", importOrEmbed (n+defIndent) electron)  
@@ -346,3 +358,15 @@ instance MakeYaml (ObjectDescription ImportList) where
                 <> maybe [] (\trk -> [("Track", importOrEmbed' (n+defIndent) trk)]) track
                 <> [ ( "PTThresholds", importOrEmbed' (n+defIndent) ptThresholds) ]
     where importOrEmbed' m = YIArray . fmap (importOrEmbed m) . unImportList
+
+instance MakeYaml (ObjectDescription []) where
+  makeYaml n ObjectDescription {..} = 
+      YObject $ [ ( "Electron", embed' (n+defIndent) electron)  
+                , ( "Photon", embed' (n+defIndent) photon) 
+                , ( "BJet", embed' (n+defIndent) bJet)
+                , ( "Muon", embed' (n+defIndent) muon) 
+                , ( "Jet", embed' (n+defIndent) jet)
+                , ( "Tau", embed' (n+defIndent) tau) ] 
+                <> maybe [] (\trk -> [("Track", embed' (n+defIndent) trk)]) track
+                <> [ ( "PTThresholds", embed' (n+defIndent) ptThresholds) ]
+    where embed' m = YIArray . fmap (makeYaml m)
