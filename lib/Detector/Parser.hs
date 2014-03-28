@@ -89,8 +89,15 @@ getObjectDescription kvlst = do
               trkObjs <- maybeList =<< find "Track" kvlst
               ImportList <$> (traverse (importOrDeal getTrackEffData) =<< mapM maybeObject trkObjs)
         pt <- ImportList <$> (traverse (importOrDeal getPTThresholds) =<< mapM maybeObject ptThres) 
-        return ObjectDescription { electron = e, photon = p, bJet = b, muon = m
-                                 , jet = j, tau = ta, track = mtk, ptThresholds = pt } 
+        return ObjectDescription 
+               { electron = e
+               , photon = p
+               , bJet = b
+               , muon = m
+               , jet = j
+               , tau = ta
+               , track = mtk
+               , ptThresholds = pt } 
       _ -> Nothing
     
 -- |
@@ -194,12 +201,38 @@ getTauEffData kvlst = do
     nm <- (maybeText <=< find "Name") kvlst
     tagmtd <- (maybeText <=< find "TaggingMethod") kvlst
     meta <- getMetaInfo kvlst
+    effkvlst <- (maybeObject <=< find "Efficiency") kvlst
+    eff <- getTauEffDetail effkvlst
     return TauEffData 
            { tauName = nm
            , tauMetaInfo = meta
            , tauTagMethod = tagmtd 
-           , tauEfficiency = undefined
+           , tauEfficiency = eff
            }
+
+-- | 
+getTauEffDetail :: [ (T.Text,PYaml) ] -> Maybe TauEffDetail
+getTauEffDetail kvlst = do 
+    typ <- (maybeText <=< find "Type") kvlst
+    if | typ == "Tau1or3Prong" -> getTau1or3Prong kvlst
+       | typ == "TauCombined" -> getTauCombined kvlst
+
+-- | 
+getTau1or3Prong :: [ (T.Text,PYaml) ] -> Maybe TauEffDetail
+getTau1or3Prong kvlst = do
+    eff1 <- (getPTEtaData <=< maybeObject <=< find "Efficiency1Prong") kvlst
+    rej1 <- (getPTEtaData <=< maybeObject <=< find "Rejection1Prong") kvlst
+    eff3 <- (getPTEtaData <=< maybeObject <=< find "Efficiency3Prong") kvlst
+    rej3 <- (getPTEtaData <=< maybeObject <=< find "Rejection3Prong") kvlst
+    return (Tau1or3Prong eff1 rej1 eff3 rej3)
+
+-- |
+getTauCombined :: [ (T.Text,PYaml) ] -> Maybe TauEffDetail
+getTauCombined kvlst = do 
+    eff <- (getPTEtaData <=< maybeObject <=< find "Efficiency") kvlst
+    rej <- (getPTEtaData <=< maybeObject <=< find "Rejection") kvlst
+    return (TauCombined eff rej) 
+
 
 -- | 
 getTrackEffData :: [ (T.Text,PYaml) ] -> Maybe TrackEffData
