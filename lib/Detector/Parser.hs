@@ -107,12 +107,13 @@ importOrDeal func x = let y = fmap func (getEitherImportOrObj x) :: Either Impor
 -- | get smearing description from parsed YAML object
 getSmearingDescription :: [(T.Text,PYaml)] -> Maybe (SmearingDescription ImportList) 
 getSmearingDescription kvlst = do
-    xs <- mapM (maybeList <=< flip find kvlst) [ "Jet" ]
+    xs <- mapM (maybeList <=< flip find kvlst) [ "Electron", "Muon", "Photon", "Jet", "Track", "Tau", "MissingET" ]
     case xs of 
-      [ jetObjs ] -> do j <- ImportList <$> (traverse (importOrDeal getJetSmearData) =<< mapM maybeObject jetObjs)
-                        return SmearingDescription { smearJet = j } 
+      [ elecObjs, muonObjs, phoObjs, jetObjs, trkObjs, tauObjs, metObjs ] -> do 
+        SmearingDescription <$> implst elecObjs <*> implst muonObjs <*> implst phoObjs 
+                            <*> implst jetObjs <*> implst trkObjs <*> implst tauObjs <*> implst metObjs
       _ -> Nothing
-
+  where implst ys = ImportList <$> (traverse (importOrDeal getSmearData) =<< mapM maybeObject ys)
 
     
 -- |
@@ -272,13 +273,13 @@ getPTThresholds kvlst = do
                , jetPTMin = j, bJetPTMin = b, trkPTMin = tr, tauPTMin = ta } 
       _ -> Nothing
 
-getJetSmearData :: [ (T.Text,PYaml) ] -> Maybe JetSmearData
-getJetSmearData kvlst = do
+getSmearData :: [ (T.Text,PYaml) ] -> Maybe (SmearData a)
+getSmearData kvlst = do
     nm <- (maybeText <=< find "Name") kvlst
     meta <- getMetaInfo kvlst
     smkvlst <- (maybeObject <=< find "Smearing") kvlst
     sm <- getPTEtaData smkvlst
-    return (JetSmearData nm meta sm)
+    return (SmearData nm meta sm)
 
 --------------
 -- import   --
@@ -319,7 +320,14 @@ importSmearingDescription :: FilePath
                         -> MaybeT IO (SmearingDescription [])
 importSmearingDescription rdir SmearingDescription {..} = do
     SmearingDescription 
-    <$> (traverse (importData getJetSmearData rdir) . unImportList) smearJet
+    <$> (traverse (importData getSmearData rdir) . unImportList) smearElectron
+    <*> (traverse (importData getSmearData rdir) . unImportList) smearMuon
+    <*> (traverse (importData getSmearData rdir) . unImportList) smearPhoton
+    <*> (traverse (importData getSmearData rdir) . unImportList) smearJet
+    <*> (traverse (importData getSmearData rdir) . unImportList) smearTrack
+    <*> (traverse (importData getSmearData rdir) . unImportList) smearTau
+    <*> (traverse (importData getSmearData rdir) . unImportList) smearMET
+
 
 importDetectorDescription :: FilePath
                           -> DetectorDescription ImportList

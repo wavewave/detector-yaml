@@ -13,7 +13,7 @@ cms2011 = DetectorDescription
             , detectorComment = "extracted the efficiencies from the plot 3,4,5 in the reference" 
             , detectorValidationInfo = "Validated on 2014/02" 
             , detectorIdentification = cms2011Object 
-            , detectorSmearing = SmearingDescription { smearJet = ImportList [ Right cmsTopoJet ] } 
+            , detectorSmearing = cmsSmearing
             }
 
 cms2011Object :: IdentificationDescription ImportList
@@ -28,6 +28,17 @@ cms2011Object = IdentificationDescription
                               , Left (Import "Tau_TaNCT_CMS")]
   , track        = Just (ImportList [Left (Import "Track_CMS")])
   , ptThresholds = ImportList [Left (Import "CMS_PTThreshold")]
+  }
+
+cmsSmearing :: SmearingDescription ImportList
+cmsSmearing = SmearingDescription
+  { smearElectron = ImportList [ Right cmsSmearElectron ]
+  , smearPhoton   = ImportList [ Right cmsSmearPhoton ]
+  , smearMuon     = ImportList [ Right cmsSmearMuon ]
+  , smearJet      = ImportList [ Right cmsSmearTopoJet ]
+  , smearTrack    = ImportList [ Right cmsSmearTrack ]
+  , smearTau      = ImportList [ Right cmsSmearTau ]
+  , smearMET      = ImportList [ Right cmsSmearMET ]
   }
 
 cmsBTagTCHEL :: BJetEffData
@@ -462,11 +473,58 @@ cmsPTThresholds = PTThresholds
   , tauPTMin = 5.0 
   }
 
-cmsTopoJet :: JetSmearData
-cmsTopoJet = JetSmearData 
-               "TopoJet_CMS"  
-               MetaInfo { tag = "CMS", description = "topojet", comment = "table", reference = "XXX" } 
-               PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
-                         , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
-                         , grid = GridConst { gridConst = 1.0 } } 
+cmsSmearElectron :: SmearData TElectron
+cmsSmearElectron = SmearData 
+                     "Smear_Electron_CMS"  
+                     MetaInfo { tag = "CMS", description = "electron", comment = "table", reference = "XXX" } 
+                     PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
+                               , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
+                               , grid = GridConst { gridConst = 1.0 } } 
 
+cmsSmearPhoton :: SmearData TPhoton
+cmsSmearPhoton = SmearData 
+                   "Smear_Photon_CMS"  
+                   MetaInfo { tag = "CMS", description = "photon", comment = "table", reference = "XXX" } 
+                   PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
+                             , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
+                             , grid = GridConst { gridConst = 1.0 } } 
+
+cmsSmearMuon :: SmearData TMuon
+cmsSmearMuon = SmearData 
+                 "Smear_Muon_CMS"  
+                 MetaInfo { tag = "CMS", description = "muon", comment = "table", reference = "XXX" } 
+                 PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
+                           , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
+                           , grid = GridConst { gridConst = 1.0 } } 
+
+cmsSmearTopoJet :: SmearData TJet
+cmsSmearTopoJet = SmearData
+                    "Smear_TopoJet_CMS"  
+                    MetaInfo { tag = "CMS", description = "topojet", comment = "table", reference = "XXX" } 
+                    PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
+                              , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
+                              , grid = GridConst { gridConst = 1.0 } } 
+
+cmsSmearTrack :: SmearData TTrack
+cmsSmearTrack = SmearData
+                  "Smear_Track_CMS"  
+                  MetaInfo { tag = "CMS", description = "track", comment = "table", reference = "XXX" } 
+                  PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
+                            , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
+                            , grid = GridConst { gridConst = 1.0 } } 
+
+cmsSmearTau :: SmearData TTau
+cmsSmearTau = SmearData
+                "Smear_Tau_CMS"  
+                MetaInfo { tag = "CMS", description = "tau", comment = "table", reference = "XXX" } 
+                PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
+                          , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
+                          , grid = GridConst { gridConst = 1.0 } } 
+
+cmsSmearMET :: SmearData TMET
+cmsSmearMET = SmearData
+                      "Smear_MissingET_CMS"  
+                      MetaInfo { tag = "CMS", description = "missingET", comment = "table", reference = "XXX" } 
+                      PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
+                                , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
+                                , grid = GridConst { gridConst = 1.0 } } 
