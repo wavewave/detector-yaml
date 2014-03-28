@@ -1,5 +1,5 @@
 Name:		detector-yaml
-Version:	0.0
+Version:	0.0.999
 Synopsis:	YAML description handler for collider detectors
 Description: 	YAML description handler for collider detectors
 License: 	GPL-3
@@ -9,11 +9,7 @@ Maintainer: 	Ian-Woo Kim <ianwookim@gmail.com>
 Build-Type: 	Simple
 Cabal-Version:  >= 1.8
 data-files:     
-Extra-source-files: csrc/testffi.h
-                    csrc/testffi.cpp
-                    csrc/detector/type.h
-                    csrc/detector/parser.h
-                    csrc/detector/parser.cpp
+Extra-source-files:
 
 Executable mkyaml
   Main-is: mkyaml.hs
@@ -43,17 +39,6 @@ Executable parseyaml
                    yayaml,
                    detector-yaml
 
-Executable parsecpp
-  Main-is: parsecpp.hs
-  hs-source-dirs: exe
-  ghc-options: 	-Wall -Werror -O2 -threaded -funbox-strict-fields -fno-warn-unused-do-bind -rtsopts
-  ghc-prof-options: -caf-all -auto-all
-  Build-Depends: 
-                   base>4, 
-                   text, 
-                   attoparsec,
-                   detector-yaml
-
 Library
   hs-source-dirs: lib
   ghc-options: 	-Wall -Werror -funbox-strict-fields -fno-warn-unused-do-bind -fno-warn-orphans
@@ -74,16 +59,9 @@ Library
                    CMS
                    Detector.Parser
                    Detector.Type
-                   Test
-
-  include-dirs:      csrc
-  C-sources:         csrc/testffi.cpp
-                     csrc/detector/parser.cpp
-
-  install-includes:  testffi.h
-                     detector/type.h
-                     detector/parser.h
-
-  extra-libraries:   stdc++, yaml-cpp
-
-  pkgconfig-depends: yaml-cpp
+                   
+  include-dirs:      
+  C-sources:         
+  install-includes:  
+  extra-libraries:  
+  pkgconfig-depends:
