@@ -59,7 +59,8 @@ Library
                    CMS
                    Detector.Parser
                    Detector.Type
-                   
+                   Detector.Type.Common
+                   Detector.Type.Efficiency                   
   include-dirs:      
   C-sources:         
   install-includes:  
