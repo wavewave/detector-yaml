@@ -58,13 +58,16 @@ getDetectorDescription kvlst = do
     case xs of
       [ nm, dsc, ref, cmt, vinfo] -> do
         obj <- (getObjectDescription <=< maybeObject <=< find "Object") kvlst
+        sm <- (getSmearingDescription <=< maybeObject <=< find "Smearing") kvlst
         return DetectorDescription 
                { detectorName = nm
                , detectorDescription = dsc
                , detectorReference = ref
                , detectorComment = cmt
                , detectorValidationInfo = vinfo
-               , detectorObject = obj }
+               , detectorObject = obj 
+               , detectorSmearing = sm
+               }
       _ -> Nothing
 
 -- | get an object description from parsed YAML object
@@ -75,10 +78,6 @@ getObjectDescription kvlst = do
                  , "Tau", "PTThresholds" ]
     case xs of 
       [ eleObjs, phoObjs, bjetObjs, muObjs, jetObjs, tauObjs, ptThres ] -> do
-        let importOrDeal :: forall a. ([(T.Text, PYaml)] -> Maybe a) -> [(T.Text, PYaml)] 
-                         -> Maybe (Either Import a) 
-            importOrDeal func x = let y = fmap func (getEitherImportOrObj x) :: Either Import (Maybe a)
-                                  in sequenceA y
         e <- ImportList <$> (traverse (importOrDeal getElectronEffData) =<< mapM maybeObject eleObjs)
         p <- ImportList <$> (traverse (importOrDeal getPhotonEffData) =<< mapM maybeObject phoObjs)
         b <- ImportList <$> (traverse (importOrDeal getBJetEffData) =<< mapM maybeObject bjetObjs)
@@ -99,6 +98,22 @@ getObjectDescription kvlst = do
                , track = mtk
                , ptThresholds = pt } 
       _ -> Nothing
+
+importOrDeal :: forall a. ([(T.Text, PYaml)] -> Maybe a) -> [(T.Text, PYaml)] -> Maybe (Either Import a) 
+importOrDeal func x = let y = fmap func (getEitherImportOrObj x) :: Either Import (Maybe a)
+                      in sequenceA y
+
+
+-- | get smearing description from parsed YAML object
+getSmearingDescription :: [(T.Text,PYaml)] -> Maybe (SmearingDescription ImportList) 
+getSmearingDescription kvlst = do
+    xs <- mapM (maybeList <=< flip find kvlst) [ "Jet" ]
+    case xs of 
+      [ jetObjs ] -> do j <- ImportList <$> (traverse (importOrDeal getJetSmearData) =<< mapM maybeObject jetObjs)
+                        return SmearingDescription { smearJet = j } 
+      _ -> Nothing
+
+
     
 -- |
 getEitherImportOrObj :: [(T.Text,PYaml)] -> Either Import [(T.Text,PYaml)]
@@ -257,6 +272,13 @@ getPTThresholds kvlst = do
                , jetPTMin = j, bJetPTMin = b, trkPTMin = tr, tauPTMin = ta } 
       _ -> Nothing
 
+getJetSmearData :: [ (T.Text,PYaml) ] -> Maybe JetSmearData
+getJetSmearData kvlst = do
+    nm <- (maybeText <=< find "Name") kvlst
+    meta <- getMetaInfo kvlst
+    smkvlst <- (maybeObject <=< find "Smearing") kvlst
+    sm <- getPTEtaData smkvlst
+    return (JetSmearData nm meta sm)
 
 --------------
 -- import   --
@@ -292,9 +314,19 @@ importObjectDescription rdir ObjectDescription {..} = do
     <*> maybe (return Nothing) (liftA Just . (traverse (importData getTrackEffData rdir) . unImportList)) track
     <*> (traverse (importData getPTThresholds rdir) . unImportList) ptThresholds
 
-importDetectorDescription :: FilePath 
+importSmearingDescription :: FilePath 
+                          -> SmearingDescription ImportList
+                        -> MaybeT IO (SmearingDescription [])
+importSmearingDescription rdir SmearingDescription {..} = do
+    SmearingDescription 
+    <$> (traverse (importData getJetSmearData rdir) . unImportList) smearJet
+
+importDetectorDescription :: FilePath
                           -> DetectorDescription ImportList
                           -> MaybeT IO (DetectorDescription [])
 importDetectorDescription rdir dd@DetectorDescription {..} = do 
-    od <- importObjectDescription rdir detectorObject
-    return dd { detectorObject = od }
+    od <- importObjectDescription rdir detectorObject :: MaybeT IO (ObjectDescription [])
+    sd <- importSmearingDescription rdir detectorSmearing :: MaybeT IO (SmearingDescription [])
+    return dd { detectorObject = od 
+              , detectorSmearing = sd 
+              }

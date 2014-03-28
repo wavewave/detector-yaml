@@ -9,6 +9,7 @@ module Detector.Type.Common where
 
 import           Control.Applicative
 import           Data.Foldable
+import           Data.Functor.Identity
 import           Data.Scientific
 import           Data.Text (Text)
 import qualified Data.Text.Lazy as L
@@ -19,6 +20,9 @@ import           YAML.Builder
 deriving instance Foldable (Either e)
 
 deriving instance Traversable (Either e)
+
+instance (Show a) => Show (Identity a) where
+  show x = show (runIdentity x)
 
 class Nameable a where
   name :: a -> Text
@@ -77,8 +81,6 @@ importOrEmbedF :: (MakeYaml a, Applicative f) =>
               -> f YamlValue
 importOrEmbedF n = fmap (importOrEmbed n) . sequenceA
 
-
-
 instance MakeYaml Grid where
   makeYaml n GridFull {..} = 
     YObject $ [ ("Type", mkString (n+defIndent) "Full")
@@ -88,3 +90,14 @@ instance MakeYaml Grid where
     YObject $ [ ("Type", mkString (n+defIndent) "Const")
               , ("Data", (YPrim . YNumber) gridConst)
               ]
+
+instance MakeYaml PTEtaData where 
+  makeYaml n PTEtaGrid {..} = 
+    YObject $ [ ("Type", mkString (n+defIndent) "Grid" )
+              , ("PtBins", mkInline ptBins)
+              , ("EtaBins", mkInline etaBins)
+              , ("Grid", makeYaml (n+defIndent) grid ) ]
+  makeYaml n PTEtaInterpolation {..} =
+    YObject $ [ ("Type", mkString (n+defIndent) "Interpolation")
+              , ("Function", mkString (n+defIndent) interpolationFunction) ] 
+

@@ -1,8 +1,11 @@
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 module Detector.Type.Efficiency where
 
+import           Data.Functor.Identity
 import           Data.Monoid ((<>))
 import           Data.Scientific
 import           Data.Text (Text)
@@ -11,11 +14,64 @@ import           YAML.Builder
 --
 import           Detector.Type.Common
 
+data ObjectDescription m = 
+  ObjectDescription 
+  { electron :: m ElectronEffData 
+  , photon :: m PhotonEffData 
+  , bJet :: m BJetEffData 
+  , muon :: m MuonEffData
+  , jet :: m JetEffData 
+  , tau :: m TauEffData 
+  , track :: Maybe (m TrackEffData) 
+  , ptThresholds :: m PTThresholds
+  }
+
+deriving instance Show (ObjectDescription (Either Import))
+deriving instance Show (ObjectDescription Identity)
+
+
+instance MakeYaml (ObjectDescription (Either Import)) where
+  makeYaml n ObjectDescription {..} = 
+    YObject $ [ ( "Electron", importOrEmbed (n+defIndent) electron)  
+              , ( "Photon", importOrEmbed (n+defIndent) photon) 
+              , ( "BJet", importOrEmbed (n+defIndent) bJet)
+              , ( "Muon", importOrEmbed (n+defIndent) muon) 
+              , ( "Jet", importOrEmbed (n+defIndent) jet)
+              , ( "Tau", importOrEmbed (n+defIndent) tau) ] 
+              <> maybe [] (\trk -> [("Track", importOrEmbed (n+defIndent) trk)]) track
+              <> [ ( "PTThresholds", importOrEmbed (n+defIndent) ptThresholds) ]
+
+ 
+instance MakeYaml (ObjectDescription ImportList) where
+  makeYaml n ObjectDescription {..} = 
+      YObject $ [ ( "Electron", importOrEmbed' (n+defIndent) electron)  
+                , ( "Photon", importOrEmbed' (n+defIndent) photon) 
+                , ( "BJet", importOrEmbed' (n+defIndent) bJet)
+                , ( "Muon", importOrEmbed' (n+defIndent) muon) 
+                , ( "Jet", importOrEmbed' (n+defIndent) jet)
+                , ( "Tau", importOrEmbed' (n+defIndent) tau) ] 
+                <> maybe [] (\trk -> [("Track", importOrEmbed' (n+defIndent) trk)]) track
+                <> [ ( "PTThresholds", importOrEmbed' (n+defIndent) ptThresholds) ]
+    where importOrEmbed' m = YIArray . fmap (importOrEmbed m) . unImportList
+
+
+instance MakeYaml (ObjectDescription []) where
+  makeYaml n ObjectDescription {..} = 
+      YObject $ [ ( "Electron", embed' (n+defIndent) electron)  
+                , ( "Photon", embed' (n+defIndent) photon) 
+                , ( "BJet", embed' (n+defIndent) bJet)
+                , ( "Muon", embed' (n+defIndent) muon) 
+                , ( "Jet", embed' (n+defIndent) jet)
+                , ( "Tau", embed' (n+defIndent) tau) ] 
+                <> maybe [] (\trk -> [("Track", embed' (n+defIndent) trk)]) track
+                <> [ ( "PTThresholds", embed' (n+defIndent) ptThresholds) ]
+    where embed' m = YIArray . fmap (makeYaml m)
+
 data ElectronEffData = ElectronEffData
-                            { eleName :: Text
-                            , eleMetaInfo :: MetaInfo 
-                            , eleEfficiency :: PTEtaData
-                            }
+                         { eleName :: Text
+                         , eleMetaInfo :: MetaInfo 
+                         , eleEfficiency :: PTEtaData
+                         }
                       deriving (Show)
 
 instance Nameable ElectronEffData where
@@ -120,16 +176,6 @@ instance MakeYaml ElectronEffData where
     YObject $ [ ("Name", mkString (n+defIndent) eleName) ]
               <> mkMetaInfoPairs (n+defIndent) eleMetaInfo 
               <> [ ("Efficiency", makeYaml (n+defIndent) eleEfficiency) ]
-
-instance MakeYaml PTEtaData where 
-  makeYaml n PTEtaGrid {..} = 
-    YObject $ [ ("Type", mkString (n+defIndent) "Grid" )
-              , ("PtBins", mkInline ptBins)
-              , ("EtaBins", mkInline etaBins)
-              , ("Grid", makeYaml (n+defIndent) grid ) ]
-  makeYaml n PTEtaInterpolation {..} =
-    YObject $ [ ("Type", mkString (n+defIndent) "Interpolation")
-              , ("Function", mkString (n+defIndent) interpolationFunction) ] 
 
 
 instance MakeYaml PhotonEffData where

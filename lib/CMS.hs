@@ -12,7 +12,9 @@ cms2011 = DetectorDescription
             , detectorReference = "arXiv:xxxx.yyyy"
             , detectorComment = "extracted the efficiencies from the plot 3,4,5 in the reference" 
             , detectorValidationInfo = "Validated on 2014/02" 
-            , detectorObject = cms2011Object }
+            , detectorObject = cms2011Object 
+            , detectorSmearing = SmearingDescription { smearJet = ImportList [ Right cmsTopoJet ] } 
+            }
 
 cms2011Object :: ObjectDescription ImportList
 cms2011Object = ObjectDescription 
@@ -459,4 +461,12 @@ cmsPTThresholds = PTThresholds
   , trkPTMin = 0.5
   , tauPTMin = 5.0 
   }
+
+cmsTopoJet :: JetSmearData
+cmsTopoJet = JetSmearData 
+               "TopoJet_CMS"  
+               MetaInfo { tag = "CMS", description = "topojet", comment = "table", reference = "XXX" } 
+               PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
+                         , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
+                         , grid = GridConst { gridConst = 1.0 } } 
 
