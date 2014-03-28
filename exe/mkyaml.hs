@@ -51,6 +51,7 @@ main = do
           , MkYamlBox atlasTauDataBDTMedium
           , MkYamlBox atlasTauDataBDTTight
           , MkYamlBox atlasPTThresholds
+          , MkYamlBox atlasTopoJet
           ]
 
 
@@ -79,6 +80,7 @@ main = do
           , MkYamlBox cmsJetPF
           , MkYamlBox cmsJetCalo
           , MkYamlBox cmsPTThresholds
+          , MkYamlBox cmsTopoJet
           ]
  
 

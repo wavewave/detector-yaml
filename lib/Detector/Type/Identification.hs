@@ -3,7 +3,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StandaloneDeriving #-}
 
-module Detector.Type.Efficiency where
+module Detector.Type.Identification where
 
 import           Data.Functor.Identity
 import           Data.Monoid ((<>))
@@ -14,8 +14,8 @@ import           YAML.Builder
 --
 import           Detector.Type.Common
 
-data ObjectDescription m = 
-  ObjectDescription 
+data IdentificationDescription m = 
+  IdentificationDescription 
   { electron :: m ElectronEffData 
   , photon :: m PhotonEffData 
   , bJet :: m BJetEffData 
@@ -26,12 +26,12 @@ data ObjectDescription m =
   , ptThresholds :: m PTThresholds
   }
 
-deriving instance Show (ObjectDescription (Either Import))
-deriving instance Show (ObjectDescription Identity)
+deriving instance Show (IdentificationDescription (Either Import))
+deriving instance Show (IdentificationDescription Identity)
 
 
-instance MakeYaml (ObjectDescription (Either Import)) where
-  makeYaml n ObjectDescription {..} = 
+instance MakeYaml (IdentificationDescription (Either Import)) where
+  makeYaml n IdentificationDescription {..} = 
     YObject $ [ ( "Electron", importOrEmbed (n+defIndent) electron)  
               , ( "Photon", importOrEmbed (n+defIndent) photon) 
               , ( "BJet", importOrEmbed (n+defIndent) bJet)
@@ -42,8 +42,8 @@ instance MakeYaml (ObjectDescription (Either Import)) where
               <> [ ( "PTThresholds", importOrEmbed (n+defIndent) ptThresholds) ]
 
  
-instance MakeYaml (ObjectDescription ImportList) where
-  makeYaml n ObjectDescription {..} = 
+instance MakeYaml (IdentificationDescription ImportList) where
+  makeYaml n IdentificationDescription {..} = 
       YObject $ [ ( "Electron", importOrEmbed' (n+defIndent) electron)  
                 , ( "Photon", importOrEmbed' (n+defIndent) photon) 
                 , ( "BJet", importOrEmbed' (n+defIndent) bJet)
@@ -55,8 +55,8 @@ instance MakeYaml (ObjectDescription ImportList) where
     where importOrEmbed' m = YIArray . fmap (importOrEmbed m) . unImportList
 
 
-instance MakeYaml (ObjectDescription []) where
-  makeYaml n ObjectDescription {..} = 
+instance MakeYaml (IdentificationDescription []) where
+  makeYaml n IdentificationDescription {..} = 
       YObject $ [ ( "Electron", embed' (n+defIndent) electron)  
                 , ( "Photon", embed' (n+defIndent) photon) 
                 , ( "BJet", embed' (n+defIndent) bJet)

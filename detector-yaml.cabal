@@ -60,7 +60,7 @@ Library
                    Detector.Parser
                    Detector.Type
                    Detector.Type.Common
-                   Detector.Type.Efficiency
+                   Detector.Type.Identification
                    Detector.Type.Smearing
   include-dirs:      
   C-sources:         

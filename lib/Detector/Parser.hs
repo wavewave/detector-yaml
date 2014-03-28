@@ -57,7 +57,7 @@ getDetectorDescription kvlst = do
             , "Comment", "ValidationInfo"]
     case xs of
       [ nm, dsc, ref, cmt, vinfo] -> do
-        obj <- (getObjectDescription <=< maybeObject <=< find "Object") kvlst
+        idd <- (getIdentificationDescription <=< maybeObject <=< find "Identification") kvlst
         sm <- (getSmearingDescription <=< maybeObject <=< find "Smearing") kvlst
         return DetectorDescription 
                { detectorName = nm
@@ -65,14 +65,14 @@ getDetectorDescription kvlst = do
                , detectorReference = ref
                , detectorComment = cmt
                , detectorValidationInfo = vinfo
-               , detectorObject = obj 
+               , detectorIdentification = idd 
                , detectorSmearing = sm
                }
       _ -> Nothing
 
 -- | get an object description from parsed YAML object
-getObjectDescription :: [(T.Text,PYaml)] -> Maybe (ObjectDescription ImportList) 
-getObjectDescription kvlst = do
+getIdentificationDescription :: [(T.Text,PYaml)] -> Maybe (IdentificationDescription ImportList) 
+getIdentificationDescription kvlst = do
     xs <- mapM (maybeList <=< flip find kvlst) 
                  [ "Electron", "Photon", "BJet", "Muon", "Jet"
                  , "Tau", "PTThresholds" ]
@@ -88,7 +88,7 @@ getObjectDescription kvlst = do
               trkObjs <- maybeList =<< find "Track" kvlst
               ImportList <$> (traverse (importOrDeal getTrackEffData) =<< mapM maybeObject trkObjs)
         pt <- ImportList <$> (traverse (importOrDeal getPTThresholds) =<< mapM maybeObject ptThres) 
-        return ObjectDescription 
+        return IdentificationDescription 
                { electron = e
                , photon = p
                , bJet = b
@@ -300,11 +300,11 @@ importData f rdir (Left (Import n)) = do
               (f kvlst)
       Right _ -> fail "not an object"
 
-importObjectDescription :: FilePath 
-                        -> ObjectDescription ImportList
-                        -> MaybeT IO (ObjectDescription [])
-importObjectDescription rdir ObjectDescription {..} = do
-    ObjectDescription 
+importIdentificationDescription :: FilePath 
+                        -> IdentificationDescription ImportList
+                        -> MaybeT IO (IdentificationDescription [])
+importIdentificationDescription rdir IdentificationDescription {..} = do
+    IdentificationDescription 
     <$> (traverse (importData getElectronEffData rdir) . unImportList) electron
     <*> (traverse (importData getPhotonEffData rdir) . unImportList) photon
     <*> (traverse (importData getBJetEffData rdir) . unImportList) bJet
@@ -325,8 +325,8 @@ importDetectorDescription :: FilePath
                           -> DetectorDescription ImportList
                           -> MaybeT IO (DetectorDescription [])
 importDetectorDescription rdir dd@DetectorDescription {..} = do 
-    od <- importObjectDescription rdir detectorObject :: MaybeT IO (ObjectDescription [])
-    sd <- importSmearingDescription rdir detectorSmearing :: MaybeT IO (SmearingDescription [])
-    return dd { detectorObject = od 
+    idd <- importIdentificationDescription rdir detectorIdentification
+    sd <- importSmearingDescription rdir detectorSmearing 
+    return dd { detectorIdentification = idd 
               , detectorSmearing = sd 
               }

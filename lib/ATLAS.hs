@@ -5,19 +5,19 @@ module ATLAS where
 
 import Detector.Type
 
-atlas2011 :: DetectorDescription ImportList -- (Either Import)
+atlas2011 :: DetectorDescription ImportList
 atlas2011 = DetectorDescription 
             { detectorName = "ATLAS2011"
             , detectorDescription = "ATLAS 2011 detector description"
             , detectorReference = "arXiv:xxxx.yyyy"
             , detectorComment = "extracted the efficiencies from the plot 3,4,5 in the reference" 
             , detectorValidationInfo = "Validated on 2014/02" 
-            , detectorObject = atlas2011Object 
+            , detectorIdentification = atlas2011Identify
             , detectorSmearing = SmearingDescription { smearJet = ImportList [ Right atlasTopoJet ] }  
             }
 
-atlas2011Object :: ObjectDescription ImportList -- (Either Import)
-atlas2011Object = ObjectDescription 
+atlas2011Identify :: IdentificationDescription ImportList 
+atlas2011Identify = IdentificationDescription 
   { electron = ImportList -- [Left (Import "Electron_Tight_ATLAS")]
                           [ Right atlasEleDataTight
                           , Right atlasEleDataMedium
@@ -557,8 +557,8 @@ atlasPTThresholds = PTThresholds
 
 atlasTopoJet :: JetSmearData
 atlasTopoJet = JetSmearData 
-                 "TopoJet_CMS"  
-                 MetaInfo { tag = "CMS", description = "topojet", comment = "table", reference = "XXX" } 
+                 "TopoJet_ATLAS"  
+                 MetaInfo { tag = "ATLAS", description = "topojet", comment = "table", reference = "XXX" } 
                  PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
                            , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
                            , grid = GridConst { gridConst = 1.0 } } 

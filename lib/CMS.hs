@@ -12,12 +12,12 @@ cms2011 = DetectorDescription
             , detectorReference = "arXiv:xxxx.yyyy"
             , detectorComment = "extracted the efficiencies from the plot 3,4,5 in the reference" 
             , detectorValidationInfo = "Validated on 2014/02" 
-            , detectorObject = cms2011Object 
+            , detectorIdentification = cms2011Object 
             , detectorSmearing = SmearingDescription { smearJet = ImportList [ Right cmsTopoJet ] } 
             }
 
-cms2011Object :: ObjectDescription ImportList
-cms2011Object = ObjectDescription 
+cms2011Object :: IdentificationDescription ImportList
+cms2011Object = IdentificationDescription 
   { electron     = ImportList [Left (Import "Electron_PF_CMS")]
   , photon       = ImportList [Left (Import "Photon_PF_CMS")]
   , bJet         = ImportList [Left (Import "BJet_TCHEL_CMS")]
