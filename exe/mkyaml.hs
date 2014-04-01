@@ -8,10 +8,11 @@ import qualified Data.Text.Lazy.IO as TIO
 import           System.Directory
 import           System.FilePath
 --
+import YAML.Builder
+--
 import ATLAS
 import CMS
 import Detector.Type
-import YAML.Builder
 
 data YamlBox = forall a. (MakeYaml a, Nameable a) => MkYamlBox a 
 

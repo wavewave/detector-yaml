@@ -10,6 +10,7 @@ import           Control.Monad ((<=<))
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Maybe
 -- import           Data.Functor.Identity
+import qualified Data.HashMap.Strict as HM
 import qualified Data.List as L
 import           Data.Scientific
 import qualified Data.Text as T
@@ -128,12 +129,15 @@ getEitherImportOrObj kvlst =
 getPTEtaData :: [(T.Text,PYaml)] -> Maybe PTEtaData
 getPTEtaData kvlst = do
     typ <- (maybeText <=< find "Type") kvlst
-    binpt <- get1DList "PtBins" kvlst
-    bineta <- get1DList "EtaBins" kvlst    
-    g <- if | typ == "Grid" -> (getGrid <=< maybeObject <=< find "Grid") kvlst
-            | typ == "Interpolation" -> error "Interpolation is not processed well yet" 
-            | otherwise -> Nothing
-    return PTEtaGrid { ptBins = binpt, etaBins = bineta, grid = g } 
+    if | typ == "Grid" -> do 
+         binpt <- get1DList "PtBins" kvlst
+         bineta <- get1DList "EtaBins" kvlst    
+         g <- (getGrid <=< maybeObject <=< find "Grid") kvlst
+         return PTEtaGrid { ptBins = binpt, etaBins = bineta, grid = g } 
+       | typ == "Interpolation" -> do
+         i <- (getInterpolation <=< maybeObject <=< find "Interpolation") kvlst
+         return (PTEtaInterpolation i)
+       | otherwise -> Nothing
 
 -- | 
 getGrid :: [(T.Text,PYaml)] -> Maybe Grid
@@ -143,6 +147,7 @@ getGrid kvlst = do
        | typ == "Const" -> GridConst <$> (maybeNum <=< find "Data") kvlst
        | otherwise -> Nothing
     
+
 
 -- | 
 get1DList :: T.Text -> [(T.Text,PYaml)] -> Maybe [ Scientific ] 
@@ -154,6 +159,37 @@ get2DList key kvlst = do
     lst1 :: [ PYaml ] <- (maybeList <=< find key) kvlst 
     lstoflst :: [ [ PYaml ] ] <- mapM maybeList lst1 
     mapM (mapM maybeNum) lstoflst 
+
+
+-- | 
+getInterpolation :: [(T.Text,PYaml)] -> Maybe Interpolation
+getInterpolation kvlst = do
+    typ <- (maybeText <=< find "Type") kvlst
+    lst <- (maybeList <=< find "EtaBinContent") kvlst 
+    lst2 <- mapM (getFuncBin <=< maybeObject) lst
+    etabound <- (maybeNum <=< find "EtaBound") kvlst
+    if | typ == "PredefinedMode1" -> Just (IPPredefinedMode1 lst2 etabound)
+       | typ == "PredefinedMode2" -> Just (IPPredefinedMode2 lst2 etabound)
+       | typ == "PredefinedMode3" -> Just (IPPredefinedMode3 lst2 etabound)
+       | otherwise -> Nothing
+      
+    -- error $ "number of lst = " ++ show (map binStart lst2)
+
+-- | 
+getFuncBin :: [(T.Text,PYaml)] -> Maybe (FuncBin (HM.HashMap Int Scientific) )
+getFuncBin kvlst = do 
+   b <- (maybeNum <=< find "BinStart") kvlst
+   lst <- (maybeList <=< find "BinContent") kvlst
+   lst' <- mapM getIntNum lst
+   return (FuncBin b (HM.fromList lst'))
+
+-- | 
+getIntNum :: PYaml -> Maybe (Int, Scientific)
+getIntNum (PYList (PYNumber x : PYNumber y : [])) = Just (round x, realToFrac y)
+getIntNum _ = Nothing
+
+
+
 
 
 getMetaInfo :: [(T.Text, PYaml)] -> Maybe MetaInfo

@@ -7,6 +7,7 @@
 module Detector.Type (
   module Detector.Type.Common
 , module Detector.Type.Identification
+, module Detector.Type.PTEtaData
 , module Detector.Type.Smearing
 , DetectorDescription (..)
 , IdentificationDescription (..)
@@ -19,6 +20,7 @@ import           YAML.Builder
 -- 
 import           Detector.Type.Common
 import           Detector.Type.Identification
+import           Detector.Type.PTEtaData
 import           Detector.Type.Smearing
 -- 
 import Prelude hiding (lines)

@@ -14,6 +14,7 @@ import           Data.Text (Text)
 import           YAML.Builder
 --
 import           Detector.Type.Common
+import           Detector.Type.PTEtaData
  
 data TElectron
 data TMuon

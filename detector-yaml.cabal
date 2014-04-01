@@ -11,6 +11,23 @@ Cabal-Version:  >= 1.8
 data-files:     
 Extra-source-files:
 
+Executable tester
+  Main-is: tester.hs
+  hs-source-dirs: exe
+  ghc-options: 	-Wall -Werror -O2 -threaded -funbox-strict-fields -fno-warn-unused-do-bind -rtsopts
+  ghc-prof-options: -caf-all -auto-all
+  Build-Depends: 
+                   attoparsec,
+                   base>4, 
+                   directory,
+                   filepath,
+                   text,  
+                   unordered-containers,
+                   yayaml,
+                   detector-yaml
+
+
+
 Executable mkyaml
   Main-is: mkyaml.hs
   hs-source-dirs: exe
@@ -52,6 +69,7 @@ Library
                    scientific, 
                    text, 
                    transformers,
+                   unordered-containers,
                    yayaml
 
   Exposed-Modules: 
@@ -61,6 +79,7 @@ Library
                    Detector.Type
                    Detector.Type.Common
                    Detector.Type.Identification
+                   Detector.Type.PTEtaData
                    Detector.Type.Smearing
   include-dirs:      
   C-sources:         
