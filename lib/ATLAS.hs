@@ -3,6 +3,8 @@
 
 module ATLAS where
 
+import qualified Data.HashMap.Strict as HM
+--
 import Detector.Type
 
 atlas2011 :: DetectorDescription ImportList
@@ -18,15 +20,28 @@ atlas2011 = DetectorDescription
 
 atlas2011Identify :: IdentificationDescription ImportList 
 atlas2011Identify = IdentificationDescription 
-  { electron = ImportList -- [Left (Import "Electron_Tight_ATLAS")]
-                          [ Right atlasEleDataTight
-                          , Right atlasEleDataMedium
-                          , Right atlasEleDataLoose ]
-  , photon   = ImportList [Left (Import "Photon_Tight_ATLAS")]
-  , bJet     = ImportList [Left (Import "BJet_SV50_ATLAS")]
-  , muon     = ImportList [Left (Import "Muon_CB1_ATLAS")]
-  , jet      = ImportList [Left (Import "Jet_ATLAS")]
-  , tau      = ImportList [Left (Import "Tau_Cut_Loose_ATLAS")]
+  { electron = ImportList [ Left (Import "Electron_Tight_ATLAS")
+                          , Left (Import "Electron_Medium_ATLAS")
+                          , Left (Import "Electron_Loose_ATLAS") ]
+  , photon   = ImportList [ Left (Import "Photon_Tight_ATLAS")
+                          , Left (Import "Photon_Loose_ATLAS") ]
+  , bJet     = ImportList [ Left (Import "BJet_SV50_ATLAS")
+                          , Left (Import "BJet_JP50_ATLAS")
+                          , Left (Import "BJet_JP70_ATLAS") ]
+  , muon     = ImportList [ Left (Import "Muon_CB1_ATLAS")
+                          , Left (Import "Muon_CB2_ATLAS")
+                          , Left (Import "Muon_ST1_ATLAS") 
+                          , Left (Import "Muon_ST2_ATLAS") ]
+  , jet      = ImportList [ Left (Import "Jet_ATLAS") ]
+  , tau      = ImportList [ Left (Import "Tau_Cut_Loose_ATLAS")
+                          , Left (Import "Tau_Cut_Medium_ATLAS")
+                          , Left (Import "Tau_Cut_Tight_ATLAS") 
+                          , Left (Import "Tau_Lik_Loose_ATLAS") 
+                          , Left (Import "Tau_Lik_Medium_ATLAS") 
+                          , Left (Import "Tau_Lik_Tight_ATLAS") 
+                          , Left (Import "Tau_BDT_Loose_ATLAS")
+                          , Left (Import "Tau_BDT_Medium_ATLAS") 
+                          , Left (Import "Tau_BDT_Tight_ATLAS") ]
   , track    = Nothing
   , ptThresholds = ImportList [Left (Import "ATLAS_PTThreshold")]
   }
@@ -34,13 +49,13 @@ atlas2011Identify = IdentificationDescription
 
 atlas2011Smearing :: SmearingDescription ImportList
 atlas2011Smearing = SmearingDescription 
-  { smearElectron = ImportList [ Right atlasSmearElectron ]
-  , smearPhoton   = ImportList [ Right atlasSmearPhoton ]
-  , smearMuon     = ImportList [ Right atlasSmearMuon ]
-  , smearJet      = ImportList [ Right atlasSmearTopoJet ]
-  , smearTrack    = ImportList [ Right atlasSmearTrack ]
-  , smearTau      = ImportList [ Right atlasSmearTau ]
-  , smearMET      = ImportList [ Right atlasSmearMET ]
+  { smearElectron = ImportList [ Left (Import "Smear_Electron_ATLAS") ]
+  , smearPhoton   = ImportList [ Left (Import "Smear_Photon_ATLAS") ]
+  , smearMuon     = ImportList [ Left (Import "Smear_Muon_ATLAS") ]
+  , smearJet      = ImportList [ Left (Import "Smear_TopoJet_ATLAS") ]
+  , smearTrack    = ImportList [ Left (Import "Smear_Track_ATLAS") ]
+  , smearTau      = ImportList [ Left (Import "Smear_Tau_ATLAS") ]
+  , smearMET      = ImportList [ Left (Import "Smear_MissingET_ATLAS") ]
   }
 
 atlasEleDataTight :: ElectronEffData
@@ -591,11 +606,63 @@ atlasSmearMuon = SmearData
 
 atlasSmearTopoJet :: SmearData TJet
 atlasSmearTopoJet = SmearData
-                    "Smear_TopoJet_ATLAS"  
-                    MetaInfo { tag = "ATLAS", description = "topojet", comment = "table", reference = "XXX" } 
-                    PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
-                              , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
-                              , grid = GridConst { gridConst = 1.0 } } 
+                      "Smear_TopoJet_ATLAS"  
+                      MetaInfo { tag = "ATLAS", description = "topojet", comment = "table", reference = "XXX" } 
+                      PTEtaInterpolation
+                        { interpol = IPPredefinedMode3 
+                            { seriesBA = [ FuncBin 0    (HM.fromList [ (-2,  9.476216187754203)
+                                                                     , (-1, -0.16939888048822812)
+                                                                     , ( 0,  0.01096643215740863)
+                                                                     , ( 1, -0.00001147146295333292)
+                                                                 , ( 2,  1.9289334367006085e-8)
+                                                                     , ( 3, -1.5000987275723775e-12) ])
+                                         , FuncBin 0.75 (HM.fromList [ (-2,  8.197400117302609)
+                                                                     , (-1, -0.05636233086517818) 
+                                                                     , ( 0,  0.010365438976501047)
+                                                                     , ( 1, -0.0000020835685322585434)
+                                                                     , ( 2,  2.001368792089794e-9)
+                                                                     , ( 3,  6.012078707551757e-12) ])
+                                         , FuncBin 1.25 (HM.fromList [ (-2,  6.446193732566276) 
+                                                                     , (-1, -0.010586512399379697)
+                                                                     , ( 0,  0.016592828729054618)
+                                                                     , ( 1, -0.000008966344163685219)
+                                                                     , ( 2,  6.867359722322189e-10)
+                                                                     , ( 3,  8.093547934486339e-12) ])
+                                         , FuncBin 1.75 (HM.fromList [ (-2, -0.8554617719091405)
+                                                                     , (-1,  0.4246942698759444)
+                                                                     , ( 0,  0.018887675539395778)
+                                                                     , ( 1,  0.0000008827096751274164)
+                                                                     , ( 2, -3.395818453325127e-9)
+                                                                     , ( 3, -3.808692671281164e-12) ])
+                                         , FuncBin 2.25 (HM.fromList [ (-2, -6.078548157133825)
+                                                                     , (-1,  0.6523709619986131)
+                                                                     , ( 0,  0.02566741878632772)
+                                                                     , ( 1, -0.000004513118203117088)
+                                                                     , ( 2,  1.5015469175097658e-9)
+                                                                     , ( 3,  8.156483941322221e-12) ])
+                                         , FuncBin 2.75 (HM.fromList [ (-2, -9.496101460575369)
+                                                                     , (-1,  0.7866574724505102)
+                                                                     , ( 0,  0.031548358061336486)
+                                                                     , ( 1, -0.000007095429220069707)
+                                                                     , ( 2,  2.099191724700867e-9)
+                                                                     , ( 3,  1.1359410993905745e-11) ])
+                                         , FuncBin 3.25 (HM.fromList [ (-2, -4.5274342332395815)
+                                                                     , (-1,  0.43592198252621316)
+                                                                     , ( 0,  0.040108297897736325)
+                                                                     , ( 1,  0.00002082414790810237)
+                                                                     , ( 2, -5.43013214981909e-9)
+                                                                     , ( 3, -1.529328127051232e-11) ])
+                                         , FuncBin 3.75 (HM.fromList [ (-2, -1.1160615726947604)
+                                                                     , (-1,  0.34705420681539366) 
+                                                                     , ( 0,  0.04184642899559342)
+                                                                     , ( 1,  0.00002971363284633445)
+                                                                     , ( 2, -7.670934703489684e-9 )
+                                                                     , ( 3, -2.3710958935037943e-11) ])
+                                         ] 
+                            , etaBound = 4.0 
+                            }
+                        }
+                     
 
 atlasSmearTrack :: SmearData TTrack
 atlasSmearTrack = SmearData

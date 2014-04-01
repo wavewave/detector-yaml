@@ -74,8 +74,8 @@ instance MakeYaml Interpolation where
                 ] 
     makeYaml n IPPredefinedMode3 {..} = 
       YObject $ [ ("Type", mkString (n+defIndent) "PredefinedMode3") 
-                , ("EtaBinContent", (YIArray . map (makeYaml (n+defIndent))) seriesBA)
                 , ("EtaBound", (YPrim . YNumber) etaBound)
+                , ("EtaBinContent", (YIArray . map (makeYaml (n+defIndent))) seriesBA)
                 ] 
 
 data PTEtaData = PTEtaGrid 

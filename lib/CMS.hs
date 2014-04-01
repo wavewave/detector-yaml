@@ -18,27 +18,42 @@ cms2011 = DetectorDescription
 
 cms2011Object :: IdentificationDescription ImportList
 cms2011Object = IdentificationDescription 
-  { electron     = ImportList [Left (Import "Electron_PF_CMS")]
-  , photon       = ImportList [Left (Import "Photon_PF_CMS")]
-  , bJet         = ImportList [Left (Import "BJet_TCHEL_CMS")]
-  , muon         = ImportList [Left (Import "Muon_S_CMS")]
-  , jet          = ImportList [Left (Import "Jet_PF_CMS")]
+  { electron     = ImportList [ Left (Import "Electron_PF_CMS")
+                              , Left (Import "Electron_CicSTight_CMS") 
+                              , Left (Import "Electron_CicLoose_CMS") 
+                              , Left (Import "Electron_WP80_CMS")
+                              , Left (Import "Electron_WP95_CMS") ]
+  , photon       = ImportList [ Left (Import "Photon_PF_CMS")
+                              , Left (Import "Photon_Tight_CMS") 
+                              , Left (Import "Photon_Loose_CMS") ]
+  , bJet         = ImportList [ Left (Import "BJet_TCHEL_CMS")
+                              , Left (Import "BJet_SSVHPT_CMS") 
+                              , Left (Import "BJet_SSVHEM_CMS") ]
+  , muon         = ImportList [ Left (Import "Muon_S_CMS")
+                              , Left (Import "Muon_P_CMS") 
+                              , Left (Import "Muon_T_CMS") ]
+  , jet          = ImportList [ Left (Import "Jet_PF_CMS")
+                              , Left (Import "Jet_Calo_CMS") ]
   , tau          = ImportList [ Left (Import "Tau_TaNCL_CMS")
                               , Left (Import "Tau_TaNCM_CMS")
-                              , Left (Import "Tau_TaNCT_CMS")]
+                              , Left (Import "Tau_TaNCT_CMS")
+                              , Left (Import "Tau_TaHPSL_CMS") 
+                              , Left (Import "Tau_TaHPSM_CMS") 
+                              , Left (Import "Tau_TaHPST_CMS") 
+                              , Left (Import "Tau_TaTCT_CMS") ]
   , track        = Just (ImportList [Left (Import "Track_CMS")])
-  , ptThresholds = ImportList [Left (Import "CMS_PTThreshold")]
+  , ptThresholds = ImportList [ Left (Import "CMS_PTThreshold") ]
   }
 
 cmsSmearing :: SmearingDescription ImportList
 cmsSmearing = SmearingDescription
-  { smearElectron = ImportList [ Right cmsSmearElectron ]
-  , smearPhoton   = ImportList [ Right cmsSmearPhoton ]
-  , smearMuon     = ImportList [ Right cmsSmearMuon ]
-  , smearJet      = ImportList [ Right cmsSmearTopoJet ]
-  , smearTrack    = ImportList [ Right cmsSmearTrack ]
-  , smearTau      = ImportList [ Right cmsSmearTau ]
-  , smearMET      = ImportList [ Right cmsSmearMET ]
+  { smearElectron = ImportList [ Left (Import "Smear_Electron_CMS") ]
+  , smearPhoton   = ImportList [ Left (Import "Smear_Photon_CMS") ]
+  , smearMuon     = ImportList [ Left (Import "Smear_Muon_CMS") ]
+  , smearJet      = ImportList [ Left (Import "Smear_TopoJet_CMS") ]
+  , smearTrack    = ImportList [ Left (Import "Smear_Track_CMS") ]
+  , smearTau      = ImportList [ Left (Import "Smear_Tau_CMS") ]
+  , smearMET      = ImportList [ Left (Import "Smear_MissingET_CMS") ]
   }
 
 cmsBTagTCHEL :: BJetEffData
@@ -187,7 +202,7 @@ cmsEleCicLoose = ElectronEffData
 
 cmsEleWP80 :: ElectronEffData
 cmsEleWP80 = ElectronEffData
-  { eleName = "Electron_CicLoose_CMS"
+  { eleName = "Electron_WP80_CMS"
   , eleMetaInfo = MetaInfo 
       { tag = "CMS"
       , description = "electron WP80 CMS"
@@ -201,7 +216,7 @@ cmsEleWP80 = ElectronEffData
 
 cmsEleWP95 :: ElectronEffData
 cmsEleWP95 = ElectronEffData
-  { eleName = "Electron_CicLoose_CMS"
+  { eleName = "Electron_WP95_CMS"
   , eleMetaInfo = MetaInfo 
       { tag = "CMS"
       , description = "electron WP95 CMS"
