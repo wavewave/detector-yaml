@@ -165,13 +165,18 @@ get2DList key kvlst = do
 getInterpolation :: [(T.Text,PYaml)] -> Maybe Interpolation
 getInterpolation kvlst = do
     typ <- (maybeText <=< find "Type") kvlst
-    lst <- (maybeList <=< find "EtaBinContent") kvlst 
-    lst2 <- mapM (getFuncBin <=< maybeObject) lst
-    etabound <- (maybeNum <=< find "EtaBound") kvlst
-    if | typ == "PredefinedMode1" -> Just (IPPredefinedMode1 lst2 etabound)
-       | typ == "PredefinedMode2" -> Just (IPPredefinedMode2 lst2 etabound)
-       | typ == "PredefinedMode3" -> Just (IPPredefinedMode3 lst2 etabound)
-       | otherwise -> Nothing
+    if typ == "Constant" 
+      then do 
+        v <- (maybeNum <=< find "Value") kvlst
+        return (IPConstant v) 
+      else do 
+        lst <- (maybeList <=< find "EtaBinContent") kvlst 
+        lst2 <- mapM (getFuncBin <=< maybeObject) lst
+        etabound <- (maybeNum <=< find "EtaBound") kvlst
+        if | typ == "PredefinedMode1" -> Just (IPPredefinedMode1 lst2 etabound)
+           | typ == "PredefinedMode2" -> Just (IPPredefinedMode2 lst2 etabound)
+           | typ == "PredefinedMode3" -> Just (IPPredefinedMode3 lst2 etabound)
+           | otherwise -> Nothing
       
     -- error $ "number of lst = " ++ show (map binStart lst2)
 

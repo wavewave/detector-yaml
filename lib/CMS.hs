@@ -492,54 +492,40 @@ cmsSmearElectron :: SmearData TElectron
 cmsSmearElectron = SmearData 
                      "Smear_Electron_CMS"  
                      MetaInfo { tag = "CMS", description = "electron", comment = "table", reference = "XXX" } 
-                     PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
-                               , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
-                               , grid = GridConst { gridConst = 1.0 } } 
+                     PTEtaInterpolation { interpol = IPConstant 1.0 }
 
 cmsSmearPhoton :: SmearData TPhoton
 cmsSmearPhoton = SmearData 
                    "Smear_Photon_CMS"  
                    MetaInfo { tag = "CMS", description = "photon", comment = "table", reference = "XXX" } 
-                   PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
-                             , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
-                             , grid = GridConst { gridConst = 1.0 } } 
+                   PTEtaInterpolation { interpol = IPConstant 1.0 }
 
 cmsSmearMuon :: SmearData TMuon
 cmsSmearMuon = SmearData 
                  "Smear_Muon_CMS"  
                  MetaInfo { tag = "CMS", description = "muon", comment = "table", reference = "XXX" } 
-                 PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
-                           , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
-                           , grid = GridConst { gridConst = 1.0 } } 
+                 PTEtaInterpolation { interpol = IPConstant 1.0 }
 
 cmsSmearTopoJet :: SmearData TJet
 cmsSmearTopoJet = SmearData
                     "Smear_TopoJet_CMS"  
                     MetaInfo { tag = "CMS", description = "topojet", comment = "table", reference = "XXX" } 
-                    PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
-                              , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
-                              , grid = GridConst { gridConst = 1.0 } } 
+                    PTEtaInterpolation { interpol = IPConstant 1.0 }
 
 cmsSmearTrack :: SmearData TTrack
 cmsSmearTrack = SmearData
                   "Smear_Track_CMS"  
                   MetaInfo { tag = "CMS", description = "track", comment = "table", reference = "XXX" } 
-                  PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
-                            , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
-                            , grid = GridConst { gridConst = 1.0 } } 
+                  PTEtaInterpolation { interpol = IPConstant 1.0 }
 
 cmsSmearTau :: SmearData TTau
 cmsSmearTau = SmearData
                 "Smear_Tau_CMS"  
                 MetaInfo { tag = "CMS", description = "tau", comment = "table", reference = "XXX" } 
-                PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
-                          , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
-                          , grid = GridConst { gridConst = 1.0 } } 
+                PTEtaInterpolation { interpol = IPConstant 1.0 }
 
 cmsSmearMET :: SmearData TMET
 cmsSmearMET = SmearData
-                      "Smear_MissingET_CMS"  
-                      MetaInfo { tag = "CMS", description = "missingET", comment = "table", reference = "XXX" } 
-                      PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
-                                , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
-                                , grid = GridConst { gridConst = 1.0 } } 
+                "Smear_MissingET_CMS"  
+                MetaInfo { tag = "CMS", description = "missingET", comment = "table", reference = "XXX" } 
+                PTEtaInterpolation { interpol = IPConstant 1.0 }

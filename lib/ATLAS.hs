@@ -582,27 +582,21 @@ atlasPTThresholds = PTThresholds
 
 atlasSmearElectron :: SmearData TElectron
 atlasSmearElectron = SmearData
-                         "Smear_Electron_ATLAS"  
-                         MetaInfo { tag = "ATLAS", description = "electron", comment = "table", reference = "XXX" } 
-                         PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
-                                   , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
-                                   , grid = GridConst { gridConst = 1.0 } } 
+                       "Smear_Electron_ATLAS"  
+                       MetaInfo { tag = "ATLAS", description = "electron", comment = "table", reference = "XXX" } 
+                       PTEtaInterpolation { interpol = IPConstant 1.0 } 
 
 atlasSmearPhoton :: SmearData TPhoton
 atlasSmearPhoton = SmearData
                        "Smear_Photon_ATLAS"  
                        MetaInfo { tag = "ATLAS", description = "photon", comment = "table", reference = "XXX" } 
-                       PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
-                                 , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
-                                 , grid = GridConst { gridConst = 1.0 } } 
+                       PTEtaInterpolation { interpol = IPConstant 1.0 }  
 
 atlasSmearMuon :: SmearData TMuon
 atlasSmearMuon = SmearData
                     "Smear_Muon_ATLAS"  
                     MetaInfo { tag = "ATLAS", description = "muon", comment = "table", reference = "XXX" } 
-                    PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
-                              , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
-                              , grid = GridConst { gridConst = 1.0 } } 
+                    PTEtaInterpolation { interpol = IPConstant 1.0 } 
 
 atlasSmearTopoJet :: SmearData TJet
 atlasSmearTopoJet = SmearData
@@ -666,24 +660,19 @@ atlasSmearTopoJet = SmearData
 
 atlasSmearTrack :: SmearData TTrack
 atlasSmearTrack = SmearData
-                      "Smear_Track_ATLAS"  
-                      MetaInfo { tag = "ATLAS", description = "track", comment = "table", reference = "XXX" } 
-                      PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
-                                , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
-                                , grid = GridConst { gridConst = 1.0 } } 
+                    "Smear_Track_ATLAS"  
+                    MetaInfo { tag = "ATLAS", description = "track", comment = "table", reference = "XXX" } 
+                    PTEtaInterpolation { interpol = IPConstant 1.0 } 
 
 atlasSmearTau :: SmearData TTau
 atlasSmearTau = SmearData
-                    "Smear_Tau_ATLAS"  
-                    MetaInfo { tag = "ATLAS", description = "tau", comment = "table", reference = "XXX" } 
-                    PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
-                              , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
-                              , grid = GridConst { gridConst = 1.0 } } 
+                  "Smear_Tau_ATLAS"  
+                  MetaInfo { tag = "ATLAS", description = "tau", comment = "table", reference = "XXX" } 
+                  PTEtaInterpolation { interpol = IPConstant 1.0 }
 
 atlasSmearMET :: SmearData TMET
 atlasSmearMET = SmearData
-                         "Smear_MissingET_ATLAS"  
-                         MetaInfo { tag = "ATLAS", description = "missingET", comment = "table", reference = "XXX" } 
-                         PTEtaGrid { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
-                                   , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
-                                   , grid = GridConst { gridConst = 1.0 } } 
+                  "Smear_MissingET_ATLAS"  
+                  MetaInfo { tag = "ATLAS", description = "missingET", comment = "table", reference = "XXX" } 
+                  PTEtaInterpolation { interpol = IPConstant 1.0 }
+

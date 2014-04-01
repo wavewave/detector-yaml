@@ -47,7 +47,8 @@ instance (MakeYaml a) => MakeYaml (FuncBin a) where
               , ("BinContent", makeYaml (n+defIndent) binContent) ] 
   
 
-data Interpolation = IPPredefinedMode1 
+data Interpolation = IPConstant { ipConstant :: Scientific }  
+                   | IPPredefinedMode1 
                      { seriesBA :: [ FuncBin (HM.HashMap Int Scientific) ]  
                      , etaBound :: Scientific
                      } 
@@ -62,27 +63,26 @@ data Interpolation = IPPredefinedMode1
                    deriving (Show)
 
 instance MakeYaml Interpolation where
+    makeYaml n IPConstant {..} = 
+      YObject $ [ ("Type", mkString (n+defIndent) "Constant") 
+                , ("Value", (YPrim . YNumber) ipConstant) ]
     makeYaml n IPPredefinedMode1 {..} = 
       YObject $ [ ("Type", mkString (n+defIndent) "PredefinedMode1") 
                 , ("EtaBinContent", (YIArray . map (makeYaml (n+defIndent))) seriesBA)
-                , ("EtaBound", (YPrim . YNumber) etaBound)
-                ]
+                , ("EtaBound", (YPrim . YNumber) etaBound) ]
     makeYaml n IPPredefinedMode2 {..} = 
       YObject $ [ ("Type", mkString (n+defIndent) "PredefinedMode2") 
                 , ("EtaBinContent", (YIArray . map (makeYaml (n+defIndent))) seriesBA)
-                , ("EtaBound", (YPrim . YNumber) etaBound)
-                ] 
+                , ("EtaBound", (YPrim . YNumber) etaBound) ] 
     makeYaml n IPPredefinedMode3 {..} = 
       YObject $ [ ("Type", mkString (n+defIndent) "PredefinedMode3") 
                 , ("EtaBound", (YPrim . YNumber) etaBound)
-                , ("EtaBinContent", (YIArray . map (makeYaml (n+defIndent))) seriesBA)
-                ] 
+                , ("EtaBinContent", (YIArray . map (makeYaml (n+defIndent))) seriesBA) ] 
 
 data PTEtaData = PTEtaGrid 
                    { ptBins :: [Scientific]
                    , etaBins :: [Scientific]
-                   , grid :: Grid
-                   } 
+                   , grid :: Grid } 
                 | PTEtaInterpolation { interpol :: Interpolation } 
                
 deriving instance Show PTEtaData
