@@ -67,7 +67,8 @@ atlasEleDataTight = ElectronEffData
       , comment = "We use table from reference" 
       , reference = "arXiv:xxxx.yyyy" }
   , eleEfficiency = PTEtaGrid 
-      { ptBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
+      { isEtaSymmetric = False
+      , ptBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
       , etaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
       , grid = atlasElecTightEff
       }
@@ -82,7 +83,8 @@ atlasEleDataMedium = ElectronEffData
       , comment = "We use table from reference" 
       , reference = "arXiv:xxxx.yyyy" }
   , eleEfficiency = PTEtaGrid
-      { ptBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
+      { isEtaSymmetric = False
+      , ptBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
       , etaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
       , grid = atlasElecMediumEff
       }
@@ -97,7 +99,8 @@ atlasEleDataLoose = ElectronEffData
       , comment = "We use table from reference" 
       , reference = "arXiv:xxxx.yyyy" }
   , eleEfficiency = PTEtaGrid
-      { ptBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
+      { isEtaSymmetric = False
+      , ptBins = [4.0, 7.0, 10.0, 15.0, 20.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 80.0]
       , etaBins = [-2.5, -2.0, -1.52, -1.37, -0.75, 0.0, 0.75, 1.37, 1.52, 2.0, 2.5]
       , grid = atlasElecLooseEff
       }
@@ -154,7 +157,8 @@ atlasPhoDataLoose = PhotonEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , phoEfficiency = PTEtaGrid 
-      { ptBins = [15.0, 18.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 60.0, 80.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0] 
+      { isEtaSymmetric = False 
+      , ptBins = [15.0, 18.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 60.0, 80.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0] 
       , etaBins = [ -2.4, -2.2, -2.0, -1.8, -1.52, -1.37, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, -0.1, 0.0, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.37, 1.52, 1.8, 2.0, 2.2, 2.4 ] 
       , grid = GridConst { gridConst = 1.0 } }
   }
@@ -168,7 +172,8 @@ atlasPhoDataTight = PhotonEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , phoEfficiency = PTEtaGrid 
-      { ptBins = [15.0, 18.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 60.0, 80.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0] 
+      { isEtaSymmetric = False
+      , ptBins = [15.0, 18.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 60.0, 80.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0] 
       , etaBins = [ -2.4, -2.2, -2.0, -1.8, -1.52, -1.37, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, -0.1, 0.0, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.37, 1.52, 1.8, 2.0, 2.2, 2.4 ] 
       , grid = GridConst { gridConst = 1.0 } }
   }
@@ -182,11 +187,13 @@ atlasBJetDataSV50 = BJetEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , bJetEfficiency = PTEtaGrid 
-      { ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ] 
+      { isEtaSymmetric = True
+      , ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ] 
       , etaBins = [ 0.0, 1.2, 2.5 ] 
       , grid = GridConst { gridConst = 0.5 } }
   , bJetRejection = PTEtaGrid
-      { ptBins = [ 20.0, 25.0, 40.0, 60.0, 90.0, 140.0, 200.0, 300.0, 500.0 ]
+      { isEtaSymmetric = True
+      , ptBins = [ 20.0, 25.0, 40.0, 60.0, 90.0, 140.0, 200.0, 300.0, 500.0 ]
       , etaBins = [ 0.0, 1.2, 2.5 ]
       , grid = GridConst { gridConst = 100.0 } }
   }
@@ -201,14 +208,16 @@ atlasBJetDataJP50 = BJetEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , bJetEfficiency = PTEtaGrid 
-      { ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ] 
+      { isEtaSymmetric = True
+      , ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ] 
       , etaBins = [ 0.0, 1.2, 2.5 ] 
       , grid =  GridFull 
           { gridData =  
               [ [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ]
               , [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ] ] } }
   , bJetRejection = PTEtaGrid
-      { ptBins = [ 20.0, 25.0, 40.0, 60.0, 90.0, 140.0, 200.0, 300.0, 500.0 ]
+      { isEtaSymmetric = True
+      , ptBins = [ 20.0, 25.0, 40.0, 60.0, 90.0, 140.0, 200.0, 300.0, 500.0 ]
       , etaBins = [ 0.0, 1.2, 2.5 ]
       , grid = GridConst { gridConst = 100.0 } }
   }
@@ -222,11 +231,13 @@ atlasBJetDataJP70 = BJetEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , bJetEfficiency = PTEtaGrid 
-      { ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ] 
+      { isEtaSymmetric = True
+      , ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ] 
       , etaBins = [ 0.0, 1.2, 2.5 ] 
       , grid =  GridConst { gridConst = 0.7 } }
   , bJetRejection = PTEtaGrid
-      { ptBins = [ 20.0, 25.0, 40.0, 60.0, 90.0, 140.0, 200.0, 300.0, 500.0 ]
+      { isEtaSymmetric = True
+      , ptBins = [ 20.0, 25.0, 40.0, 60.0, 90.0, 140.0, 200.0, 300.0, 500.0 ]
       , etaBins = [ 0.0, 1.2, 2.5 ]
       , grid = GridConst { gridConst = 100.0 } }
   }
@@ -241,7 +252,8 @@ atlasMuonDataCB1 = MuonEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , muonEfficiency = PTEtaGrid 
-      { ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
+      { isEtaSymmetric = False
+      , ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
       , etaBins = [ -2.5, -2.25, -2.0, -1.75, -1.50, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5 ]
       , grid = GridConst { gridConst = 1.0 } }
   }
@@ -255,7 +267,8 @@ atlasMuonDataCB2 = MuonEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , muonEfficiency = PTEtaGrid 
-      { ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
+      { isEtaSymmetric = False
+      , ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
       , etaBins = [ -2.5, -2.25, -2.0, -1.75, -1.50, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5 ]
       , grid = GridConst { gridConst = 1.0 } }
   }
@@ -269,7 +282,8 @@ atlasMuonDataST1 = MuonEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , muonEfficiency = PTEtaGrid 
-      { ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
+      { isEtaSymmetric = False
+      , ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
       , etaBins = [ -2.5, -2.25, -2.0, -1.75, -1.50, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5 ]
       , grid = GridConst { gridConst = 1.0 } }
   }
@@ -283,7 +297,8 @@ atlasMuonDataST2 = MuonEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , muonEfficiency = PTEtaGrid 
-      { ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
+      { isEtaSymmetric = False
+      , ptBins = [ 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 70.0, 100.0 ]
       , etaBins = [ -2.5, -2.25, -2.0, -1.75, -1.50, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5 ]
       , grid = GridConst { gridConst = 1.0 } }
   }
@@ -298,7 +313,8 @@ atlasJetData = JetEffData
       , comment = "We use table from reference"
       , reference = "arXiv:xxxx.yyyy" }
   , jetEfficiency = PTEtaGrid 
-      { ptBins = [ 20.0, 30.0, 40.0, 60.0, 80.0, 120.0, 160.0, 200.0, 280.0, 360.0, 500.0, 600.0, 900.0, 1200.0, 2000.0 ] 
+      { isEtaSymmetric = False
+      , ptBins = [ 20.0, 30.0, 40.0, 60.0, 80.0, 120.0, 160.0, 200.0, 280.0, 360.0, 500.0, 600.0, 900.0, 1200.0, 2000.0 ] 
       , etaBins = [ -4.5, -3.6, -2.8, -2.5, -2.0, -1.2, -0.8, -0.3, 0.0, 0.3, 0.8, 1.2, 2.0, 2.5, 2.8, 3.6, 4.5 ]
       , grid = GridConst { gridConst = 1.0 }
       }
@@ -315,19 +331,23 @@ atlasTauDataCutLoose = TauEffData
   , tauTagMethod = "Cut"
   , tauEfficiency = Tau1or3Prong 
       { tau1ProngEff = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
-         , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
-         , grid = GridConst { gridConst = 1.0 } }
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
+          , grid = GridConst { gridConst = 1.0 } }
       , tau1ProngRej = PTEtaGrid 
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
           , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngEff = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
           , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngRej = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
           , grid = GridConst { gridConst = 1.0 } }
       }
@@ -344,19 +364,23 @@ atlasTauDataCutMedium = TauEffData
   , tauTagMethod = "Cut"
   , tauEfficiency = Tau1or3Prong 
       { tau1ProngEff = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
           , grid = GridConst { gridConst = 1.0 } }
       , tau1ProngRej = PTEtaGrid 
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
           , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngEff = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
           , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngRej = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True 
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
           , grid = GridConst { gridConst = 1.0 } }
       }
@@ -373,19 +397,23 @@ atlasTauDataCutTight = TauEffData
   , tauTagMethod = "Cut"
   , tauEfficiency = Tau1or3Prong 
       { tau1ProngEff = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
           , grid = GridConst { gridConst = 1.0 } }
       , tau1ProngRej = PTEtaGrid 
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
           , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngEff = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
           , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngRej = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
           , grid = GridConst { gridConst = 1.0 } }
       } 
@@ -402,19 +430,23 @@ atlasTauDataLikLoose = TauEffData
   , tauTagMethod = "Likelihood"
   , tauEfficiency = Tau1or3Prong 
       { tau1ProngEff = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
           , grid = GridConst { gridConst = 1.0 } }
       , tau1ProngRej = PTEtaGrid 
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
           , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngEff = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
           , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngRej = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
           , grid = GridConst { gridConst = 1.0 } }
       }
@@ -431,19 +463,23 @@ atlasTauDataLikMedium = TauEffData
   , tauTagMethod = "Likelihood"
   , tauEfficiency = Tau1or3Prong 
       { tau1ProngEff = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
           , grid = GridConst { gridConst = 1.0 } }
       , tau1ProngRej = PTEtaGrid 
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
           , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngEff = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
           , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngRej = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
           , grid = GridConst { gridConst = 1.0 } }
       }
@@ -460,19 +496,23 @@ atlasTauDataLikTight = TauEffData
   , tauTagMethod = "Likelihood"
   , tauEfficiency = Tau1or3Prong 
       { tau1ProngEff = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
           , grid = GridConst { gridConst = 1.0 } }
       , tau1ProngRej = PTEtaGrid 
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
           , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngEff = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
           , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngRej = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
           , grid = GridConst { gridConst = 1.0 } }
       }
@@ -489,19 +529,23 @@ atlasTauDataBDTLoose = TauEffData
   , tauTagMethod = "BoostedDecisionTree"
   , tauEfficiency = Tau1or3Prong 
       { tau1ProngEff = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
           , grid = GridConst { gridConst = 1.0 } }
       , tau1ProngRej = PTEtaGrid 
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
           , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngEff = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
           , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngRej = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
           , grid = GridConst { gridConst = 1.0 } }
       }
@@ -519,19 +563,23 @@ atlasTauDataBDTMedium = TauEffData
   , tauTagMethod = "BoostedDecisionTree"
   , tauEfficiency = Tau1or3Prong 
       { tau1ProngEff = PTEtaGrid
-          { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
           , grid = GridConst { gridConst = 1.0 } }
       , tau1ProngRej = PTEtaGrid 
-	  { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+	  { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
 	  , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
 	  , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngEff = PTEtaGrid
-	  { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+	  { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
 	  , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
 	  , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngRej = PTEtaGrid
-	  { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+	  { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
 	  , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
 	  , grid = GridConst { gridConst = 1.0 } }
       }
@@ -549,19 +597,23 @@ atlasTauDataBDTTight = TauEffData
   , tauTagMethod = "BoostedDecisionTree"
   , tauEfficiency = Tau1or3Prong 
       { tau1ProngEff = PTEtaGrid
-	  { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+	  { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
 	  , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
 	  , grid = GridConst { gridConst = 1.0 } }
       , tau1ProngRej = PTEtaGrid 
-	  { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+	  { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
 	  , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
 	  , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngEff = PTEtaGrid
-	  { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+	  { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
 	  , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]  
 	  , grid = GridConst { gridConst = 1.0 } }
       , tau3ProngRej = PTEtaGrid
-	  { ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+	  { isEtaSymmetric = True
+          , ptBins = [ 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
 	  , etaBins = [ 0.0, 1.3, 1.6, 2.5 ]
 	  , grid = GridConst { gridConst = 1.0 } }
       }
@@ -584,26 +636,27 @@ atlasSmearElectron :: SmearData TElectron
 atlasSmearElectron = SmearData
                        "Smear_Electron_ATLAS"  
                        MetaInfo { tag = "ATLAS", description = "electron", comment = "table", reference = "XXX" } 
-                       PTEtaInterpolation { interpol = IPConstant 1.0 } 
+                       PTEtaInterpolation { isEtaSymmetric = True, interpol = IPConstant 1.0 } 
 
 atlasSmearPhoton :: SmearData TPhoton
 atlasSmearPhoton = SmearData
                        "Smear_Photon_ATLAS"  
                        MetaInfo { tag = "ATLAS", description = "photon", comment = "table", reference = "XXX" } 
-                       PTEtaInterpolation { interpol = IPConstant 1.0 }  
+                       PTEtaInterpolation { isEtaSymmetric = True, interpol = IPConstant 1.0 }  
 
 atlasSmearMuon :: SmearData TMuon
 atlasSmearMuon = SmearData
                     "Smear_Muon_ATLAS"  
                     MetaInfo { tag = "ATLAS", description = "muon", comment = "table", reference = "XXX" } 
-                    PTEtaInterpolation { interpol = IPConstant 1.0 } 
+                    PTEtaInterpolation { isEtaSymmetric = True, interpol = IPConstant 1.0 } 
 
 atlasSmearTopoJet :: SmearData TJet
 atlasSmearTopoJet = SmearData
                       "Smear_TopoJet_ATLAS"  
                       MetaInfo { tag = "ATLAS", description = "topojet", comment = "table", reference = "XXX" } 
                       PTEtaInterpolation
-                        { interpol = IPPredefinedMode3 
+                        { isEtaSymmetric = True
+                        , interpol = IPPredefinedMode3 
                             { seriesBA = [ FuncBin 0    (HM.fromList [ (-2,  9.476216187754203)
                                                                      , (-1, -0.16939888048822812)
                                                                      , ( 0,  0.01096643215740863)
@@ -662,17 +715,17 @@ atlasSmearTrack :: SmearData TTrack
 atlasSmearTrack = SmearData
                     "Smear_Track_ATLAS"  
                     MetaInfo { tag = "ATLAS", description = "track", comment = "table", reference = "XXX" } 
-                    PTEtaInterpolation { interpol = IPConstant 1.0 } 
+                    PTEtaInterpolation { isEtaSymmetric = True, interpol = IPConstant 1.0 } 
 
 atlasSmearTau :: SmearData TTau
 atlasSmearTau = SmearData
                   "Smear_Tau_ATLAS"  
                   MetaInfo { tag = "ATLAS", description = "tau", comment = "table", reference = "XXX" } 
-                  PTEtaInterpolation { interpol = IPConstant 1.0 }
+                  PTEtaInterpolation { isEtaSymmetric = True, interpol = IPConstant 1.0 }
 
 atlasSmearMET :: SmearData TMET
 atlasSmearMET = SmearData
                   "Smear_MissingET_ATLAS"  
                   MetaInfo { tag = "ATLAS", description = "missingET", comment = "table", reference = "XXX" } 
-                  PTEtaInterpolation { interpol = IPConstant 1.0 }
+                  PTEtaInterpolation { isEtaSymmetric = True, interpol = IPConstant 1.0 }
 

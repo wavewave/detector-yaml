@@ -9,7 +9,6 @@ import           Control.Applicative
 import           Control.Monad ((<=<))
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Maybe
--- import           Data.Functor.Identity
 import qualified Data.HashMap.Strict as HM
 import qualified Data.List as L
 import           Data.Scientific
@@ -32,6 +31,14 @@ find key = L.lookup key
 maybeText :: PYaml -> Maybe T.Text 
 maybeText (PYText txt) = Just txt
 maybeText _ = Nothing
+
+-- | 
+maybeBool :: PYaml -> Maybe Bool
+maybeBool (PYText txt) = let txtCap = T.toUpper txt 
+                         in if | txtCap == "TRUE" -> Just True
+                               | txtCap == "FALSE" -> Just False
+                               | otherwise -> Nothing
+maybeBool _ = Nothing
 
 -- | Just only when PYObject, and otherwise Nothing
 maybeObject :: PYaml -> Maybe [(T.Text,PYaml)]
@@ -129,14 +136,15 @@ getEitherImportOrObj kvlst =
 getPTEtaData :: [(T.Text,PYaml)] -> Maybe PTEtaData
 getPTEtaData kvlst = do
     typ <- (maybeText <=< find "Type") kvlst
+    b <- (maybeBool <=< find "IsEtaSymmetric") kvlst
     if | typ == "Grid" -> do 
          binpt <- get1DList "PtBins" kvlst
          bineta <- get1DList "EtaBins" kvlst    
          g <- (getGrid <=< maybeObject <=< find "Grid") kvlst
-         return PTEtaGrid { ptBins = binpt, etaBins = bineta, grid = g } 
+         return PTEtaGrid { isEtaSymmetric = b, ptBins = binpt, etaBins = bineta, grid = g } 
        | typ == "Interpolation" -> do
          i <- (getInterpolation <=< maybeObject <=< find "Interpolation") kvlst
-         return (PTEtaInterpolation i)
+         return (PTEtaInterpolation i b)
        | otherwise -> Nothing
 
 -- | 

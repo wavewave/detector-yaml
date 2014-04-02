@@ -30,7 +30,8 @@ atlasEleTest = ElectronEffData
       , comment = "We use table from reference" 
       , reference = "arXiv:xxxx.yyyy" }
   , eleEfficiency = PTEtaInterpolation
-      { interpol = IPPredefinedMode3 
+      { isEtaSymmetric = True
+      , interpol = IPPredefinedMode3 
           { seriesBA = [ FuncBin 0    (HM.fromList [ (-2,  9.476216187754203)
                                                    , (-1, -0.16939888048822812)
                                                    , ( 0,  0.01096643215740863)

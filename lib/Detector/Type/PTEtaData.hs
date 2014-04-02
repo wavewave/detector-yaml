@@ -82,8 +82,12 @@ instance MakeYaml Interpolation where
 data PTEtaData = PTEtaGrid 
                    { ptBins :: [Scientific]
                    , etaBins :: [Scientific]
+                   , isEtaSymmetric :: Bool
                    , grid :: Grid } 
-                | PTEtaInterpolation { interpol :: Interpolation } 
+                | PTEtaInterpolation 
+                   { interpol :: Interpolation 
+                   , isEtaSymmetric :: Bool
+                   } 
                
 deriving instance Show PTEtaData
 
@@ -92,9 +96,11 @@ instance MakeYaml PTEtaData where
     YObject $ [ ("Type", mkString (n+defIndent) "Grid" )
               , ("PtBins", mkInline ptBins)
               , ("EtaBins", mkInline etaBins)
+              , ("IsEtaSymmetric", makeYaml (n+defIndent) isEtaSymmetric)
               , ("Grid", makeYaml (n+defIndent) grid ) ]
   makeYaml n PTEtaInterpolation {..} =
     YObject $ [ ("Type", mkString (n+defIndent) "Interpolation")
+              , ("IsEtaSymmetric", makeYaml (n+defIndent) isEtaSymmetric)
               , ("Interpolation", makeYaml (n+defIndent) interpol) ] 
 
 

@@ -66,11 +66,13 @@ cmsBTagTCHEL = BJetEffData
       , reference = "arXiv:xxxx.yyyy"
       }
   , bJetEfficiency = PTEtaGrid
-      { ptBins = [ 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 100.0, 120.0, 240.0 ] 
+      { isEtaSymmetric = True
+      , ptBins = [ 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 100.0, 120.0, 240.0 ] 
       , etaBins = [ 0.0, 1.2, 2.4 ] 
       , grid = GridConst { gridConst = 0.7 } }
   , bJetRejection = PTEtaGrid
-      { ptBins = [ 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0 ] 
+      { isEtaSymmetric = True
+      , ptBins = [ 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0 ] 
       , etaBins = [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4 ] 
       , grid = GridConst { gridConst = 100.0 } } 
   }
@@ -85,11 +87,13 @@ cmsBTagSSVHPT = BJetEffData
       , reference = "arXiv:xxxx.yyyy"
       }
   , bJetEfficiency = PTEtaGrid
-      { ptBins = [ 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 100.0, 120.0, 240.0 ] 
+      { isEtaSymmetric = True
+      , ptBins = [ 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 100.0, 120.0, 240.0 ] 
       , etaBins = [ 0.0, 1.2, 2.4 ] 
       , grid = GridConst { gridConst = 0.5 } }
   , bJetRejection = PTEtaGrid
-      { ptBins = [ 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0 ] 
+      { isEtaSymmetric = True
+      , ptBins = [ 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0 ] 
       , etaBins = [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4 ] 
       , grid = GridConst { gridConst = 100.0 } } 
   }
@@ -104,11 +108,13 @@ cmsBTagSSVHEM = BJetEffData
       , reference = "arXiv:xxxx.yyyy"
       }
   , bJetEfficiency = PTEtaGrid
-      { ptBins = [ 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 100.0, 120.0, 240.0 ] 
+      { isEtaSymmetric = True
+      , ptBins = [ 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 100.0, 120.0, 240.0 ] 
       , etaBins = [ 0.0, 1.2, 2.4 ] 
       , grid = GridConst { gridConst = 0.825 } }
   , bJetRejection = PTEtaGrid
-      { ptBins = [ 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0 ] 
+      { isEtaSymmetric = True
+      , ptBins = [ 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0 ] 
       , etaBins = [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4 ] 
       , grid = GridConst { gridConst = 10.0 } } 
   }
@@ -122,7 +128,8 @@ cmsMuonS = MuonEffData
       , comment = "table"
       , reference = "arXiv:xxxx.yyyy" }
   , muonEfficiency = PTEtaGrid
-      { ptBins = [ 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 7.0, 9.0, 11.0, 14.0, 17.0, 20.0, 30.0, 40.0, 60.0, 100.0 ] 
+      { isEtaSymmetric = False
+      , ptBins = [ 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 7.0, 9.0, 11.0, 14.0, 17.0, 20.0, 30.0, 40.0, 60.0, 100.0 ] 
       , etaBins = [ -2.4, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.4 ] 
       , grid = GridConst { gridConst = 1.0 }  
       }       
@@ -137,7 +144,8 @@ cmsMuonP = MuonEffData
       , comment = "table"
       , reference = "arXiv:xxxx.yyyy" }
   , muonEfficiency = PTEtaGrid
-      { ptBins = [ 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 7.0, 9.0, 11.0, 14.0, 17.0, 20.0, 30.0, 40.0, 60.0, 100.0 ] 
+      { isEtaSymmetric = False
+      , ptBins = [ 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 7.0, 9.0, 11.0, 14.0, 17.0, 20.0, 30.0, 40.0, 60.0, 100.0 ] 
       , etaBins = [ -2.4, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.4 ] 
       , grid = GridConst { gridConst = 1.0 }  
       }       
@@ -152,7 +160,8 @@ cmsMuonT = MuonEffData
       , comment = "table"
       , reference = "arXiv:xxxx.yyyy" }
   , muonEfficiency = PTEtaGrid
-      { ptBins = [ 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 7.0, 9.0, 11.0, 14.0, 17.0, 20.0, 30.0, 40.0, 60.0, 100.0 ] 
+      { isEtaSymmetric = False
+      , ptBins = [ 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 7.0, 9.0, 11.0, 14.0, 17.0, 20.0, 30.0, 40.0, 60.0, 100.0 ] 
       , etaBins = [ -2.4, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.4 ] 
       , grid = GridConst { gridConst = 1.0 }  
       }       
@@ -167,7 +176,8 @@ cmsElePF = ElectronEffData
       , comment = "table"
       , reference = "arXiv:xxxx.yyyy" }
   , eleEfficiency = PTEtaGrid
-      { ptBins = [ 15.0, 17.5, 20.0, 30.0, 40.0, 50.0, 150.0 ] 
+      { isEtaSymmetric = False
+      , ptBins = [ 15.0, 17.5, 20.0, 30.0, 40.0, 50.0, 150.0 ] 
       , etaBins = [ -2.5, -1.56, -1.442, 0.0, 1.442, 1.56, 2.5 ] 
       , grid = GridConst { gridConst = 1.0 } }
   }
@@ -181,7 +191,8 @@ cmsEleCicSTight = ElectronEffData
       , comment = "table"
       , reference = "arXiv:xxxx.yyyy" }
   , eleEfficiency = PTEtaGrid
-      { ptBins = [ 15.0, 17.5, 20.0, 30.0, 40.0, 50.0, 150.0 ] 
+      { isEtaSymmetric = False
+      , ptBins = [ 15.0, 17.5, 20.0, 30.0, 40.0, 50.0, 150.0 ] 
       , etaBins = [ -2.5, -1.56, -1.442, 0.0, 1.442, 1.56, 2.5 ] 
       , grid = GridConst { gridConst = 1.0 } }
   }
@@ -195,7 +206,8 @@ cmsEleCicLoose = ElectronEffData
       , comment = "table"
       , reference = "arXiv:xxxx.yyyy" }
   , eleEfficiency = PTEtaGrid
-      { ptBins = [ 15.0, 17.5, 20.0, 30.0, 40.0, 50.0, 150.0 ] 
+      { isEtaSymmetric = False
+      , ptBins = [ 15.0, 17.5, 20.0, 30.0, 40.0, 50.0, 150.0 ] 
       , etaBins = [ -2.5, -1.56, -1.442, 0.0, 1.442, 1.56, 2.5 ] 
       , grid = GridConst { gridConst = 1.0 } }
   }
@@ -209,7 +221,8 @@ cmsEleWP80 = ElectronEffData
       , comment = "table"
       , reference = "arXiv:xxxx.yyyy" }
   , eleEfficiency = PTEtaGrid
-      { ptBins = [ 15.0, 17.5, 20.0, 30.0, 40.0, 50.0, 150.0 ] 
+      { isEtaSymmetric = False
+      , ptBins = [ 15.0, 17.5, 20.0, 30.0, 40.0, 50.0, 150.0 ] 
       , etaBins = [ -2.5, -1.56, -1.442, 0.0, 1.442, 1.56, 2.5 ] 
       , grid = GridConst { gridConst = 1.0 } }
   }
@@ -223,7 +236,8 @@ cmsEleWP95 = ElectronEffData
       , comment = "table"
       , reference = "arXiv:xxxx.yyyy" }
   , eleEfficiency = PTEtaGrid
-      { ptBins = [ 15.0, 17.5, 20.0, 30.0, 40.0, 50.0, 150.0 ] 
+      { isEtaSymmetric = False
+      , ptBins = [ 15.0, 17.5, 20.0, 30.0, 40.0, 50.0, 150.0 ] 
       , etaBins = [ -2.5, -1.56, -1.442, 0.0, 1.442, 1.56, 2.5 ] 
       , grid = GridConst { gridConst = 1.0 } }
   }
@@ -237,7 +251,8 @@ cmsPhoPF = PhotonEffData
       , comment = "table"
       , reference = "arXiv:xxxx.yyyy" }
   , phoEfficiency = PTEtaGrid
-      { ptBins = [ 20.0, 35.0, 45.0, 100.0 ] 
+      { isEtaSymmetric = False
+      , ptBins = [ 20.0, 35.0, 45.0, 100.0 ] 
       , etaBins = [ -2.5, -1.56, -1.442, 0.0, 1.442, 1.56, 2.5 ] 
       , grid = GridConst { gridConst = 1.0 } }
   } 
@@ -251,7 +266,8 @@ cmsPhoTight = PhotonEffData
       , comment = "table"
       , reference = "arXiv:xxxx.yyyy" }
   , phoEfficiency = PTEtaGrid
-      { ptBins = [ 20.0, 35.0, 45.0, 100.0 ] 
+      { isEtaSymmetric = False
+      , ptBins = [ 20.0, 35.0, 45.0, 100.0 ] 
       , etaBins = [ -2.5, -1.56, -1.442, 0.0, 1.442, 1.56, 2.5 ] 
       , grid = GridConst { gridConst = 1.0 } }
   } 
@@ -265,7 +281,8 @@ cmsPhoLoose = PhotonEffData
       , comment = "table"
       , reference = "arXiv:xxxx.yyyy" }
   , phoEfficiency = PTEtaGrid
-      { ptBins = [ 20.0, 35.0, 45.0, 100.0 ] 
+      { isEtaSymmetric = False
+      , ptBins = [ 20.0, 35.0, 45.0, 100.0 ] 
       , etaBins = [ -2.5, -1.56, -1.442, 0.0, 1.442, 1.56, 2.5 ] 
       , grid = GridConst { gridConst = 1.0 } }
   } 
@@ -279,7 +296,8 @@ cmsTrack = TrackEffData
       , comment = "table"
       , reference = "arXiv:xxxx.yyyy" }
   , trackEfficiency = PTEtaGrid
-      { ptBins = [ 0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0, 4.0, 6.0, 8.0, 10.0, 20.0, 40.0, 60.0, 80.0, 100.0 ] 
+      { isEtaSymmetric = False
+      , ptBins = [ 0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0, 4.0, 6.0, 8.0, 10.0, 20.0, 40.0, 60.0, 80.0, 100.0 ] 
       , etaBins = [ -2.5, -1.56, -1.442, 0.0, 1.442, 1.56, 2.5 ] 
       , grid = GridConst { gridConst = 1.0 } }
   }
@@ -296,12 +314,14 @@ cmsTauTaNCL = TauEffData
   , tauTagMethod = "TaNCL"
   , tauEfficiency = TauCombined 
       { tauCombEff = PTEtaGrid
-          { ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.0, 1.5, 2.5 ] 
           , grid = GridConst { gridConst = 1.0 } 
           } 
       , tauCombRej = PTEtaGrid
-          { ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100 ] 
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100 ] 
           , etaBins = [ 0.0, 1.0, 1.5, 2.5 ] 
           , grid = GridConst { gridConst = 1.0 } 
           }
@@ -319,12 +339,14 @@ cmsTauTaNCM = TauEffData
   , tauTagMethod = "TaNCM"
   , tauEfficiency = TauCombined 
       { tauCombEff = PTEtaGrid
-          { ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.0, 1.5, 2.5 ] 
           , grid = GridConst { gridConst = 1.0 } 
           } 
       , tauCombRej = PTEtaGrid
-          { ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100 ] 
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100 ] 
           , etaBins = [ 0.0, 1.0, 1.5, 2.5 ] 
           , grid = GridConst { gridConst = 1.0 } 
           }
@@ -343,12 +365,14 @@ cmsTauTaNCT = TauEffData
   , tauTagMethod = "TaNCT"
   , tauEfficiency = TauCombined 
       { tauCombEff = PTEtaGrid
-          { ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.0, 1.5, 2.5 ] 
           , grid = GridConst { gridConst = 1.0 } 
           } 
       , tauCombRej = PTEtaGrid
-          { ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100 ] 
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100 ] 
           , etaBins = [ 0.0, 1.0, 1.5, 2.5 ] 
           , grid = GridConst { gridConst = 1.0 } 
           }
@@ -366,12 +390,14 @@ cmsTauHPSL = TauEffData
   , tauTagMethod = "HPSL"
   , tauEfficiency = TauCombined 
       { tauCombEff = PTEtaGrid
-          { ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.0, 1.5, 2.5 ] 
           , grid = GridConst { gridConst = 1.0 } 
           } 
       , tauCombRej = PTEtaGrid
-          { ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100 ] 
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100 ] 
           , etaBins = [ 0.0, 1.0, 1.5, 2.5 ] 
           , grid = GridConst { gridConst = 1.0 } 
           }
@@ -389,12 +415,14 @@ cmsTauHPSM = TauEffData
   , tauTagMethod = "HPSM"
   , tauEfficiency = TauCombined 
       { tauCombEff = PTEtaGrid
-          { ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.0, 1.5, 2.5 ] 
           , grid = GridConst { gridConst = 1.0 } 
           } 
       , tauCombRej = PTEtaGrid
-          { ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100 ] 
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100 ] 
           , etaBins = [ 0.0, 1.0, 1.5, 2.5 ] 
           , grid = GridConst { gridConst = 1.0 } 
           }
@@ -412,12 +440,14 @@ cmsTauHPST = TauEffData
   , tauTagMethod = "HPST"
   , tauEfficiency = TauCombined 
       { tauCombEff = PTEtaGrid
-          { ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.0, 1.5, 2.5 ] 
           , grid = GridConst { gridConst = 1.0 } 
           } 
       , tauCombRej = PTEtaGrid
-          { ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100 ] 
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100 ] 
           , etaBins = [ 0.0, 1.0, 1.5, 2.5 ] 
           , grid = GridConst { gridConst = 1.0 } 
           }
@@ -435,12 +465,14 @@ cmsTauTCT = TauEffData
   , tauTagMethod = "TCT"
   , tauEfficiency = TauCombined 
       { tauCombEff = PTEtaGrid
-          { ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100.0 ]
           , etaBins = [ 0.0, 1.0, 1.5, 2.5 ] 
           , grid = GridConst { gridConst = 1.0 } 
           } 
       , tauCombRej = PTEtaGrid
-          { ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100 ] 
+          { isEtaSymmetric = True
+          , ptBins = [ 15.0, 17.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 100 ] 
           , etaBins = [ 0.0, 1.0, 1.5, 2.5 ] 
           , grid = GridConst { gridConst = 1.0 } 
           }
@@ -456,7 +488,8 @@ cmsJetPF = JetEffData
       , comment = "table"
       , reference = "PFT-09-001-pas" } 
   , jetEfficiency = PTEtaGrid
-      { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
+      { isEtaSymmetric = False
+      , ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
       , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
       , grid = GridConst { gridConst = 1.0 } } 
   }
@@ -470,7 +503,8 @@ cmsJetCalo = JetEffData
       , comment = "table"
       , reference = "PFT-09-001-pas" }
   , jetEfficiency = PTEtaGrid 
-      { ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
+      { isEtaSymmetric = False
+      , ptBins = [ 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0, 60.0, 80.0, 100.0 ]
       , etaBins = [ -2.5, -1.5, 0.0, 1.5, 2.5 ] 
       , grid = GridConst { gridConst = 1.0 } } 
   }
@@ -492,40 +526,40 @@ cmsSmearElectron :: SmearData TElectron
 cmsSmearElectron = SmearData 
                      "Smear_Electron_CMS"  
                      MetaInfo { tag = "CMS", description = "electron", comment = "table", reference = "XXX" } 
-                     PTEtaInterpolation { interpol = IPConstant 1.0 }
+                     PTEtaInterpolation { isEtaSymmetric = True, interpol = IPConstant 1.0 }
 
 cmsSmearPhoton :: SmearData TPhoton
 cmsSmearPhoton = SmearData 
                    "Smear_Photon_CMS"  
                    MetaInfo { tag = "CMS", description = "photon", comment = "table", reference = "XXX" } 
-                   PTEtaInterpolation { interpol = IPConstant 1.0 }
+                   PTEtaInterpolation { isEtaSymmetric = True, interpol = IPConstant 1.0 }
 
 cmsSmearMuon :: SmearData TMuon
 cmsSmearMuon = SmearData 
                  "Smear_Muon_CMS"  
                  MetaInfo { tag = "CMS", description = "muon", comment = "table", reference = "XXX" } 
-                 PTEtaInterpolation { interpol = IPConstant 1.0 }
+                 PTEtaInterpolation { isEtaSymmetric = True, interpol = IPConstant 1.0 }
 
 cmsSmearTopoJet :: SmearData TJet
 cmsSmearTopoJet = SmearData
                     "Smear_TopoJet_CMS"  
                     MetaInfo { tag = "CMS", description = "topojet", comment = "table", reference = "XXX" } 
-                    PTEtaInterpolation { interpol = IPConstant 1.0 }
+                    PTEtaInterpolation { isEtaSymmetric = True, interpol = IPConstant 1.0 }
 
 cmsSmearTrack :: SmearData TTrack
 cmsSmearTrack = SmearData
                   "Smear_Track_CMS"  
                   MetaInfo { tag = "CMS", description = "track", comment = "table", reference = "XXX" } 
-                  PTEtaInterpolation { interpol = IPConstant 1.0 }
+                  PTEtaInterpolation { isEtaSymmetric = True, interpol = IPConstant 1.0 }
 
 cmsSmearTau :: SmearData TTau
 cmsSmearTau = SmearData
                 "Smear_Tau_CMS"  
                 MetaInfo { tag = "CMS", description = "tau", comment = "table", reference = "XXX" } 
-                PTEtaInterpolation { interpol = IPConstant 1.0 }
+                PTEtaInterpolation { isEtaSymmetric = True, interpol = IPConstant 1.0 }
 
 cmsSmearMET :: SmearData TMET
 cmsSmearMET = SmearData
                 "Smear_MissingET_CMS"  
                 MetaInfo { tag = "CMS", description = "missingET", comment = "table", reference = "XXX" } 
-                PTEtaInterpolation { interpol = IPConstant 1.0 }
+                PTEtaInterpolation { isEtaSymmetric = True, interpol = IPConstant 1.0 }
