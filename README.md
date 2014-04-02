@@ -16,8 +16,23 @@ for identification and smearing will be located in the `object` directory.
 
 DetectorDescription consists of the following information: `Name`, `Class`, `Description`, `Reference`, 
 `Comment`, `ValidationInfo`, `Identification` and `Smearing`. Objects in `Identification` and `Smearing` are
-`Electron`, `Photon`, `BJet`, `Muon`, `Jet`, `Tau`, `Track` and `PTThresholds`. Each object can be either imported or 
-directly embedded. For ATOM, we generally recommend to import each object in top-level files since it is easier 
+`Electron`, `Photon`, `BJet`, `Muon`, `Jet`, `Tau`, `Track` and `PTThresholds`. 
+
+Each object are a list of items, each of which is either an import or a directly embedded object.  
+For ATOM, we generally recommend to import each object in top-level files since it is easier 
 to identify each object with their names.
+
+An import object is simply described by `Import: (Name)` where `(Name)` is the name of the object. The object 
+should be able to be found in the `object` directory as a YAML file with name `(Name).yaml`. Both of the YAML file 
+in the `object` directory and the embedded object have the same format. In the following, we describe the YAML 
+format of each object. 
+
+As a common format, the following meta-informations are necessary for every type of objects. 
+
+* *Name* : must be matched with the file name if it is defined in the `object` directory
+* *Tag* : 
+* *Description* : 
+* *Comment* :
+* *Reference* :
 
 (to be continued)
