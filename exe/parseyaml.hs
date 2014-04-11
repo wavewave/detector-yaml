@@ -3,7 +3,7 @@
 module Main where
 
 -- import Control.Monad ((<=<))
-import           Control.Monad.Trans.Maybe
+import           Control.Monad.Trans.Either
 import           Data.Text.Lazy.Builder
 import qualified Data.Text.Lazy.IO as TIO
 import           System.Directory
@@ -25,16 +25,16 @@ main = do
   case r of 
     Left err -> print err
     Right (PYObject kvlst) -> do 
-      let mdd = getDetectorDescription kvlst
-      case mdd of
-        Nothing -> putStrLn "parsing failed"
-        Just dd -> do 
+      let edd = getDetectorDescription kvlst
+      case edd of
+        Left err -> putStrLn err
+        Right dd -> do 
           (TIO.putStrLn . toLazyText . buildYaml 0 . makeYaml 0) dd
           putStrLn "======================"
           putStrLn "======================"
           putStrLn "======================"
-          mdd' <- runMaybeT (importDetectorDescription (bdir </> "object") dd)
-          case mdd' of
-            Just dd' -> (TIO.putStrLn . toLazyText . buildYaml 0 . makeYaml 0) dd'
-            Nothing -> return ()
+          edd' <- runEitherT (importDetectorDescription (bdir </> "object") dd)
+          case edd' of
+            Right dd' -> (TIO.putStrLn . toLazyText . buildYaml 0 . makeYaml 0) dd'
+            Left err -> putStrLn err
     Right _ -> putStrLn "not an object"

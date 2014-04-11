@@ -50,6 +50,7 @@ Executable parseyaml
                    attoparsec,
                    base>4, 
                    directory,
+                   either,
                    filepath,
                    text, 
                    transformers,
@@ -63,9 +64,12 @@ Library
   cc-options: -std=c++11
   Build-Depends: 
                    attoparsec,
-                   base>4, 
+                   base>4,
+                   bifunctors, 
                    bytestring, 
+                   either,
                    filepath,
+                   mmorph,
                    scientific, 
                    text, 
                    transformers,
