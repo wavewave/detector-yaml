@@ -11,22 +11,20 @@ Cabal-Version:  >= 1.8
 data-files:     
 Extra-source-files:
 
-Executable tester
-  Main-is: tester.hs
-  hs-source-dirs: exe
-  ghc-options: 	-Wall -Werror -O2 -threaded -funbox-strict-fields -fno-warn-unused-do-bind -rtsopts
-  ghc-prof-options: -caf-all -auto-all
-  Build-Depends: 
-                   attoparsec,
-                   base>4, 
-                   directory,
-                   filepath,
-                   text,  
-                   unordered-containers,
-                   yayaml,
-                   detector-yaml
-
-
+-- Executable tester
+--  Main-is: tester.hs
+--  hs-source-dirs: exe
+--  ghc-options: 	-Wall -Werror -O2 -threaded -funbox-strict-fields -fno-warn-unused-do-bind -rtsopts
+--  ghc-prof-options: -caf-all -auto-all
+--  Build-Depends: 
+--                   attoparsec,
+--                   base>4, 
+--                   directory,
+--                   filepath,
+--                   text,  
+--                   unordered-containers,
+--                   yayaml,
+--                   detector-yaml
 
 Executable mkyaml
   Main-is: mkyaml.hs
@@ -65,7 +63,7 @@ Library
   Build-Depends: 
                    attoparsec,
                    base>4,
-                   bifunctors, 
+                   -- bifunctors, 
                    bytestring, 
                    either,
                    filepath,
