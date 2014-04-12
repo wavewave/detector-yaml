@@ -10,6 +10,7 @@ import           Control.Applicative
 import           Control.Monad ((<=<))
 import           Control.Monad.Morph
 import           Control.Monad.IO.Class
+import           Control.Monad.Trans.State
 import           Control.Monad.Trans.Either
 -- import           Data.Bifunctor
 import           Data.Functor.Identity
@@ -25,6 +26,23 @@ import           Detector.Type
 import           YAML.Parser
 -- 
 import Prelude hiding (mapM)
+
+type Context = [String]
+type ErrorContextT m = EitherT String (StateT Context m)
+
+withContext :: (Monad m) => 
+               String 
+            -> ErrorContextT m a
+            -> ErrorContextT m a 
+withContext ctxt action = do 
+    lift $ modify (ctxt:) 
+    r <- action
+    lift $ modify tail 
+    return r
+
+             -- -> EitherT String (StateT [String] m) a 
+             -- -> EitherT String (StateT [String] m) a
+
 
 instance MFunctor (EitherT e) where
     hoist nat m = EitherT (nat (runEitherT m))
@@ -67,8 +85,8 @@ eitherNum _ = left "Not a number"
 -- | get a detector description from parsed YAML object
 getDetectorDescription :: (Monad m) => 
                           [(T.Text, PYaml)] 
-                       -> EitherT String m (DetectorDescription ImportList) 
-getDetectorDescription kvlst = do
+                       -> ErrorContextT m (DetectorDescription ImportList) 
+getDetectorDescription kvlst = withContext "DetectorDescription" $ do
     xs <- mapM (eitherText <=< flip find kvlst) 
             ["Name", "Description", "Reference"
             , "Comment", "ValidationInfo"]
@@ -89,10 +107,10 @@ getDetectorDescription kvlst = do
 
 -- | get an object description from parsed YAML object
 getIdentificationDescription 
-  :: (Monad m) => 
+  :: (Monad m) =>
      [(T.Text,PYaml)] 
-  -> EitherT String m (IdentificationDescription ImportList) 
-getIdentificationDescription kvlst = do
+  -> ErrorContextT m (IdentificationDescription ImportList)
+getIdentificationDescription kvlst = withContext "Identification Description" $ do 
     xs <- mapM (eitherList <=< flip find kvlst) 
                  [ "Electron", "Photon", "BJet", "Muon", "Jet"
                  , "Tau", "PTThresholds" ]
@@ -104,7 +122,7 @@ getIdentificationDescription kvlst = do
         m <- ImportList <$> (traverse (importOrDeal getMuonEffData) =<< mapM eitherObject muObjs)
         j <- ImportList <$> (traverse (importOrDeal getJetEffData) =<< mapM eitherObject jetObjs)
         ta <- ImportList <$> (traverse (importOrDeal getTauEffData) =<< mapM eitherObject tauObjs)
-        let etk = runIdentity . runEitherT $ do 
+        let etk = runIdentity . flip evalStateT [] . runEitherT $ do 
               trkObjs <- eitherList =<< find "Track" kvlst
               ImportList <$> (traverse (importOrDeal getTrackEffData) =<< mapM eitherObject trkObjs)
             mtk = either (const Nothing) Just etk
@@ -121,7 +139,7 @@ getIdentificationDescription kvlst = do
       _ -> left "Not an identification description"
 
 importOrDeal :: forall a m. (Monad m) => 
-                (forall n. (Monad n) => [(T.Text, PYaml)] -> EitherT String n a) 
+                ([(T.Text, PYaml)] -> EitherT String m a)
              -> [(T.Text, PYaml)] 
              -> EitherT String m (Either Import a) 
 importOrDeal func x = let y = fmap func (getEitherImportOrObj x) 
@@ -129,16 +147,16 @@ importOrDeal func x = let y = fmap func (getEitherImportOrObj x)
 
 
 -- | get smearing description from parsed YAML object
-getSmearingDescription :: (Monad m) => 
+getSmearingDescription :: forall m. (Monad m) => 
                           [(T.Text,PYaml)] 
-                       -> EitherT String m (SmearingDescription ImportList) 
-getSmearingDescription kvlst = do
+                       -> ErrorContextT m (SmearingDescription ImportList) 
+getSmearingDescription kvlst = withContext "SmearingDescription" $ do
     xs <- mapM (eitherList <=< flip find kvlst) [ "Electron", "Muon", "Photon", "Jet", "Track", "Tau", "MissingET" ]
     case xs of 
       [ elecObjs, muonObjs, phoObjs, jetObjs, trkObjs, tauObjs, metObjs ] -> do 
         SmearingDescription <$> implst elecObjs <*> implst muonObjs <*> implst phoObjs 
                             <*> implst jetObjs <*> implst trkObjs <*> implst tauObjs <*> implst metObjs
-      _ -> (hoistEither . Left) "Not a Smearing Description"
+      _ -> left "Not a Smearing Description"
   where implst ys = ImportList <$> (traverse (importOrDeal getSmearData) =<< mapM eitherObject ys)
 
     
@@ -164,7 +182,7 @@ getPTEtaData kvlst = do
        | typ == "Interpolation" -> do
          i <- (getInterpolation <=< eitherObject <=< find "Interpolation") kvlst
          return (PTEtaInterpolation i b)
-       | otherwise -> (EitherT . return . Left) "Not a PTEtaData"
+       | otherwise -> left "Not a PTEtaData"
 
 -- | 
 getGrid :: (Monad m) => [(T.Text,PYaml)] -> EitherT String m Grid
@@ -172,7 +190,7 @@ getGrid kvlst = do
     typ <- (eitherText <=< find "Type") kvlst
     if | typ == "Full" -> GridFull <$> get2DList "Data" kvlst
        | typ == "Const" -> GridConst <$> (eitherNum <=< find "Data") kvlst
-       | otherwise -> (EitherT . return . Left) "Not a Grid"
+       | otherwise -> left "Not a Grid"
     
 
 
@@ -203,7 +221,7 @@ getInterpolation kvlst = do
         if | typ == "PredefinedMode1" -> return (IPPredefinedMode1 lst2 etabound)
            | typ == "PredefinedMode2" -> return (IPPredefinedMode2 lst2 etabound)
            | typ == "PredefinedMode3" -> return (IPPredefinedMode3 lst2 etabound)
-           | otherwise -> (EitherT . return . Left) "Not an interpolation"
+           | otherwise -> left "Not an interpolation"
       
 
 -- | 
@@ -218,7 +236,7 @@ getFuncBin kvlst = do
 -- | 
 getIntNum :: (Monad m) => PYaml -> EitherT String m (Int, Scientific)
 getIntNum (PYList (PYNumber x : PYNumber y : [])) = return (round x, realToFrac y)
-getIntNum _ = (EitherT . return . Left) "Not an (Int,Number)"
+getIntNum _ = left "Not an (Int,Number)"
 
 
 
@@ -230,11 +248,11 @@ getMetaInfo kvlst = do
     case xs of
       [ t, d, c, r ] ->  
         return (MetaInfo t d c r)
-      _ -> (EitherT . return . Left) "Not a metainfo"
+      _ -> left "Not a metainfo"
 
 -- | 
-getElectronEffData :: (Monad m) => [ (T.Text,PYaml)] -> EitherT String m ElectronEffData
-getElectronEffData kvlst = do
+getElectronEffData :: (Monad m) => [ (T.Text,PYaml)] -> ErrorContextT m ElectronEffData
+getElectronEffData kvlst = withContext "ElectronEffData" $ do
     nm <- (eitherText <=< find "Name") kvlst
     meta <- getMetaInfo kvlst
     effkvlst <- (eitherObject <=< find "Efficiency") kvlst
@@ -242,8 +260,8 @@ getElectronEffData kvlst = do
     return (ElectronEffData nm meta eff)
       
 -- | 
-getPhotonEffData :: (Monad m) => [ (T.Text,PYaml) ] -> EitherT String m PhotonEffData
-getPhotonEffData kvlst = do 
+getPhotonEffData :: (Monad m) => [ (T.Text,PYaml) ] -> ErrorContextT m PhotonEffData
+getPhotonEffData kvlst = withContext "PhotonEffData" $ do 
     nm <- (eitherText <=< find "Name") kvlst
     meta <- getMetaInfo kvlst
     effkvlst <- (eitherObject <=< find "Efficiency") kvlst
@@ -251,8 +269,8 @@ getPhotonEffData kvlst = do
     return (PhotonEffData nm meta eff)
 
 -- | 
-getBJetEffData :: (Monad m) => [ (T.Text,PYaml) ] -> EitherT String m BJetEffData
-getBJetEffData kvlst = do
+getBJetEffData :: (Monad m) => [ (T.Text,PYaml) ] -> ErrorContextT m BJetEffData
+getBJetEffData kvlst = withContext "BJetEffData" $ do
     nm <- (eitherText <=< find "Name") kvlst
     meta <- getMetaInfo kvlst
     effkvlst <- (eitherObject <=< find "Efficiency") kvlst
@@ -262,8 +280,8 @@ getBJetEffData kvlst = do
     return (BJetEffData nm meta eff rej)
 
 -- | 
-getMuonEffData :: (Monad m) => [ (T.Text,PYaml) ] -> EitherT String m MuonEffData
-getMuonEffData kvlst = do
+getMuonEffData :: (Monad m) => [ (T.Text,PYaml) ] -> ErrorContextT m MuonEffData
+getMuonEffData kvlst = withContext "MuonEffData" $ do
     nm <- (eitherText <=< find "Name") kvlst
     meta <- getMetaInfo kvlst
     effkvlst <- (eitherObject <=< find "Efficiency") kvlst
@@ -271,8 +289,8 @@ getMuonEffData kvlst = do
     return (MuonEffData nm meta eff)
   
 -- | 
-getJetEffData :: (Monad m) => [ (T.Text,PYaml) ] -> EitherT String m JetEffData
-getJetEffData kvlst = do
+getJetEffData :: (Monad m) => [ (T.Text,PYaml) ] -> ErrorContextT m JetEffData
+getJetEffData kvlst = withContext "JetEffData" $ do
     nm <- (eitherText <=< find "Name") kvlst
     meta <- getMetaInfo kvlst
     effkvlst <- (eitherObject <=< find "Efficiency") kvlst
@@ -280,8 +298,8 @@ getJetEffData kvlst = do
     return (JetEffData nm meta eff)
 
 -- |
-getTauEffData :: (Monad m) => [(T.Text,PYaml)] -> EitherT String m TauEffData
-getTauEffData kvlst = do 
+getTauEffData :: (Monad m) => [(T.Text,PYaml)] -> ErrorContextT m TauEffData
+getTauEffData kvlst = withContext "TauEffData" $ do 
     nm <- (eitherText <=< find "Name") kvlst
     tagmtd <- (eitherText <=< find "TaggingMethod") kvlst
     meta <- getMetaInfo kvlst
@@ -295,15 +313,15 @@ getTauEffData kvlst = do
            }
 
 -- | 
-getTauEffDetail :: (Monad m) => [ (T.Text,PYaml) ] -> EitherT String m TauEffDetail
-getTauEffDetail kvlst = do 
+getTauEffDetail :: (Monad m) => [ (T.Text,PYaml) ] -> ErrorContextT m TauEffDetail
+getTauEffDetail kvlst = withContext "TauEffDatail" $ do 
     typ <- (eitherText <=< find "Type") kvlst
     if | typ == "Tau1or3Prong" -> getTau1or3Prong kvlst
        | typ == "TauCombined" -> getTauCombined kvlst
 
 -- | 
-getTau1or3Prong :: (Monad m) => [ (T.Text,PYaml) ] -> EitherT String m TauEffDetail
-getTau1or3Prong kvlst = do
+getTau1or3Prong :: (Monad m) => [ (T.Text,PYaml) ] -> ErrorContextT m TauEffDetail
+getTau1or3Prong kvlst = withContext "Tau1or3Prong" $ do
     eff1 <- (getPTEtaData <=< eitherObject <=< find "Efficiency1Prong") kvlst
     rej1 <- (getPTEtaData <=< eitherObject <=< find "Rejection1Prong") kvlst
     eff3 <- (getPTEtaData <=< eitherObject <=< find "Efficiency3Prong") kvlst
@@ -311,16 +329,16 @@ getTau1or3Prong kvlst = do
     return (Tau1or3Prong eff1 rej1 eff3 rej3)
 
 -- |
-getTauCombined :: (Monad m) => [ (T.Text,PYaml) ] -> EitherT String m TauEffDetail
-getTauCombined kvlst = do 
+getTauCombined :: (Monad m) => [ (T.Text,PYaml) ] -> ErrorContextT m TauEffDetail
+getTauCombined kvlst = withContext "TauCombined" $ do 
     eff <- (getPTEtaData <=< eitherObject <=< find "Efficiency") kvlst
     rej <- (getPTEtaData <=< eitherObject <=< find "Rejection") kvlst
     return (TauCombined eff rej) 
 
 
 -- | 
-getTrackEffData :: (Monad m) => [ (T.Text,PYaml) ] -> EitherT String m TrackEffData
-getTrackEffData kvlst = do
+getTrackEffData :: (Monad m) => [ (T.Text,PYaml) ] -> ErrorContextT m TrackEffData
+getTrackEffData kvlst = withContext "TrackEffData" $ do
     nm <- (eitherText <=< find "Name") kvlst
     meta <- getMetaInfo kvlst
     effkvlst <- (eitherObject <=< find "Efficiency") kvlst
@@ -328,8 +346,8 @@ getTrackEffData kvlst = do
     return (TrackEffData nm meta eff)
 
 -- |
-getPTThresholds :: (Monad m) => [(T.Text,PYaml)] -> EitherT String m PTThresholds
-getPTThresholds kvlst = do
+getPTThresholds :: (Monad m) => [(T.Text,PYaml)] -> ErrorContextT m PTThresholds
+getPTThresholds kvlst = withContext "PTThresholds" $ do
     nm <- (eitherText <=< find "Name") kvlst
     xs <- mapM (eitherNum <=< flip find kvlst) 
             [ "MuPTMIN", "ElePTMIN", "PhoPTMIN", "JetPTMIN"
@@ -339,10 +357,10 @@ getPTThresholds kvlst = do
         return PTThresholds 
                { pTThreName = nm, muPTMin = m, elePTMin = e, phoPTMin = p
                , jetPTMin = j, bJetPTMin = b, trkPTMin = tr, tauPTMin = ta } 
-      _ -> (EitherT . return . Left) "Not a PTThresholds"
+      _ -> left "Not a PTThresholds"
 
-getSmearData :: (Monad m) => [ (T.Text,PYaml) ] -> EitherT String m (SmearData a)
-getSmearData kvlst = do
+getSmearData :: (Monad m) => [ (T.Text,PYaml) ] -> ErrorContextT m (SmearData a)
+getSmearData kvlst = withContext "getSmearData" $ do
     nm <- (eitherText <=< find "Name") kvlst
     meta <- getMetaInfo kvlst
     smkvlst <- (eitherObject <=< find "Smearing") kvlst
@@ -354,26 +372,25 @@ getSmearData kvlst = do
 --------------
 
 importData :: (MonadIO m) => 
-              (forall n. (Monad n) => [(T.Text, PYaml)] -> EitherT String n a)  
+              ([(T.Text, PYaml)] -> ErrorContextT m a)
            -> FilePath
            -> Either Import a 
-           -> EitherT String m a
+           -> ErrorContextT m a
 importData _ _ (Right x) = return x 
-importData f rdir (Left (Import n)) = do
+importData f rdir (Left (Import n)) = 
     let fname = rdir </> T.unpack n <.> "yaml"
-    r <- liftIO (parseFile fname)
-    case r of
-      Left err -> (EitherT . return . Left) err
-      Right (PYObject kvlst) -> f kvlst
-            -- (bimap (const ("parse " ++ fname ++ " failed")) id (f kvlst))
-      Right _ -> (EitherT . return . Left) 
-                    ("File content of " ++ fname ++ " is not an object.")
+    in withContext ("Importing " ++ fname) $ do
+      r <- liftIO (parseFile fname)
+      case r of
+	Left err -> left err
+	Right (PYObject kvlst) -> f kvlst
+	Right _ -> left ("File content of " ++ fname ++ " is not an object.")
 
 importIdentificationDescription 
     :: (MonadIO m) => 
        FilePath 
     -> IdentificationDescription ImportList
-    -> EitherT String m (IdentificationDescription [])
+    -> ErrorContextT m (IdentificationDescription [])
 importIdentificationDescription rdir IdentificationDescription {..} = do
     IdentificationDescription 
     <$> (traverse (importData getElectronEffData rdir) . unImportList) electron
@@ -389,7 +406,7 @@ importSmearingDescription
     :: (MonadIO m) => 
        FilePath 
     -> SmearingDescription ImportList
-    -> EitherT String m (SmearingDescription [])
+    -> ErrorContextT m (SmearingDescription [])
 importSmearingDescription rdir SmearingDescription {..} = do
     SmearingDescription 
     <$> (traverse (importData getSmearData rdir) . unImportList) smearElectron
@@ -405,10 +422,11 @@ importDetectorDescription
     :: (MonadIO m) => 
        FilePath
     -> DetectorDescription ImportList
-    -> EitherT String m (DetectorDescription [])
-importDetectorDescription rdir dd@DetectorDescription {..} = do 
-    idd <- importIdentificationDescription rdir detectorIdentification
-    sd <- importSmearingDescription rdir detectorSmearing 
-    return dd { detectorIdentification = idd 
-              , detectorSmearing = sd 
-              }
+    -> ErrorContextT m (DetectorDescription [])
+importDetectorDescription rdir dd@DetectorDescription {..} = 
+    withContext "Importing files in DetectorDescription" $ do 
+      idd <- importIdentificationDescription rdir detectorIdentification
+      sd <- importSmearingDescription rdir detectorSmearing 
+      return dd { detectorIdentification = idd 
+                , detectorSmearing = sd 
+                }

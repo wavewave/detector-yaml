@@ -5,6 +5,7 @@ module Main where
 -- import Control.Monad ((<=<))
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Either
+import           Control.Monad.Trans.State
 import           Data.Text.Lazy.Builder
 import qualified Data.Text.Lazy.IO as TIO
 import           System.Directory
@@ -22,8 +23,8 @@ main = do
   bdir <- getCurrentDirectory
   args <- getArgs
   let fp = args !! 0  
-  r <- runEitherT $ do 
-    PYObject kvlst <- EitherT (parseFile (bdir </> "top-level" </> fp <.> "yaml"))
+  r <- flip runStateT [] . runEitherT $ do 
+    PYObject kvlst <- (EitherT . liftIO) (parseFile (bdir </> "top-level" </> fp <.> "yaml"))
     dd <- getDetectorDescription kvlst 
     liftIO $ do
       (TIO.putStrLn . toLazyText . buildYaml 0 . makeYaml 0) dd
@@ -33,8 +34,8 @@ main = do
     dd' <- importDetectorDescription (bdir </> "object") dd
     liftIO $ (liftIO . TIO.putStrLn . toLazyText . buildYaml 0 . makeYaml 0) dd'
   case r of 
-    Left err -> putStrLn err
-    Right _ -> return ()
+    (Left err, strs) -> putStrLn err >> print strs
+    (Right _, _) -> return ()
 
 {-
   r <- parseFile (bdir </> "top-level" </> fp <.> "yaml")
