@@ -19,6 +19,7 @@ import qualified Data.List as L
 import           Data.Scientific
 import qualified Data.Text as T
 import           Data.Traversable
+import           System.Directory
 import           System.FilePath
 --
 import           Detector.Type
@@ -170,8 +171,8 @@ getEitherImportOrObj kvlst =
          Left _ -> Right kvlst
 
 -- | 
-getPTEtaData :: (Monad m) => [(T.Text,PYaml)] -> EitherT String m PTEtaData
-getPTEtaData kvlst = do
+getPTEtaData :: (Monad m) => [(T.Text,PYaml)] -> ErrorContextT m PTEtaData
+getPTEtaData kvlst = withContext "PTEtaData" $ do
     typ <- (eitherText <=< find "Type") kvlst
     b <- (eitherBool <=< find "IsEtaSymmetric") kvlst
     if | typ == "Grid" -> do 
@@ -182,10 +183,10 @@ getPTEtaData kvlst = do
        | typ == "Interpolation" -> do
          i <- (getInterpolation <=< eitherObject <=< find "Interpolation") kvlst
          return (PTEtaInterpolation i b)
-       | otherwise -> left "Not a PTEtaData"
+       | otherwise -> left ("Cannot understand Type : " ++ T.unpack typ)
 
 -- | 
-getGrid :: (Monad m) => [(T.Text,PYaml)] -> EitherT String m Grid
+getGrid :: (Monad m) => [(T.Text,PYaml)] -> ErrorContextT m Grid
 getGrid kvlst = do
     typ <- (eitherText <=< find "Type") kvlst
     if | typ == "Full" -> GridFull <$> get2DList "Data" kvlst
@@ -195,23 +196,24 @@ getGrid kvlst = do
 
 
 -- | 
-get1DList :: (Monad m) => T.Text -> [(T.Text,PYaml)] -> EitherT String m [Scientific] 
-get1DList key = (mapM eitherNum <=< eitherList <=< find key) 
+get1DList :: (Monad m) => T.Text -> [(T.Text,PYaml)] -> ErrorContextT m [Scientific] 
+get1DList key = withContext ("obtaining 1D list of " ++ T.unpack key) .  
+                  (mapM eitherNum <=< eitherList <=< find key) 
 
 -- | 
-get2DList :: (Monad m) => T.Text -> [(T.Text,PYaml)] -> EitherT String m [[Scientific]] 
-get2DList key kvlst = do
+get2DList :: (Monad m) => T.Text -> [(T.Text,PYaml)] -> ErrorContextT m [[Scientific]] 
+get2DList key kvlst = withContext ("obtaining 2D list of " ++ T.unpack key) $ do
     lst1 :: [ PYaml ] <- (eitherList <=< find key) kvlst 
     lstoflst :: [ [ PYaml ] ] <- mapM eitherList lst1 
     mapM (mapM eitherNum) lstoflst 
 
 
 -- | 
-getInterpolation :: (Monad m) => [(T.Text,PYaml)] -> EitherT String m Interpolation
-getInterpolation kvlst = do
+getInterpolation :: (Monad m) => [(T.Text,PYaml)] -> ErrorContextT m Interpolation
+getInterpolation kvlst = withContext "getting Interpolation" $ do
     typ <- (eitherText <=< find "Type") kvlst
     if typ == "Constant" 
-      then do 
+      then withContext "Constant interpolation" $ do 
         v <- (eitherNum <=< find "Value") kvlst
         return (IPConstant v) 
       else do 
@@ -221,7 +223,7 @@ getInterpolation kvlst = do
         if | typ == "PredefinedMode1" -> return (IPPredefinedMode1 lst2 etabound)
            | typ == "PredefinedMode2" -> return (IPPredefinedMode2 lst2 etabound)
            | typ == "PredefinedMode3" -> return (IPPredefinedMode3 lst2 etabound)
-           | otherwise -> left "Not an interpolation"
+           | otherwise -> left "cannot understand an interpolation Type"
       
 
 -- | 
@@ -380,11 +382,15 @@ importData _ _ (Right x) = return x
 importData f rdir (Left (Import n)) = 
     let fname = rdir </> T.unpack n <.> "yaml"
     in withContext ("Importing " ++ fname) $ do
-      r <- liftIO (parseFile fname)
-      case r of
-	Left err -> left err
-	Right (PYObject kvlst) -> f kvlst
-	Right _ -> left ("File content of " ++ fname ++ " is not an object.")
+      b <- liftIO $ doesFileExist fname
+      if not b 
+        then left ("File " ++ fname ++ " doesn't exist" )
+        else do 
+	  r <- liftIO (parseFile fname)
+	  case r of
+	    Left err -> left err
+	    Right (PYObject kvlst) -> f kvlst
+	    Right _ -> left ("File content of " ++ fname ++ " is not an object.")
 
 importIdentificationDescription 
     :: (MonadIO m) => 

@@ -65,6 +65,7 @@ Library
                    base>4,
                    -- bifunctors, 
                    bytestring, 
+                   directory,
                    either,
                    filepath,
                    mmorph,
