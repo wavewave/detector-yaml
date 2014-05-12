@@ -14,9 +14,31 @@ atlas2011 = DetectorDescription
             , detectorReference = "arXiv:xxxx.yyyy"
             , detectorComment = "extracted the efficiencies from the plot 3,4,5 in the reference" 
             , detectorValidationInfo = "Validated on 2014/02" 
+            , detectorRange = atlas2011Range
             , detectorIdentification = atlas2011Identify
             , detectorSmearing = atlas2011Smearing
             }
+
+atlas2011Range :: RangeDescription ImportList
+atlas2011Range = (RangeDescription . ImportList) 
+                   [ Left (Import "Range_Full_ATLAS")
+                   , Left (Import "Range_ECal_ATLAS")
+                   , Left (Import "Range_MuonDetector_ATLAS")
+                   , Left ( Import "Range_HCal_ATLAS")
+                   , Left ( Import "Range_Muon_Combined_ATLAS")
+                   , Left ( Import "Range_Muon_ID_ATLAS")
+                   , Left ( Import "Range_Muon_MS_ATLAS")
+                   , Left ( Import "Range_Electron_Loose_ATLAS")
+                   , Left ( Import "Range_Electron_Medium_ATLAS")
+                   , Left ( Import "Range_Electron_Tight_ATLAS")
+                   , Left ( Import "Range_Photon_Loose_ATLAS")
+                   , Left ( Import "Range_Photon_Tight_ATLAS")
+                   , Left ( Import "Range_Jet_Topo_ATLAS")
+                   , Left ( Import "Range_Track_ATLAS")
+                   , Left ( Import "Range_BJet_ATLAS")
+                   , Left ( Import "Range_Tau_ATLAS")
+                   ] 
+                                                
 
 atlas2011Identify :: IdentificationDescription ImportList 
 atlas2011Identify = IdentificationDescription 
@@ -57,6 +79,7 @@ atlas2011Smearing = SmearingDescription
   , smearTau      = ImportList [ Left (Import "Smear_Tau_ATLAS") ]
   , smearMET      = ImportList [ Left (Import "Smear_MissingET_ATLAS") ]
   }
+
 
 atlasEleDataTight :: ElectronEffData
 atlasEleDataTight = ElectronEffData

@@ -12,6 +12,7 @@ cms2011 = DetectorDescription
             , detectorReference = "arXiv:xxxx.yyyy"
             , detectorComment = "extracted the efficiencies from the plot 3,4,5 in the reference" 
             , detectorValidationInfo = "Validated on 2014/02" 
+            , detectorRange = RangeDescription (ImportList [])
             , detectorIdentification = cms2011Object 
             , detectorSmearing = cmsSmearing
             }

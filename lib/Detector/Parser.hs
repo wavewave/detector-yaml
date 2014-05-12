@@ -93,6 +93,7 @@ getDetectorDescription kvlst = withContext "DetectorDescription" $ do
             , "Comment", "ValidationInfo"]
     case xs of
       [ nm, dsc, ref, cmt, vinfo] -> do
+        rd <- (getRangeDescription <=< eitherList <=< find "Range") kvlst
         idd <- (getIdentificationDescription <=< eitherObject <=< find "Identification") kvlst
         sm <- (getSmearingDescription <=< eitherObject <=< find "Smearing") kvlst
         return DetectorDescription 
@@ -101,16 +102,16 @@ getDetectorDescription kvlst = withContext "DetectorDescription" $ do
                , detectorReference = ref
                , detectorComment = cmt
                , detectorValidationInfo = vinfo
+               , detectorRange = rd
                , detectorIdentification = idd 
                , detectorSmearing = sm
                }
       _ -> left "Not a Detector Description"
 
 -- | get an object description from parsed YAML object
-getIdentificationDescription 
-  :: (Monad m) =>
-     [(T.Text,PYaml)] 
-  -> ErrorContextT m (IdentificationDescription ImportList)
+getIdentificationDescription :: (Monad m) =>
+                                [(T.Text,PYaml)] 
+                             -> ErrorContextT m (IdentificationDescription ImportList)
 getIdentificationDescription kvlst = withContext "Identification Description" $ do 
     xs <- mapM (eitherList <=< flip find kvlst) 
                  [ "Electron", "Photon", "BJet", "Muon", "Jet"
@@ -161,6 +162,14 @@ getSmearingDescription kvlst = withContext "SmearingDescription" $ do
   where implst ys = ImportList <$> (traverse (importOrDeal getSmearData) =<< mapM eitherObject ys)
 
     
+-- | 
+getRangeDescription :: (Monad m) => 
+                       [PYaml] 
+                    -> ErrorContextT m (RangeDescription ImportList)
+getRangeDescription lst = withContext "RangeDescription" $ RangeDescription <$> implst lst
+  where implst ys = ImportList <$> (traverse (importOrDeal getRangeData) =<< mapM eitherObject ys)
+
+
 -- |
 getEitherImportOrObj :: [(T.Text,PYaml)] 
                      -> Either Import [(T.Text,PYaml)]
@@ -369,6 +378,19 @@ getSmearData kvlst = withContext "getSmearData" $ do
     sm <- getPTEtaData smkvlst
     return (SmearData nm meta sm)
 
+getRangeData :: (Monad m) => [ (T.Text,PYaml) ] -> ErrorContextT m Range
+getRangeData kvlst = withContext "getRangeData" $ do 
+    nm <- (eitherText <=< find "Name") kvlst
+    ptrng_pre <- get1DList "PTRange" kvlst
+    etarng_pre <- get1DList "EtaRange" kvlst
+    (pt1,pt2) <- case ptrng_pre of 
+                   p1:p2:[] -> return (p1,p2)
+                   _ -> left "PT1: Not two element list"
+    (et1,et2) <- case etarng_pre of
+                   e1:e2:[] -> return (e1,e2)
+                   _ -> left "ET1: Not two element list"
+    return Range { rangeName = nm, rangePT = (pt1,pt2), rangeEta = (et1,et2) } 
+
 --------------
 -- import   --
 --------------
@@ -392,12 +414,18 @@ importData f rdir (Left (Import n)) =
 	    Right (PYObject kvlst) -> f kvlst
 	    Right _ -> left ("File content of " ++ fname ++ " is not an object.")
 
-importIdentificationDescription 
-    :: (MonadIO m) => 
-       FilePath 
-    -> IdentificationDescription ImportList
-    -> ErrorContextT m (IdentificationDescription [])
-importIdentificationDescription rdir IdentificationDescription {..} = do
+importRangeDescription :: (MonadIO m) => 
+                          FilePath        
+                       -> RangeDescription ImportList 
+                       -> ErrorContextT m (RangeDescription [])
+importRangeDescription rdir RangeDescription {..} = 
+    RangeDescription <$> (traverse (importData getRangeData rdir) . unImportList) ranges
+
+importIdentificationDescription :: (MonadIO m) => 
+                                   FilePath 
+                                -> IdentificationDescription ImportList
+                                -> ErrorContextT m (IdentificationDescription [])
+importIdentificationDescription rdir IdentificationDescription {..} = 
     IdentificationDescription 
     <$> (traverse (importData getElectronEffData rdir) . unImportList) electron
     <*> (traverse (importData getPhotonEffData rdir) . unImportList) photon
@@ -408,11 +436,10 @@ importIdentificationDescription rdir IdentificationDescription {..} = do
     <*> maybe (return Nothing) (liftA Just . (traverse (importData getTrackEffData rdir) . unImportList)) track
     <*> (traverse (importData getPTThresholds rdir) . unImportList) ptThresholds
 
-importSmearingDescription 
-    :: (MonadIO m) => 
-       FilePath 
-    -> SmearingDescription ImportList
-    -> ErrorContextT m (SmearingDescription [])
+importSmearingDescription :: (MonadIO m) => 
+                             FilePath 
+                          -> SmearingDescription ImportList
+                          -> ErrorContextT m (SmearingDescription [])
 importSmearingDescription rdir SmearingDescription {..} = do
     SmearingDescription 
     <$> (traverse (importData getSmearData rdir) . unImportList) smearElectron
@@ -424,15 +451,16 @@ importSmearingDescription rdir SmearingDescription {..} = do
     <*> (traverse (importData getSmearData rdir) . unImportList) smearMET
 
 
-importDetectorDescription 
-    :: (MonadIO m) => 
-       FilePath
-    -> DetectorDescription ImportList
-    -> ErrorContextT m (DetectorDescription [])
+importDetectorDescription :: (MonadIO m) => 
+                             FilePath
+                          -> DetectorDescription ImportList
+                          -> ErrorContextT m (DetectorDescription [])
 importDetectorDescription rdir dd@DetectorDescription {..} = 
     withContext "Importing files in DetectorDescription" $ do 
+      rd  <- importRangeDescription rdir detectorRange
       idd <- importIdentificationDescription rdir detectorIdentification
-      sd <- importSmearingDescription rdir detectorSmearing 
-      return dd { detectorIdentification = idd 
+      sd  <- importSmearingDescription rdir detectorSmearing 
+      return dd { detectorRange = rd
+                , detectorIdentification = idd 
                 , detectorSmearing = sd 
                 }

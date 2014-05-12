@@ -8,6 +8,7 @@ module Detector.Type (
   module Detector.Type.Common
 , module Detector.Type.Identification
 , module Detector.Type.PTEtaData
+, module Detector.Type.Range
 , module Detector.Type.Smearing
 , DetectorDescription (..)
 , IdentificationDescription (..)
@@ -21,6 +22,7 @@ import           YAML.Builder
 import           Detector.Type.Common
 import           Detector.Type.Identification
 import           Detector.Type.PTEtaData
+import           Detector.Type.Range
 import           Detector.Type.Smearing
 -- 
 import Prelude hiding (lines)
@@ -31,6 +33,7 @@ data DetectorDescription m =
                       , detectorReference :: Text
                       , detectorComment :: Text
                       , detectorValidationInfo :: Text 
+                      , detectorRange :: RangeDescription m 
                       , detectorIdentification :: IdentificationDescription m
                       , detectorSmearing :: SmearingDescription m
                       }
@@ -50,6 +53,7 @@ instance MakeYaml (DetectorDescription ImportList) where
               , ( "Reference", mkString (n+defIndent) detectorReference)
               , ( "Comment", mkString (n+defIndent) detectorComment )
               , ( "ValidationInfo", mkString (n+defIndent) detectorValidationInfo )
+              , ( "Range", makeYaml (n+defIndent) detectorRange)
               , ( "Identification", makeYaml (n+defIndent) detectorIdentification ) 
               , ( "Smearing", makeYaml (n+defIndent) detectorSmearing )
               ]
@@ -62,7 +66,8 @@ instance MakeYaml (DetectorDescription []) where
               , ( "Reference", mkString (n+defIndent) detectorReference)
               , ( "Comment", mkString (n+defIndent) detectorComment )
               , ( "ValidationInfo", mkString (n+defIndent) detectorValidationInfo )
-              , ( "Object", makeYaml (n+defIndent) detectorIdentification )
+              , ( "Range", makeYaml (n+defIndent) detectorRange)
+              , ( "Identification", makeYaml (n+defIndent) detectorIdentification )
               , ( "Smearing", makeYaml (n+defIndent) detectorSmearing )
               ]
 

@@ -26,22 +26,6 @@ Executable parsecpp
                    attoparsec,
                    detector-yaml
 
-
--- Executable tester
---  Main-is: tester.hs
---  hs-source-dirs: exe
---  ghc-options: 	-Wall -Werror -O2 -threaded -funbox-strict-fields -fno-warn-unused-do-bind -rtsopts
---  ghc-prof-options: -caf-all -auto-all
---  Build-Depends: 
---                   attoparsec,
---                   base>4, 
---                   directory,
---                   filepath,
---                   text,  
---                   unordered-containers,
---                   yayaml,
---                   detector-yaml
-
 Executable mkyaml
   Main-is: mkyaml.hs
   hs-source-dirs: exe
@@ -99,6 +83,7 @@ Library
                    Detector.Type.Common
                    Detector.Type.Identification
                    Detector.Type.PTEtaData
+                   Detector.Type.Range
                    Detector.Type.Smearing
                    --
                    Test
