@@ -30,8 +30,8 @@ instance MakeYaml (RangeDescription  []) where
   makeYaml n = YIArray . fmap (makeYaml n) . ranges
 
 data Range = Range { rangeName :: Text
-                   , rangePT   :: (Scientific,Scientific)
-                   , rangeEta  :: (Scientific,Scientific)
+                   , rangePT   :: Maybe (Scientific,Scientific)
+                   , rangeEta  :: Maybe (Scientific,Scientific)
                    }
                    deriving (Show)
 
@@ -41,8 +41,10 @@ instance Nameable Range where
 instance MakeYaml Range where
   makeYaml n Range {..} = 
     YObject $ [ ("Name"    , mkString (n+defIndent) rangeName) 
-              , ("PTRange" , YLArray Inline [YPrim (YNumber pt1) , YPrim (YNumber pt2 )])
-              , ("EtaRange", YLArray Inline [YPrim (YNumber eta1), YPrim (YNumber eta2)]) ]
-    where (pt1,pt2) = rangePT
-          (eta1,eta2) = rangeEta
+              , ("PTRange" , case rangePT of
+                               Nothing -> mkString (n+defIndent) "Full"
+                               Just (pt1,pt2) -> YLArray Inline [YPrim (YNumber pt1), YPrim (YNumber pt2 )])
+              , ("EtaRange", case rangeEta of
+                               Nothing -> mkString (n+defIndent) "Full"
+                               Just (et1,et2) -> YLArray Inline [YPrim (YNumber et1), YPrim (YNumber et2)]) ]
 

@@ -7,7 +7,7 @@
 module Detector.Parser where
 
 import           Control.Applicative
-import           Control.Monad ((<=<))
+import           Control.Monad ((<=<), liftM)
 import           Control.Monad.Morph
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.State
@@ -381,15 +381,23 @@ getSmearData kvlst = withContext "getSmearData" $ do
 getRangeData :: (Monad m) => [ (T.Text,PYaml) ] -> ErrorContextT m Range
 getRangeData kvlst = withContext "getRangeData" $ do 
     nm <- (eitherText <=< find "Name") kvlst
-    ptrng_pre <- get1DList "PTRange" kvlst
-    etarng_pre <- get1DList "EtaRange" kvlst
-    (pt1,pt2) <- case ptrng_pre of 
-                   p1:p2:[] -> return (p1,p2)
+    ptrng_pre <- find "PTRange" kvlst
+    ptrng <- case ptrng_pre of
+               PYText "Full" -> return Nothing
+               PYList lst -> 
+                 case lst of 
+                   p1:p2:[] -> liftM Just ((,) <$> eitherNum p1 <*> eitherNum p2)
                    _ -> left "PT1: Not two element list"
-    (et1,et2) <- case etarng_pre of
-                   e1:e2:[] -> return (e1,e2)
+               _ -> left "PTRange parse error"
+    etrng_pre <- find "EtaRange" kvlst
+    etrng <- case etrng_pre of
+               PYText "Full" -> return Nothing
+               PYList lst -> 
+                 case lst of
+                   e1:e2:[] -> liftM Just ((,) <$> eitherNum e1 <*> eitherNum e2)
                    _ -> left "ET1: Not two element list"
-    return Range { rangeName = nm, rangePT = (pt1,pt2), rangeEta = (et1,et2) } 
+               _ -> left "EtaRange parse error"
+    return Range { rangeName=nm, rangePT=ptrng, rangeEta=etrng } 
 
 --------------
 -- import   --

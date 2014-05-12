@@ -29,7 +29,24 @@ main = do
   mapM_ f [ MkYamlBox atlas2011, MkYamlBox cms2011 ] 
 
   setCurrentDirectory (cdir </> "object")
-  mapM_ f [ MkYamlBox atlasEleDataTight
+  mapM_ f [ MkYamlBox rangeFullATLAS
+          , MkYamlBox rangeECalATLAS
+          , MkYamlBox rangeMuonDetectorATLAS
+          , MkYamlBox rangeHCalATLAS
+          , MkYamlBox rangeMuonCombinedATLAS
+          , MkYamlBox rangeMuonIDATLAS
+          , MkYamlBox rangeMuonMSATLAS
+          , MkYamlBox rangeElectronLooseATLAS
+          , MkYamlBox rangeElectronMediumATLAS
+          , MkYamlBox rangeElectronTightATLAS
+          , MkYamlBox rangePhotonLooseATLAS
+          , MkYamlBox rangePhotonTightATLAS
+          , MkYamlBox rangeJetTopoATLAS
+          , MkYamlBox rangeTrackATLAS
+          , MkYamlBox rangeBJetATLAS
+          , MkYamlBox rangeTauATLAS
+          --
+          , MkYamlBox atlasEleDataTight
           , MkYamlBox atlasEleDataMedium
           , MkYamlBox atlasEleDataLoose
           , MkYamlBox atlasPhoDataTight
@@ -52,6 +69,7 @@ main = do
           , MkYamlBox atlasTauDataBDTMedium
           , MkYamlBox atlasTauDataBDTTight
           , MkYamlBox atlasPTThresholds
+          --
           , MkYamlBox atlasSmearElectron
           , MkYamlBox atlasSmearMuon
           , MkYamlBox atlasSmearPhoton

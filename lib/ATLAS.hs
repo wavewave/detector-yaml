@@ -80,6 +80,54 @@ atlas2011Smearing = SmearingDescription
   , smearMET      = ImportList [ Left (Import "Smear_MissingET_ATLAS") ]
   }
 
+rangeFullATLAS :: Range
+rangeFullATLAS = Range "Range_Full_ATLAS" Nothing (Just (-4.9,4.9))
+
+rangeECalATLAS :: Range
+rangeECalATLAS = Range "Range_ECal_ATLAS" Nothing (Just (-2.5,2.5))
+
+rangeMuonDetectorATLAS :: Range
+rangeMuonDetectorATLAS = Range "Range_MuonDetector_ATLAS" Nothing (Just (-2.5,2.5))
+
+rangeHCalATLAS :: Range
+rangeHCalATLAS = Range "Range_HCal_ATLAS" Nothing (Just (-4.9,4.9))
+
+rangeMuonCombinedATLAS :: Range
+rangeMuonCombinedATLAS = Range "Range_Muon_Combined_ATLAS" (Just (20,14000) ) (Just (-2.5,2.5))
+
+rangeMuonIDATLAS :: Range
+rangeMuonIDATLAS = Range "Range_Muon_ID_ATLAS" (Just (20,14000)) (Just (-2.5,2.5))
+
+rangeMuonMSATLAS :: Range
+rangeMuonMSATLAS = Range "Range_Muon_MS_ATLAS" (Just (20,14000)) (Just (-2.5,2.5))
+
+rangeElectronLooseATLAS :: Range
+rangeElectronLooseATLAS = Range "Range_Electron_Loose_ATLAS" (Just (4.0,14000)) (Just (-2.5,2.5))
+
+rangeElectronMediumATLAS :: Range
+rangeElectronMediumATLAS = Range "Range_Electron_Medium_ATLAS" (Just (4.0,14000)) (Just (-2.5,2.5))
+
+rangeElectronTightATLAS :: Range
+rangeElectronTightATLAS = Range "Range_Electron_Tight_ATLAS" (Just (4.0,14000)) (Just (-2.5,2.5))
+
+rangePhotonLooseATLAS :: Range
+rangePhotonLooseATLAS = Range "Range_Photon_Loose_ATLAS" (Just (15.0,14000)) (Just (-2.4,2.4))
+
+rangePhotonTightATLAS :: Range
+rangePhotonTightATLAS = Range "Range_Photon_Tight_ATLAS" (Just (15.0,14000)) (Just (-2.4,2.4))
+
+rangeJetTopoATLAS :: Range
+rangeJetTopoATLAS = Range "Range_Jet_Topo_ATLAS" (Just (20.0,14000)) (Just (-4.5,4.5))
+
+rangeTrackATLAS :: Range
+rangeTrackATLAS = Range "Range_Track_ATLAS" Nothing (Just (-2.5,2.5))
+
+rangeBJetATLAS :: Range
+rangeBJetATLAS = Range "Range_BJet_ATLAS" (Just (20.0,14000)) (Just (-2.5,2.5))
+
+rangeTauATLAS :: Range
+rangeTauATLAS = Range "Range_Tau_ATLAS" (Just (15.0,14000)) (Just (-2.5,2.5))
+
 
 atlasEleDataTight :: ElectronEffData
 atlasEleDataTight = ElectronEffData
